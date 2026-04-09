@@ -1,5 +1,6 @@
-from uuid import UUID
 from pydantic import BaseModel
+
+from app.schemas.user import UserResponse
 
 
 class LoginRequest(BaseModel):
@@ -28,16 +29,6 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
-
-
-class UserResponse(BaseModel):
-    model_config = {"from_attributes": True}
-    id: UUID
-    email: str
-    mobile: str
-    full_name: str
-    user_type: str
-    is_active: bool
 
 
 class LoginResponse(BaseModel):

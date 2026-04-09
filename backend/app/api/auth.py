@@ -15,8 +15,8 @@ from app.schemas.auth import (
     RefreshRequest,
     ResetPasswordRequest,
     TokenResponse,
-    UserResponse,
 )
+from app.schemas.user import UserResponse
 from app.services.auth_service import (
     authenticate_email,
     authenticate_otp,
@@ -118,7 +118,6 @@ async def reset_password_endpoint(body: ResetPasswordRequest, db: AsyncSession =
     success = await reset_password(db, body.token, body.new_password)
     if not success:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token")
-    await db.commit()
     return MessageResponse(message="Password reset successfully")
 
 
