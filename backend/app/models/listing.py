@@ -1,0 +1,48 @@
+import uuid
+from datetime import date
+
+from sqlalchemy import (
+    Boolean,
+    Date,
+    Enum as SQLEnum,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.models.base import BaseModel
+from app.models.enums import ListingStatus, PropertyType
+
+
+class Listing(BaseModel):
+    __tablename__ = "listings"
+
+    macro_location: Mapped[str] = mapped_column(String(255))
+    city: Mapped[str] = mapped_column(String(255))
+    property_type: Mapped[PropertyType] = mapped_column(SQLEnum(PropertyType))
+    status: Mapped[ListingStatus] = mapped_column(
+        SQLEnum(ListingStatus), default=ListingStatus.DRAFT
+    )
+    report_count: Mapped[int] = mapped_column(Integer, default=0)
+    latest_report_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    listing_reports: Mapped[list["ListingReport"]] = relationship(
+        back_populates="listing"
+    )
+
+
+class ListingReport(BaseModel):
+    __tablename__ = "listing_reports"
+
+    listing_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("listings.id"))
+    report_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("reports.id"))
+    display_order: Mapped[int] = mapped_column(Integer, default=0)
+
+    listing: Mapped[Listing] = relationship(back_populates="listing_reports")
+
+    __table_args__ = (
+        UniqueConstraint("report_id", name="uq_listing_report_report_id"),
+    )
