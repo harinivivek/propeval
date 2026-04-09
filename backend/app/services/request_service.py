@@ -82,6 +82,7 @@ async def create_request(
     else:
         await broadcast_service.start_broadcast(db, request=request)
 
+    await db.refresh(request)
     return request
 
 
