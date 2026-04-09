@@ -53,4 +53,28 @@ export const api = {
     fetchApi<T>(endpoint, { method: "PATCH", body }),
   delete: <T>(endpoint: string) =>
     fetchApi<T>(endpoint, { method: "DELETE" }),
+  upload: <T>(endpoint: string, formData: FormData) => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("access_token")
+        : null;
+
+    return fetch(`${API_BASE_URL}${endpoint}`, {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    }).then(async (response) => {
+      if (!response.ok) {
+        if (response.status === 401 && typeof window !== "undefined") {
+          localStorage.removeItem("access_token");
+          window.location.href = "/login";
+        }
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.detail || `API error: ${response.status}`);
+      }
+      return response.json() as Promise<T>;
+    });
+  },
 };
