@@ -74,8 +74,16 @@ async def seed() -> None:
             db,
             vendor_id=vendor.id,
             city="Bengaluru",
-            areas=["Koramangala", "Indiranagar", "HSR Layout"],
+            areas=["Koramangala", "Indiranagar", "Jayanagar", "HSR Layout"],
             service_type="VALUATION",
+        )
+
+        await vendor_service.create_service_area(
+            db,
+            vendor_id=vendor.id,
+            city="Bengaluru",
+            areas=None,  # City-wide legal services
+            service_type="LEGAL",
         )
 
         vendor_user = await user_service.create_user(
