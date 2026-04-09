@@ -7,6 +7,7 @@ from app.api.admin.pricing import router as admin_pricing_router
 from app.api.auth import router as auth_router
 from app.api.lender.requests import router as lender_requests_router
 from app.api.lender.settings import router as lender_settings_router
+from app.api.vendor.requests import router as vendor_requests_router
 from app.api.vendor.settings import router as vendor_settings_router
 
 app = FastAPI(
@@ -35,4 +36,5 @@ app.include_router(admin_accounts_router)
 app.include_router(admin_pricing_router)
 app.include_router(lender_requests_router)
 app.include_router(lender_settings_router)
+app.include_router(vendor_requests_router)
 app.include_router(vendor_settings_router)
