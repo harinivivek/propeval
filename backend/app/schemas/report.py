@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
 
@@ -58,3 +58,22 @@ class ReportBrief(BaseModel):
     property_type: str | None = None
     status: str
     report_date: date | None = None
+
+
+class ReportUploadMeta(BaseModel):
+    """Optional metadata submitted with report upload."""
+    valuation_amount: Decimal | None = None
+    report_date: date | None = None
+
+
+class RevisionSummary(BaseModel):
+    model_config = {"from_attributes": True}
+
+    revision_number: int
+    comments: str | None = None
+    created_at: datetime | None = None
+
+
+class ReportDetail(ReportResponse):
+    """Extended response with revision history."""
+    revisions: list[RevisionSummary] = []
