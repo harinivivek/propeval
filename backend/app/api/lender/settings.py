@@ -1,0 +1,68 @@
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
+from app.core.deps import require_role
+from app.models.enums import UserType
+from app.models.user import User
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.services import lender_service, user_service
+
+router = APIRouter(prefix="/api/lender/settings", tags=["lender-settings"])
+
+
+@router.get("/users", response_model=list[UserResponse])
+async def list_org_users(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("LENDER")),
+):
+    if not current_user.organization_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User has no organization")
+    return await user_service.list_users_by_org(db, current_user.organization_id)
+
+
+@router.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def add_org_user(
+    payload: UserCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("LENDER")),
+):
+    if not current_user.organization_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User has no organization")
+    user = await user_service.create_user(
+        db,
+        email=payload.email,
+        mobile=payload.mobile,
+        full_name=payload.full_name,
+        password=payload.password,
+        user_type=UserType.LENDER,
+        organization_id=current_user.organization_id,
+    )
+    return user
+
+
+@router.put("/users/{user_id}", response_model=UserResponse)
+async def update_org_user(
+    user_id: UUID,
+    payload: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("LENDER")),
+):
+    user = await user_service.get_user(db, user_id)
+    if not user or user.organization_id != current_user.organization_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found in your organization")
+    return await user_service.update_user(db, user, **payload.model_dump(exclude_unset=True))
+
+
+@router.delete("/users/{user_id}", response_model=UserResponse)
+async def deactivate_org_user(
+    user_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("LENDER")),
+):
+    user = await user_service.get_user(db, user_id)
+    if not user or user.organization_id != current_user.organization_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found in your organization")
+    return await user_service.deactivate_user(db, user)
