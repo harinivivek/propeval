@@ -15,6 +15,7 @@ export default function LenderLayout({
         <h2 className="text-lg font-semibold mb-4">Lender Portal</h2>
         <nav className="space-y-1 text-sm">
           <a href="/lender/dashboard" className="block px-2 py-3 rounded hover:bg-gray-100">Dashboard</a>
+          <a href="/lender/requests" className="block px-2 py-3 rounded hover:bg-gray-100">Requests</a>
           <a href="/lender/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
         </nav>
       </aside>
@@ -41,6 +42,7 @@ export default function LenderLayout({
             </div>
             <nav className="space-y-1 text-sm">
               <a href="/lender/dashboard" className="block px-2 py-3 rounded hover:bg-gray-100">Dashboard</a>
+              <a href="/lender/requests" className="block px-2 py-3 rounded hover:bg-gray-100">Requests</a>
               <a href="/lender/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
             </nav>
           </aside>
