@@ -10,7 +10,7 @@ import asyncio
 from app.core.database import get_async_session_context
 from app.models.enums import AdminRole, LenderRole, UserType, VendorRole
 from app.models.user import Organization
-from app.services import lender_service, user_service, vendor_service
+from app.services import lender_service, pricing_service, user_service, vendor_service
 
 
 async def seed() -> None:
@@ -94,6 +94,62 @@ async def seed() -> None:
             role=VendorRole.VENDOR_ADMIN,
         )
         print(f"Created vendor user: {vendor_user.email} (id={vendor_user.id})")
+
+        # ── Sample pricing rules for ABCL Bank ──────────────────────────────
+        from decimal import Decimal
+
+        pricing_configs = [
+            {
+                "report_category": "VALUATION",
+                "city": "Bengaluru",
+                "area": None,
+                "property_type": "RESIDENTIAL",
+                "new_request_price": Decimal("2500.00"),
+                "listing_download_price": Decimal("1500.00"),
+                "update_additional_price": Decimal("1000.00"),
+                "nearby_additional_price": Decimal("1000.00"),
+            },
+            {
+                "report_category": "VALUATION",
+                "city": "Bengaluru",
+                "area": None,
+                "property_type": "COMMERCIAL",
+                "new_request_price": Decimal("5000.00"),
+                "listing_download_price": Decimal("3000.00"),
+                "update_additional_price": Decimal("2000.00"),
+                "nearby_additional_price": Decimal("2000.00"),
+            },
+            {
+                "report_category": "LEGAL",
+                "city": "Bengaluru",
+                "area": None,
+                "property_type": "RESIDENTIAL",
+                "new_request_price": Decimal("2000.00"),
+                "listing_download_price": Decimal("1200.00"),
+                "update_additional_price": Decimal("800.00"),
+                "nearby_additional_price": Decimal("800.00"),
+            },
+            {
+                "report_category": "VALUATION",
+                "city": "Bengaluru",
+                "area": "Koramangala",
+                "property_type": "RESIDENTIAL",
+                "new_request_price": Decimal("2800.00"),
+                "listing_download_price": Decimal("1800.00"),
+                "update_additional_price": Decimal("1200.00"),
+                "nearby_additional_price": Decimal("1200.00"),
+            },
+        ]
+        for cfg in pricing_configs:
+            rule = await pricing_service.create_pricing_rule(
+                db, lender_id=lender.id, **cfg
+            )
+            area_label = cfg["area"] or "city-wide"
+            print(
+                f"Created pricing rule: {cfg['city']}/{area_label} "
+                f"{cfg['property_type']} {cfg['report_category']} "
+                f"(new={cfg['new_request_price']})"
+            )
 
         print("\nSeed complete.")
 
