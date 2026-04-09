@@ -29,7 +29,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 
 **Phase 0 (Scaffold):** Complete — monorepo, Docker, CI/CD, Makefile
 **Phase 1 (Auth & Users):** Complete — auth, OTP, RBAC, account management, login UI, responsive design
-**Phase 2 (Pricing & Reports):** Not started
+**Phase 2 (Pricing & Reports):** Complete — 11 data models, pricing service, admin pricing API + UI
 
 ## Seed Data (local)
 
@@ -40,6 +40,8 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 | Vendor | vendor@valuepro.com | vendor123 |
 
 Run: `make seed` (or `docker compose exec backend python -m scripts.seed`)
+
+Seed also creates 4 pricing rules for ABCL Bank (Bengaluru: residential/commercial valuation, residential legal, Koramangala area-specific).
 
 ## Backend Conventions
 
@@ -120,7 +122,9 @@ make lint            # Lint backend + frontend
 - **bcrypt:** Must pin to 4.0.1 — newer versions break passlib
 - **Ports:** Use 8020/3020/5433/6380 to avoid conflicts with SV-platform (8000/3000/5432/6379)
 - **PYTHONPATH:** Must be set to `/app` in Dockerfile for alembic and scripts to work
-- **Docker volumes:** `backend/app` is volume-mounted for hot reload, but `alembic/` and `scripts/` are baked into the image — rebuild container after changes to those dirs
+- **Docker volumes:** `backend/app` is volume-mounted for hot reload, but `alembic/` and `scripts/` are baked into the image — rebuild container after changes to those dirs. Similarly, `backend/tests/` is not volume-mounted — copy test files into the container or rebuild to run new tests.
+- **Pricing area fallback:** PricingRule uses two unique constraints (one for rows WITH area, one partial index for rows WHERE area IS NULL) to support city+area exact match with fallback to city-level pricing
+- **Decimal serialization:** Pydantic serializes `Decimal` fields as strings (e.g., `"2500.00"`). Frontend types use `string` for price fields accordingly
 
 ## Key Files
 
@@ -128,10 +132,12 @@ make lint            # Lint backend + frontend
 - `backend/app/core/database.py` — Async engine + session factories
 - `backend/app/core/deps.py` — FastAPI dependencies (auth, db, require_role)
 - `backend/app/core/security.py` — JWT + bcrypt
-- `backend/app/main.py` — App init + router registration (20 endpoints)
+- `backend/app/main.py` — App init + router registration (25 endpoints)
 - `backend/app/jobs/celery_app.py` — Celery config + beat schedule
 - `backend/app/services/otp_service.py` — Mock OTP with Redis store
-- `backend/scripts/seed.py` — Seed GTR admin + sample lender/vendor
+- `backend/app/services/pricing_service.py` — Pricing CRUD + price calculation with area fallback
+- `backend/app/api/admin/pricing.py` — Admin pricing API (5 endpoints)
+- `backend/scripts/seed.py` — Seed GTR admin + sample lender/vendor + pricing rules
 - `frontend/src/lib/api.ts` — Typed API client
 - `frontend/src/hooks/use-auth.ts` — Auth state management
 - `docker-compose.local.yml` — Local dev environment
