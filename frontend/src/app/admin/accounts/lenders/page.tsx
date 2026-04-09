@@ -94,7 +94,8 @@ export default function AdminLendersPage() {
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      {/* Desktop/Tablet: Table */}
+      <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
@@ -134,6 +135,28 @@ export default function AdminLendersPage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile: Card list */}
+      <div className="md:hidden space-y-3">
+        {loading && (
+          <p className="text-center text-gray-400 py-8">Loading…</p>
+        )}
+        {!loading && lenders.length === 0 && (
+          <p className="text-center text-gray-400 py-8">No lenders yet. Add one above.</p>
+        )}
+        {lenders.map((l) => (
+          <div key={l.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-1">
+            <div className="font-medium text-gray-900">{l.name}</div>
+            <div className="text-sm text-gray-500">{l.city ?? "—"}</div>
+            <a
+              href={`/admin/accounts/lenders/${l.id}`}
+              className="text-blue-600 text-sm hover:underline"
+            >
+              View
+            </a>
+          </div>
+        ))}
       </div>
     </div>
   );

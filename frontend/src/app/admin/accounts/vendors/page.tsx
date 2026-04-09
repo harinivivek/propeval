@@ -109,13 +109,14 @@ export default function AdminVendorsPage() {
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      {/* Desktop/Tablet: Table */}
+      <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">City</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Area</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Area</th>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Actions</th>
             </tr>
           </thead>
@@ -138,7 +139,7 @@ export default function AdminVendorsPage() {
               <tr key={v.id} className="border-t border-gray-100 hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium text-gray-900">{v.name}</td>
                 <td className="px-4 py-3 text-gray-600">{v.office_city ?? "—"}</td>
-                <td className="px-4 py-3 text-gray-600">{v.office_area ?? "—"}</td>
+                <td className="px-4 py-3 text-gray-600 hidden lg:table-cell">{v.office_area ?? "—"}</td>
                 <td className="px-4 py-3">
                   <a
                     href={`/admin/accounts/vendors/${v.id}`}
@@ -151,6 +152,28 @@ export default function AdminVendorsPage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile: Card list */}
+      <div className="md:hidden space-y-3">
+        {loading && (
+          <p className="text-center text-gray-400 py-8">Loading…</p>
+        )}
+        {!loading && vendors.length === 0 && (
+          <p className="text-center text-gray-400 py-8">No vendors yet. Add one above.</p>
+        )}
+        {vendors.map((v) => (
+          <div key={v.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-1">
+            <div className="font-medium text-gray-900">{v.name}</div>
+            <div className="text-sm text-gray-500">{v.office_city ?? "—"}{v.office_area ? `, ${v.office_area}` : ""}</div>
+            <a
+              href={`/admin/accounts/vendors/${v.id}`}
+              className="text-blue-600 text-sm hover:underline"
+            >
+              View
+            </a>
+          </div>
+        ))}
       </div>
     </div>
   );

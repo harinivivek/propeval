@@ -15,7 +15,7 @@ export function PortalSelector({ loginResponse }: PortalSelectorProps) {
   ];
 
   return (
-    <div className="w-full max-w-sm space-y-6">
+    <div className="w-full max-w-md space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900">
           Welcome, {user.full_name}
