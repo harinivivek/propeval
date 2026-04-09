@@ -25,7 +25,7 @@ async def _setup_admin_and_lender(db: AsyncSession) -> tuple[str, str]:
         user_type=UserType.ADMIN,
         organization_id=admin_org.id,
     )
-    admin_token = create_access_token({"sub": str(admin.id)})
+    admin_token = create_access_token(str(admin.id))
 
     lender_org = Organization(name="Test Bank", type=UserType.LENDER, city="Mumbai")
     db.add(lender_org)
@@ -185,7 +185,7 @@ async def test_pricing_requires_admin(client: AsyncClient, db_session: AsyncSess
         user_type=UserType.LENDER,
         organization_id=lender_org.id,
     )
-    token = create_access_token({"sub": str(lender_user.id)})
+    token = create_access_token(str(lender_user.id))
     response = await client.get(
         "/api/admin/pricing/rules?lender_id=00000000-0000-0000-0000-000000000000",
         headers={"Authorization": f"Bearer {token}"},
