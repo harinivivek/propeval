@@ -30,6 +30,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 **Phase 0 (Scaffold):** Complete — monorepo, Docker, CI/CD, Makefile
 **Phase 1 (Auth & Users):** Complete — auth, OTP, RBAC, account management, login UI, responsive design
 **Phase 2 (Pricing & Reports):** Complete — 11 data models, pricing service, admin pricing API + UI
+**Phase 3 (Workflow 1 — New Request):** Complete — 4 backend services (request, broadcast, report, billing), 4 API routers (lender requests, vendor requests, polling, download), 2 Celery jobs (auto-accept, broadcast rotation), 5 frontend pages (lender list/new/detail, vendor list/detail), polling hook, file upload
 
 ## Seed Data (local)
 
@@ -41,7 +42,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 
 Run: `make seed` (or `docker compose exec backend python -m scripts.seed`)
 
-Seed also creates 4 pricing rules for ABCL Bank (Bengaluru: residential/commercial valuation, residential legal, Koramangala area-specific).
+Seed also creates 4 pricing rules for ABCL Bank (Bengaluru: residential/commercial valuation, residential legal, Koramangala area-specific) and 2 service areas for the seed vendor (valuation with 4 areas, city-wide legal).
 
 ## Backend Conventions
 
@@ -132,14 +133,22 @@ make lint            # Lint backend + frontend
 - `backend/app/core/database.py` — Async engine + session factories
 - `backend/app/core/deps.py` — FastAPI dependencies (auth, db, require_role)
 - `backend/app/core/security.py` — JWT + bcrypt
-- `backend/app/main.py` — App init + router registration (25 endpoints)
+- `backend/app/main.py` — App init + router registration (~40 endpoints)
 - `backend/app/jobs/celery_app.py` — Celery config + beat schedule
 - `backend/app/services/otp_service.py` — Mock OTP with Redis store
 - `backend/app/services/pricing_service.py` — Pricing CRUD + price calculation with area fallback
+- `backend/app/services/request_service.py` — Request lifecycle orchestration (create, accept, reject, listing)
+- `backend/app/services/broadcast_service.py` — Vendor selection, broadcast rounds, accept/reject
+- `backend/app/services/report_service.py` — Report upload, revision, download
+- `backend/app/services/billing_service.py` — VendorEarning + LenderPayable creation
+- `backend/app/api/lender/requests.py` — Lender request endpoints (6)
+- `backend/app/api/vendor/requests.py` — Vendor request endpoints (6)
 - `backend/app/api/admin/pricing.py` — Admin pricing API (5 endpoints)
-- `backend/scripts/seed.py` — Seed GTR admin + sample lender/vendor + pricing rules
-- `frontend/src/lib/api.ts` — Typed API client
+- `backend/app/core/constants.py` — Broadcast, upload, polling constants
+- `backend/scripts/seed.py` — Seed GTR admin + sample lender/vendor + pricing rules + service areas
+- `frontend/src/lib/api.ts` — Typed API client (includes upload for multipart)
 - `frontend/src/hooks/use-auth.ts` — Auth state management
+- `frontend/src/hooks/use-polling.ts` — 30s polling for request notifications
 - `docker-compose.local.yml` — Local dev environment
 - `.env.local` — Environment variables (ports, secrets, config)
 - `ARCHITECTURE.md` — Full architecture design
