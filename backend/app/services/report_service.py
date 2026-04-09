@@ -1,0 +1,134 @@
+import os
+import uuid as uuid_mod
+from datetime import date
+from decimal import Decimal
+from uuid import UUID
+
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.constants import ALLOWED_CONTENT_TYPES, MAX_UPLOAD_SIZE_MB, MEDIA_ROOT, REPORTS_DIR
+from app.models.enums import (
+    LenderRequestStatus,
+    ReportCategory,
+    ReportStatus,
+    VendorRequestStatus,
+)
+from app.models.report import Report, ReportRevision
+from app.models.request import ReportRequest
+
+
+class InvalidFileError(Exception):
+    pass
+
+
+def validate_upload(content_type: str, size: int) -> None:
+    """Validate file type and size."""
+    if content_type not in ALLOWED_CONTENT_TYPES:
+        raise InvalidFileError(f"File type '{content_type}' not allowed. Only PDF accepted.")
+    max_bytes = MAX_UPLOAD_SIZE_MB * 1024 * 1024
+    if size > max_bytes:
+        raise InvalidFileError(f"File too large. Maximum {MAX_UPLOAD_SIZE_MB}MB allowed.")
+
+
+def generate_report_path(vendor_id: UUID, report_id: UUID, suffix: str = "") -> str:
+    """Generate the storage path for a report file."""
+    filename = f"{report_id}{suffix}.pdf"
+    return os.path.join(REPORTS_DIR, str(vendor_id), str(report_id), filename)
+
+
+def get_full_path(relative_path: str) -> str:
+    """Get absolute path from relative path."""
+    return os.path.join(MEDIA_ROOT, relative_path)
+
+
+async def save_file(relative_path: str, content: bytes) -> None:
+    """Save file content to disk."""
+    full_path = get_full_path(relative_path)
+    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+    with open(full_path, "wb") as f:
+        f.write(content)
+
+
+async def create_report_for_request(
+    db: AsyncSession,
+    *,
+    request: ReportRequest,
+    vendor_id: UUID,
+    file_path: str,
+    valuation_amount: Decimal | None = None,
+    report_date: date | None = None,
+) -> tuple[Report, str]:
+    """Create a Report linked to a request, updating statuses."""
+    report = Report(
+        vendor_id=vendor_id,
+        report_category=request.report_category,
+        status=ReportStatus.UPLOADED,
+        property_address=request.property_address,
+        city=request.city,
+        property_type=request.property_type,
+        plot_extent_sqft=request.plot_extent_sqft,
+        loan_applicant_name=request.loan_applicant_name,
+        valuation_amount=valuation_amount,
+        report_date=report_date,
+        uploaded_file_path=file_path,
+    )
+    db.add(report)
+
+    request.vendor_status = VendorRequestStatus.SENT
+    request.lender_status = LenderRequestStatus.RECEIVED
+
+    await db.flush()
+    return report, file_path
+
+
+async def submit_revision(
+    db: AsyncSession,
+    *,
+    report: Report,
+    request: ReportRequest,
+    file_path: str,
+    comments: str | None = None,
+) -> ReportRevision:
+    """Create a revision for an existing report."""
+    # Get next revision number
+    result = await db.execute(
+        select(func.coalesce(func.max(ReportRevision.revision_number), 0))
+        .where(ReportRevision.report_id == report.id)
+    )
+    max_rev = result.scalar()
+    next_rev = max_rev + 1
+
+    revision = ReportRevision(
+        report_id=report.id,
+        revision_number=next_rev,
+        comments=comments,
+    )
+    db.add(revision)
+
+    # Update report with new file
+    report.uploaded_file_path = file_path
+    report.status = ReportStatus.UPLOADED
+
+    # Reset request statuses
+    request.vendor_status = VendorRequestStatus.SENT
+    request.lender_status = LenderRequestStatus.RECEIVED
+
+    await db.flush()
+    return revision
+
+
+async def get_report(db: AsyncSession, report_id: UUID) -> Report | None:
+    result = await db.execute(
+        select(Report).where(Report.id == report_id, Report.is_active == True)
+    )
+    return result.scalar_one_or_none()
+
+
+async def get_report_revisions(db: AsyncSession, report_id: UUID) -> list[ReportRevision]:
+    result = await db.execute(
+        select(ReportRevision)
+        .where(ReportRevision.report_id == report_id)
+        .order_by(ReportRevision.revision_number.desc())
+    )
+    return list(result.scalars().all())
