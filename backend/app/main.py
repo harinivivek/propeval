@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.api.admin.accounts import router as admin_accounts_router
 from app.api.auth import router as auth_router
 
 app = FastAPI(
@@ -26,3 +27,4 @@ async def health_check():
 
 
 app.include_router(auth_router)
+app.include_router(admin_accounts_router)
