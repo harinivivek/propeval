@@ -55,6 +55,10 @@ def months_ago(n: int) -> str:
     return f"{y}-{m:02d}"
 
 
+# Weighted offsets: ~50% land in current FY (April 2026), rest in previous FY
+MONTH_WEIGHTS = [0, 0, 0, 1, 2, 4, 5, 7, 9, 11]
+
+
 def date_ago(days: int) -> date:
     return date(2026, 4, 10) - timedelta(days=days)
 
@@ -494,9 +498,9 @@ async def seed_demo() -> None:
                 }
                 pt = payable_type_map.get(req.request_type, PayableType.NEW_REQUEST)
 
-                # spread across last 6 months
+                # spread across current + previous FY with weighted distribution
                 h = int(hashlib.md5(str(req.id).encode()).hexdigest(), 16)
-                m_offset = h % 6  # 0-5 months ago
+                m_offset = MONTH_WEIGHTS[h % len(MONTH_WEIGHTS)]
                 month_str = months_ago(m_offset)
 
                 status_choices = [PaymentStatus.PAID, PaymentStatus.PAID, PaymentStatus.BILLED, PaymentStatus.PENDING]
@@ -526,11 +530,11 @@ async def seed_demo() -> None:
                 billing_entries += 2
 
         # From listing purchases
-        for lender_obj, rpt, price in purchases:
-            h = int(str(rpt.id).replace("-", ""), 16) % 6
-            month_str = months_ago(h)
+        for idx, (lender_obj, rpt, price) in enumerate(purchases):
+            m_offset = MONTH_WEIGHTS[idx % len(MONTH_WEIGHTS)]
+            month_str = months_ago(m_offset)
             status_choices = [PaymentStatus.PAID, PaymentStatus.BILLED, PaymentStatus.PENDING]
-            pay_status = status_choices[h % len(status_choices)]
+            pay_status = status_choices[idx % len(status_choices)]
 
             ve = VendorEarning(
                 vendor_id=rpt.vendor_id,
