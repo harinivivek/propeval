@@ -54,7 +54,7 @@ export function ReportConfigForm({ data, onBack, onNext }: Props) {
       <div>
         <label className={labelClass}>Report Category *</label>
         <select className={inputClass} required value={reportCategory}
-          onChange={(e) => setReportCategory(e.target.value)}>
+          onChange={(e) => setReportCategory(e.target.value as "VALUATION" | "LEGAL")}>
           <option value="VALUATION">Valuation</option>
           <option value="LEGAL">Legal</option>
         </select>
