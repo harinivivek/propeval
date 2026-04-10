@@ -32,6 +32,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 **Phase 2 (Pricing & Reports):** Complete — 11 data models, pricing service, admin pricing API + UI
 **Phase 3 (Workflow 1 — New Request):** Complete — 4 backend services (request, broadcast, report, billing), 4 API routers (lender requests, vendor requests, polling, download), 2 Celery jobs (auto-accept, broadcast rotation), 5 frontend pages (lender list/new/detail, vendor list/detail), polling hook, file upload
 **Phase 4 (OCR & Report Processing):** Complete — OCR service abstraction (OcrProvider → ClaudeOcrProvider → OcrService), Celery tasks (single + batch), PDF compression (pikepdf), BulkUploadJob model, vendor reports API (7 endpoints), extraction review UI with confidence indicators, bulk upload page, bulk job status page
+**Phase 5 (Listings Marketplace):** Complete — listing service (auto-grouping by pin_code + property_type, PII redaction), ReportPurchase model, vendor listings API (4 endpoints: list/delist/browse/listable), lender listings API (5 endpoints: browse/detail/purchase/purchases/download), billing integration (LISTING_DOWNLOAD entries), 5 frontend pages (vendor listings management, lender browse/detail/purchases), sidebar navigation updates
 
 ## Seed Data (local)
 
@@ -167,6 +168,10 @@ make lint            # Lint backend + frontend
 - `backend/app/jobs/ocr_tasks.py` — Celery tasks for single + bulk OCR processing
 - `backend/app/jobs/pdf_optimize.py` — PDF lossless compression with pikepdf
 - `backend/app/api/vendor/reports.py` — Vendor report endpoints (bulk upload, edit, publish, retry, PDF)
+- `backend/app/models/purchase.py` — ReportPurchase model (listing report purchases)
+- `backend/app/services/listing_service.py` — Listing CRUD, PII redaction, browse, purchase
+- `backend/app/api/vendor/listings.py` — Vendor listing endpoints (list/delist/browse)
+- `backend/app/api/lender/listings.py` — Lender listing endpoints (browse/detail/purchase/download)
 - `docker-compose.local.yml` — Local dev environment
 - `.env.local` — Environment variables (ports, secrets, config)
 - `ARCHITECTURE.md` — Full architecture design
