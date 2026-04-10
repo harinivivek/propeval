@@ -89,3 +89,19 @@ class EligibleVendorResponse(BaseModel):
 
 class RejectReportInput(BaseModel):
     comments: str
+
+
+class UpdateRequestInput(BaseModel):
+    report_id: UUID
+    checklist: list[str]
+    comments: str | None = None
+
+
+class NearbyRequestInput(BaseModel):
+    report_id: UUID
+    property_address: str
+    city: str
+    pin_code: str
+    area: str | None = None
+    report_category: str
+    comments: str | None = None
