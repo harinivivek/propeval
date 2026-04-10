@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { PurchasedReportsResponse } from "@/types/listing";
+import { UpdateRequestDialog } from "../[id]/_components/update-request-dialog";
 
 export default function PurchasedReportsPage() {
   const [data, setData] = useState<PurchasedReportsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
+  const [updateReportId, setUpdateReportId] = useState<string | null>(null);
+  const [updateReportMeta, setUpdateReportMeta] = useState<{category: string; address: string | null; date: string | null} | null>(null);
 
   useEffect(() => {
     const fetchPurchases = async () => {
@@ -70,6 +73,7 @@ export default function PurchasedReportsPage() {
                   <th className="text-left p-3 font-medium">Purchased</th>
                   <th className="text-right p-3 font-medium">Price</th>
                   <th className="text-right p-3 font-medium">Action</th>
+                  <th className="text-right p-3 font-medium">Update</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -87,6 +91,21 @@ export default function PurchasedReportsPage() {
                         className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700"
                       >
                         Download
+                      </button>
+                    </td>
+                    <td className="p-3 text-right">
+                      <button
+                        onClick={() => {
+                          setUpdateReportId(item.report.id);
+                          setUpdateReportMeta({
+                            category: item.report.report_category,
+                            address: item.report.property_address,
+                            date: item.report.report_date,
+                          });
+                        }}
+                        className="px-3 py-1.5 text-sm border border-orange-300 text-orange-600 rounded hover:bg-orange-50"
+                      >
+                        Update
                       </button>
                     </td>
                   </tr>
@@ -111,12 +130,27 @@ export default function PurchasedReportsPage() {
                     <span className="text-gray-500">₹{item.purchase.price}</span>
                     <span className="text-gray-400 ml-2">{new Date(item.purchase.created_at).toLocaleDateString()}</span>
                   </div>
-                  <button
-                    onClick={() => handleDownload(item.purchase.id)}
-                    className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-                  >
-                    Download
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setUpdateReportId(item.report.id);
+                        setUpdateReportMeta({
+                          category: item.report.report_category,
+                          address: item.report.property_address,
+                          date: item.report.report_date,
+                        });
+                      }}
+                      className="px-3 py-2 text-sm border border-orange-300 text-orange-600 rounded hover:bg-orange-50"
+                    >
+                      Update
+                    </button>
+                    <button
+                      onClick={() => handleDownload(item.purchase.id)}
+                      className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                      Download
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -147,6 +181,23 @@ export default function PurchasedReportsPage() {
         </>
       ) : (
         <p className="text-gray-500">No purchased reports yet. Browse the <a href="/lender/listings" className="text-blue-600 hover:underline">listings marketplace</a> to find reports.</p>
+      )}
+      {updateReportId && updateReportMeta && (
+        <UpdateRequestDialog
+          reportId={updateReportId}
+          reportCategory={updateReportMeta.category}
+          locality={updateReportMeta.address}
+          reportDate={updateReportMeta.date}
+          onSuccess={() => {
+            setUpdateReportId(null);
+            setUpdateReportMeta(null);
+            window.location.href = "/lender/requests";
+          }}
+          onCancel={() => {
+            setUpdateReportId(null);
+            setUpdateReportMeta(null);
+          }}
+        />
       )}
     </div>
   );
