@@ -33,6 +33,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 **Phase 3 (Workflow 1 — New Request):** Complete — 4 backend services (request, broadcast, report, billing), 4 API routers (lender requests, vendor requests, polling, download), 2 Celery jobs (auto-accept, broadcast rotation), 5 frontend pages (lender list/new/detail, vendor list/detail), polling hook, file upload
 **Phase 4 (OCR & Report Processing):** Complete — OCR service abstraction (OcrProvider → ClaudeOcrProvider → OcrService), Celery tasks (single + batch), PDF compression (pikepdf), BulkUploadJob model, vendor reports API (7 endpoints), extraction review UI with confidence indicators, bulk upload page, bulk job status page
 **Phase 5 (Listings Marketplace):** Complete — listing service (auto-grouping by pin_code + property_type, PII redaction), ReportPurchase model, vendor listings API (4 endpoints: list/delist/browse/listable), lender listings API (5 endpoints: browse/detail/purchase/purchases/download), billing integration (LISTING_DOWNLOAD entries), 5 frontend pages (vendor listings management, lender browse/detail/purchases), sidebar navigation updates
+**Phase 6 (Update & Nearby Requests):** Complete — extended request service for UPDATE/NEARBY types with parent_report_id, dynamic billing payable types, 2 new lender API endpoints (update/nearby), update request dialog with predefined checklist, nearby request dialog with address form, parent report context on vendor request detail, request type badges
 
 ## Seed Data (local)
 
