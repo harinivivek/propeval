@@ -1,5 +1,14 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8020";
+function getApiBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    const { hostname } = window.location;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "http://localhost:8020";
+    }
+  }
+  return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8020";
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 type RequestOptions = {
   method?: string;
