@@ -135,7 +135,12 @@ export default function VendorRequestDetailPage() {
       {isCompleted && (
         <div className="border rounded-lg p-4 mb-4 bg-emerald-50">
           <p className="text-emerald-800 font-medium">
-            {request.vendor_status === "ACCEPTED" ? "Report accepted by lender." : "Report submitted."}
+            {request.vendor_status === "ACCEPTED"
+              ? "Report accepted by lender."
+              : "Report submitted — extraction processing."}
+          </p>
+          <p className="text-sm text-gray-600 mt-1">
+            Use the Bulk Upload page to manage report extraction data.
           </p>
         </div>
       )}
