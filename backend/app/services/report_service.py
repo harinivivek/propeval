@@ -7,7 +7,7 @@ from uuid import UUID
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.constants import ALLOWED_CONTENT_TYPES, MAX_UPLOAD_SIZE_MB, MEDIA_ROOT, REPORTS_DIR
+from app.core.constants import ALLOWED_CONTENT_TYPES, MAX_UPLOAD_SIZE_MB, MEDIA_ROOT, REPORTS_DIR, REQUIRED_REPORT_FIELDS
 from app.models.enums import (
     LenderRequestStatus,
     ReportCategory,
@@ -132,3 +132,51 @@ async def get_report_revisions(db: AsyncSession, report_id: UUID) -> list[Report
         .order_by(ReportRevision.revision_number.desc())
     )
     return list(result.scalars().all())
+
+
+def validate_for_publish(content_json: dict | None) -> list[str]:
+    """Return list of missing required fields. Empty list = valid."""
+    if not content_json:
+        return REQUIRED_REPORT_FIELDS[:]
+
+    anchor = content_json.get("anchor_fields", {})
+    missing = []
+    for field_name in REQUIRED_REPORT_FIELDS:
+        field_data = anchor.get(field_name)
+        if not field_data or not field_data.get("value"):
+            missing.append(field_name)
+    return missing
+
+
+async def update_extracted_data(
+    db: AsyncSession,
+    report: Report,
+    anchor_fields: dict,
+    additional_fields: dict,
+) -> Report:
+    """Update report's content_json with edited extraction data."""
+    if not report.content_json:
+        report.content_json = {
+            "extraction_version": 1,
+            "provider": "manual",
+            "anchor_fields": {},
+            "additional_fields": {},
+        }
+
+    content = dict(report.content_json)
+    content["anchor_fields"] = anchor_fields
+    content["additional_fields"] = additional_fields
+    report.content_json = content
+    await db.flush()
+    return report
+
+
+async def publish_report(db: AsyncSession, report: Report) -> Report:
+    """Validate and transition report to PUBLISHED status."""
+    missing = validate_for_publish(report.content_json)
+    if missing:
+        raise ValueError(f"Missing required fields: {', '.join(missing)}")
+
+    report.status = ReportStatus.PUBLISHED
+    await db.flush()
+    return report

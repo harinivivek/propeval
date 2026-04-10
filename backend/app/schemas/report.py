@@ -44,6 +44,7 @@ class ReportResponse(BaseModel):
     uploaded_file_path: str | None = None
     latitude: Decimal | None = None
     longitude: Decimal | None = None
+    content_json: dict | None = None
     listing_approved: bool
     is_active: bool
 
@@ -77,3 +78,17 @@ class RevisionSummary(BaseModel):
 class ReportDetail(ReportResponse):
     """Extended response with revision history."""
     revisions: list[RevisionSummary] = []
+
+
+class ExtractedFieldUpdate(BaseModel):
+    value: str | int | float | None = None
+    confidence: float | None = None
+    type: str = "text"
+    original: str | int | float | None = None
+    edited: bool = False
+
+
+class ExtractedDataUpdate(BaseModel):
+    """Payload for updating extracted report data."""
+    anchor_fields: dict[str, ExtractedFieldUpdate] = {}
+    additional_fields: dict[str, ExtractedFieldUpdate] = {}
