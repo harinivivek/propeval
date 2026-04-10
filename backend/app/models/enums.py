@@ -121,3 +121,15 @@ class BulkUploadStatus(str, Enum):
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
     PARTIALLY_FAILED = "PARTIALLY_FAILED"
+
+
+class NotificationEventType(str, Enum):
+    NEW_BROADCAST = "NEW_BROADCAST"
+    REQUEST_ACCEPTED = "REQUEST_ACCEPTED"
+    REVISION_REQUESTED = "REVISION_REQUESTED"
+    LISTING_DOWNLOADED = "LISTING_DOWNLOADED"
+
+
+class NotificationReferenceType(str, Enum):
+    REQUEST = "REQUEST"
+    REPORT = "REPORT"

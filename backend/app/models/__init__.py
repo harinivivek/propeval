@@ -8,6 +8,8 @@ from app.models.enums import (
     LenderRequestStatus,
     LenderRole,
     ListingStatus,
+    NotificationEventType,
+    NotificationReferenceType,
     PayableType,
     PaymentStatus,
     PropertyType,
@@ -30,6 +32,7 @@ from app.models.purchase import ReportPurchase
 from app.models.request import ReportRequest, RequestBroadcast, RequestAcceptance
 from app.models.billing import VendorEarning, LenderPayable, Invoice
 from app.models.bulk_upload import BulkUploadJob
+from app.models.notification import Notification
 
 __all__ = [
     "Base",
@@ -82,4 +85,9 @@ __all__ = [
     "BulkUploadJob",
     # Phase 5 models
     "ReportPurchase",
+    # Phase 7 enums
+    "NotificationEventType",
+    "NotificationReferenceType",
+    # Phase 7 models
+    "Notification",
 ]
