@@ -63,6 +63,12 @@ Seed also creates 4 pricing rules for ABCL Bank (Bengaluru: residential/commerci
 - Business logic lives here, not in routers
 - Enum coercion: services convert string roles to enum values (e.g., `LenderRole(role)`) before passing to models
 
+### Celery Tasks
+- Use `get_async_session_context()` from `database.py` for DB access (creates NullPool engine, auto-commits)
+- Wrap async code with `asyncio.run()` inside task functions
+- Lazy-import heavy dependencies (e.g., `anthropic`) inside functions to avoid import-time failures
+- Tasks auto-discovered via `celery_app.autodiscover_tasks(["app.jobs"])`
+
 ### Routers
 - Prefix: `/api/<domain>/<sub>` (e.g., `/api/lender/settings/users`)
 - Use `Depends(get_db)` and `Depends(get_current_user)`
@@ -108,6 +114,8 @@ Seed also creates 4 pricing rules for ABCL Bank (Bengaluru: residential/commerci
 
 ```bash
 make local-up        # Start all services
+# NOTE: If `make local-up` fails with port conflicts, use:
+# docker compose -f docker-compose.local.yml --env-file .env.local up -d
 make local-down      # Stop all services
 make local-logs      # Tail logs
 make migrate         # Run migrations
@@ -125,6 +133,8 @@ make lint            # Lint backend + frontend
 - **Ports:** Use 8020/3020/5433/6380 to avoid conflicts with SV-platform (8000/3000/5432/6379)
 - **PYTHONPATH:** Must be set to `/app` in Dockerfile for alembic and scripts to work
 - **Docker volumes:** `backend/app` is volume-mounted for hot reload, but `alembic/` and `scripts/` are baked into the image — rebuild container after changes to those dirs. Similarly, `backend/tests/` is not volume-mounted — copy test files into the container or rebuild to run new tests.
+- **Poetry lock:** After adding/removing deps in `pyproject.toml`, run `cd backend && poetry lock` before rebuilding containers. Build will fail with "pyproject.toml changed significantly" otherwise.
+- **Alembic migrations from container:** Migrations generated inside Docker stay in the container (alembic/ not volume-mounted). Copy to host with: `docker cp propeval-backend-1:/app/alembic/versions/<file>.py backend/alembic/versions/`
 - **Pricing area fallback:** PricingRule uses two unique constraints (one for rows WITH area, one partial index for rows WHERE area IS NULL) to support city+area exact match with fallback to city-level pricing
 - **Decimal serialization:** Pydantic serializes `Decimal` fields as strings (e.g., `"2500.00"`). Frontend types use `string` for price fields accordingly
 
@@ -140,7 +150,8 @@ make lint            # Lint backend + frontend
 - `backend/app/services/pricing_service.py` — Pricing CRUD + price calculation with area fallback
 - `backend/app/services/request_service.py` — Request lifecycle orchestration (create, accept, reject, listing)
 - `backend/app/services/broadcast_service.py` — Vendor selection, broadcast rounds, accept/reject
-- `backend/app/services/report_service.py` — Report upload, revision, download
+- `backend/app/services/report_service.py` — Report upload, revision, download, publish validation
+- **OCR Architecture:** `OcrProvider` (ABC) → `ClaudeOcrProvider` (implementation) → `OcrService` (orchestrator). Providers are swappable. Extracted data stored in `Report.content_json` (JSONB). Required fields for publish defined in `constants.REQUIRED_REPORT_FIELDS`.
 - `backend/app/services/billing_service.py` — VendorEarning + LenderPayable creation
 - `backend/app/api/lender/requests.py` — Lender request endpoints (6)
 - `backend/app/api/vendor/requests.py` — Vendor request endpoints (6)
