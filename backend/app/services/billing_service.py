@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,6 +37,43 @@ async def create_billing_entries(
         request_id=request.id,
         amount=request.price,
         payable_type=PayableType.NEW_REQUEST,
+        status=PaymentStatus.PENDING,
+        month=month,
+    )
+    db.add(payable)
+
+    await db.flush()
+    return earning, payable
+
+
+async def create_listing_purchase_entries(
+    db: AsyncSession,
+    *,
+    report_id: UUID,
+    vendor_id: UUID,
+    lender_id: UUID,
+    amount: Decimal,
+) -> tuple[VendorEarning, LenderPayable]:
+    """Create VendorEarning + LenderPayable on listing report purchase."""
+    month = datetime.utcnow().strftime("%Y-%m")
+
+    earning = VendorEarning(
+        vendor_id=vendor_id,
+        report_id=report_id,
+        request_id=None,
+        lender_id=lender_id,
+        amount=amount,
+        earning_type=EarningType.LISTING_DOWNLOAD,
+        month=month,
+    )
+    db.add(earning)
+
+    payable = LenderPayable(
+        lender_id=lender_id,
+        report_id=report_id,
+        request_id=None,
+        amount=amount,
+        payable_type=PayableType.LISTING_DOWNLOAD,
         status=PaymentStatus.PENDING,
         month=month,
     )
