@@ -26,6 +26,7 @@ from app.models.vendor import Vendor, VendorUser, ServiceArea
 from app.models.pricing import PricingRule
 from app.models.report import Report, ReportRevision
 from app.models.listing import Listing, ListingReport
+from app.models.purchase import ReportPurchase
 from app.models.request import ReportRequest, RequestBroadcast, RequestAcceptance
 from app.models.billing import VendorEarning, LenderPayable, Invoice
 from app.models.bulk_upload import BulkUploadJob
@@ -79,4 +80,6 @@ __all__ = [
     "BulkUploadStatus",
     # Phase 4 models
     "BulkUploadJob",
+    # Phase 5 models
+    "ReportPurchase",
 ]

@@ -21,16 +21,22 @@ class Listing(BaseModel):
 
     macro_location: Mapped[str] = mapped_column(String(255))
     city: Mapped[str] = mapped_column(String(255))
+    pin_code: Mapped[str] = mapped_column(String(10))
     property_type: Mapped[PropertyType] = mapped_column(SQLEnum(PropertyType))
     status: Mapped[ListingStatus] = mapped_column(
         SQLEnum(ListingStatus), default=ListingStatus.DRAFT
     )
     report_count: Mapped[int] = mapped_column(Integer, default=0)
+    vendor_count: Mapped[int] = mapped_column(Integer, default=0)
     latest_report_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     listing_reports: Mapped[list["ListingReport"]] = relationship(
         back_populates="listing"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("pin_code", "property_type", name="uq_listing_pin_code_property_type"),
     )
 
 
