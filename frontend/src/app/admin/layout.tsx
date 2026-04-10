@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { NotificationBell } from "@/components/notification-bell";
 
 export default function AdminLayout({
   children,
@@ -53,17 +54,22 @@ export default function AdminLayout({
 
       <div className="flex flex-col flex-1 min-w-0">
         {/* Mobile/tablet top bar */}
-        <header className="lg:hidden flex items-center gap-3 border-b bg-white px-4 py-3">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded hover:bg-gray-100 text-gray-600"
-            aria-label="Open menu"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <span className="font-semibold text-gray-800">GTR Admin</span>
+        <header className="lg:hidden flex items-center justify-between gap-3 border-b bg-white px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 rounded hover:bg-gray-100 text-gray-600"
+              aria-label="Open menu"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <span className="font-semibold text-gray-800">GTR Admin</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+          </div>
         </header>
 
         <main className="flex-1 p-6">{children}</main>
