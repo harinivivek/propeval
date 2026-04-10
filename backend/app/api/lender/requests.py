@@ -1,17 +1,23 @@
+import json
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.deps import require_role
+from app.models.lender import LenderUser
+from app.models.report import Report
 from app.models.user import User
 from app.schemas.request import (
     EligibleVendorResponse,
+    NearbyRequestInput,
     RejectReportInput,
     ReportRequestCreateInput,
     ReportRequestDetail,
     ReportRequestResponse,
+    UpdateRequestInput,
 )
 from app.services import broadcast_service, report_service, request_service
 from app.services.broadcast_service import NoVendorsAvailableError
@@ -28,8 +34,6 @@ async def create_request(
     current_user: User = Depends(require_role("LENDER")),
 ):
     """Create a new report request."""
-    from sqlalchemy import select
-    from app.models.lender import LenderUser
     result = await db.execute(
         select(LenderUser).where(LenderUser.user_id == current_user.id)
     )
@@ -95,8 +99,6 @@ async def list_requests(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("LENDER")),
 ):
-    from sqlalchemy import select
-    from app.models.lender import LenderUser
     result = await db.execute(
         select(LenderUser).where(LenderUser.user_id == current_user.id)
     )
@@ -113,6 +115,103 @@ async def list_requests(
         page=page,
         per_page=per_page,
     )
+
+
+@router.post("/update", response_model=ReportRequestResponse, status_code=status.HTTP_201_CREATED)
+async def create_update_request(
+    payload: UpdateRequestInput,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("LENDER")),
+):
+    result = await db.execute(
+        select(LenderUser).where(LenderUser.user_id == current_user.id)
+    )
+    lender_user = result.scalar_one_or_none()
+    if not lender_user:
+        raise HTTPException(status_code=400, detail="User not associated with a lender")
+
+    report_result = await db.execute(
+        select(Report).where(Report.id == payload.report_id, Report.is_active == True)
+    )
+    report = report_result.scalar_one_or_none()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    structured_comments = json.dumps({
+        "checklist": payload.checklist,
+        "text": payload.comments or "",
+    })
+
+    try:
+        request = await request_service.create_request(
+            db,
+            lender_id=lender_user.lender_id,
+            lender_user_id=current_user.id,
+            report_category=report.report_category.value if hasattr(report.report_category, "value") else str(report.report_category),
+            property_address=report.property_address or "",
+            city=report.city or "",
+            pin_code=report.pin_code,
+            property_type=report.property_type.value if hasattr(report.property_type, "value") else str(report.property_type),
+            plot_extent_sqft=report.plot_extent_sqft,
+            loan_applicant_name=report.loan_applicant_name or "",
+            vendor_specified_id=report.vendor_id,
+            allow_broadcast_on_reject=True,
+            comments=structured_comments,
+            request_type="UPDATE",
+            parent_report_id=report.id,
+        )
+    except PricingNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except NoVendorsAvailableError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return request
+
+
+@router.post("/nearby", response_model=ReportRequestResponse, status_code=status.HTTP_201_CREATED)
+async def create_nearby_request(
+    payload: NearbyRequestInput,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("LENDER")),
+):
+    result = await db.execute(
+        select(LenderUser).where(LenderUser.user_id == current_user.id)
+    )
+    lender_user = result.scalar_one_or_none()
+    if not lender_user:
+        raise HTTPException(status_code=400, detail="User not associated with a lender")
+
+    report_result = await db.execute(
+        select(Report).where(Report.id == payload.report_id, Report.is_active == True)
+    )
+    report = report_result.scalar_one_or_none()
+    if not report:
+        raise HTTPException(status_code=404, detail="Reference report not found")
+
+    try:
+        request = await request_service.create_request(
+            db,
+            lender_id=lender_user.lender_id,
+            lender_user_id=current_user.id,
+            report_category=payload.report_category,
+            property_address=payload.property_address,
+            city=payload.city,
+            area=payload.area,
+            pin_code=payload.pin_code,
+            property_type=report.property_type.value if hasattr(report.property_type, "value") else str(report.property_type),
+            loan_applicant_name="",
+            vendor_specified_id=report.vendor_id,
+            allow_broadcast_on_reject=True,
+            comments=payload.comments,
+            request_type="NEARBY",
+            parent_report_id=report.id,
+        )
+    except PricingNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except NoVendorsAvailableError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return request
 
 
 @router.get("/{request_id}", response_model=ReportRequestResponse)
@@ -137,7 +236,6 @@ async def accept_report(
     if not req:
         raise HTTPException(status_code=404, detail="Request not found")
 
-    from sqlalchemy import select
     from app.models.request import RequestAcceptance
     acceptance_result = await db.execute(
         select(RequestAcceptance).where(RequestAcceptance.request_id == request_id)
@@ -146,7 +244,6 @@ async def accept_report(
     if not acceptance:
         raise HTTPException(status_code=400, detail="No vendor accepted this request yet")
 
-    from app.models.report import Report
     report_result = await db.execute(
         select(Report).where(
             Report.vendor_id == acceptance.vendor_id,
@@ -178,9 +275,7 @@ async def reject_report(
     if not req:
         raise HTTPException(status_code=404, detail="Request not found")
 
-    from sqlalchemy import select
     from app.models.request import RequestAcceptance
-    from app.models.report import Report
     acceptance_result = await db.execute(
         select(RequestAcceptance).where(RequestAcceptance.request_id == request_id)
     )
