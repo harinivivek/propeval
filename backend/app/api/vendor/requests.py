@@ -182,6 +182,32 @@ async def upload_report(
     return report
 
 
+@router.get("/{request_id}/report", response_model=ReportResponse)
+async def get_request_report(
+    request_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("VENDOR")),
+):
+    """Get the latest active report uploaded by this vendor for a given request."""
+    vendor_id = await _get_vendor_id(db, current_user.id)
+
+    from app.services import request_service
+    req = await request_service.get_request(db, request_id)
+    if not req:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    result = await db.execute(
+        select(Report)
+        .where(Report.vendor_id == vendor_id, Report.is_active == True)
+        .order_by(Report.created_at.desc())
+        .limit(1)
+    )
+    report = result.scalar_one_or_none()
+    if not report:
+        raise HTTPException(status_code=404, detail="No report found for this request")
+    return report
+
+
 @router.post("/{request_id}/revise", response_model=ReportResponse)
 async def revise_report(
     request_id: UUID,

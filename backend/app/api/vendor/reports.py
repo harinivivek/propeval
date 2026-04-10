@@ -107,13 +107,16 @@ async def list_bulk_jobs(
 async def get_bulk_job(
     job_id: UUID,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_role("VENDOR")),
+    current_user: User = Depends(require_role("VENDOR")),
 ):
+    vendor_id = await _get_vendor_id(db, current_user.id)
     result = await db.execute(
         select(BulkUploadJob).where(BulkUploadJob.id == job_id)
     )
     job = result.scalar_one_or_none()
     if not job:
+        raise HTTPException(status_code=404, detail="Bulk job not found")
+    if job.vendor_id != vendor_id:
         raise HTTPException(status_code=404, detail="Bulk job not found")
     return job
 
@@ -122,8 +125,15 @@ async def get_bulk_job(
 async def get_bulk_job_reports(
     job_id: UUID,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_role("VENDOR")),
+    current_user: User = Depends(require_role("VENDOR")),
 ):
+    vendor_id = await _get_vendor_id(db, current_user.id)
+    job_result = await db.execute(
+        select(BulkUploadJob).where(BulkUploadJob.id == job_id)
+    )
+    job = job_result.scalar_one_or_none()
+    if not job or job.vendor_id != vendor_id:
+        raise HTTPException(status_code=404, detail="Bulk job not found")
     result = await db.execute(
         select(Report)
         .where(Report.bulk_upload_job_id == job_id)
@@ -204,10 +214,13 @@ async def publish_report(
 async def get_report_pdf(
     report_id: UUID,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_role("VENDOR")),
+    current_user: User = Depends(require_role("VENDOR")),
 ):
+    vendor_id = await _get_vendor_id(db, current_user.id)
     report = await report_service.get_report(db, report_id)
     if not report or not report.uploaded_file_path:
+        raise HTTPException(status_code=404, detail="Report not found")
+    if report.vendor_id != vendor_id:
         raise HTTPException(status_code=404, detail="Report not found")
 
     full_path = report_service.get_full_path(report.uploaded_file_path)

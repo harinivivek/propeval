@@ -173,6 +173,9 @@ async def update_extracted_data(
 
 async def publish_report(db: AsyncSession, report: Report) -> Report:
     """Validate and transition report to PUBLISHED status."""
+    if report.status != ReportStatus.READY_TO_PUBLISH:
+        raise ValueError(f"Report must be in READY_TO_PUBLISH status, currently: {report.status.value}")
+
     missing = validate_for_publish(report.content_json)
     if missing:
         raise ValueError(f"Missing required fields: {', '.join(missing)}")

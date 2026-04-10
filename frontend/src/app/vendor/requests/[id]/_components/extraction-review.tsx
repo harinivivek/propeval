@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import type { ContentJson, ExtractedField, Report } from "@/types/report";
 
@@ -50,6 +50,57 @@ function flattenFields(content: ContentJson): FieldEntry[] {
     entries.push({ key, ...field, isAnchor: false });
   }
   return entries;
+}
+
+function PdfModal({ reportId, onClose }: { reportId: string; onClose: () => void }) {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8020";
+
+    fetch(`${apiUrl}/api/vendor/reports/${reportId}/pdf`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load PDF");
+        return res.blob();
+      })
+      .then((blob) => {
+        setPdfUrl(URL.createObjectURL(blob));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    };
+  }, [reportId]);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg w-full max-w-4xl h-[80vh] mx-4 flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b">
+          <h3 className="font-semibold">Original Report PDF</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl">
+            &times;
+          </button>
+        </div>
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-gray-500">Loading PDF...</p>
+          </div>
+        ) : pdfUrl ? (
+          <iframe src={pdfUrl} className="flex-1 w-full" title="Report PDF" />
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-red-500">Failed to load PDF</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export function ExtractionReview({ report, onUpdated }: Props) {
@@ -306,26 +357,7 @@ export function ExtractionReview({ report, onUpdated }: Props) {
       </div>
 
       {/* PDF Modal */}
-      {showPdf && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-4xl h-[80vh] mx-4 flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="font-semibold">Original Report PDF</h3>
-              <button
-                onClick={() => setShowPdf(false)}
-                className="text-gray-500 hover:text-gray-700 text-xl"
-              >
-                &times;
-              </button>
-            </div>
-            <iframe
-              src={`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8020"}/api/vendor/reports/${report.id}/pdf`}
-              className="flex-1 w-full"
-              title="Report PDF"
-            />
-          </div>
-        </div>
-      )}
+      {showPdf && <PdfModal reportId={report.id} onClose={() => setShowPdf(false)} />}
     </div>
   );
 }

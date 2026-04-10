@@ -33,13 +33,12 @@ class ClaudeOcrProvider(OcrProvider):
 
     def _pdf_to_images(self, pdf_path: str, max_pages: int = 20) -> list[bytes]:
         """Convert PDF pages to PNG images."""
-        doc = fitz.open(pdf_path)
         images = []
-        for page_num in range(min(len(doc), max_pages)):
-            page = doc[page_num]
-            pix = page.get_pixmap(dpi=150)
-            images.append(pix.tobytes("png"))
-        doc.close()
+        with fitz.open(pdf_path) as doc:
+            for page_num in range(min(len(doc), max_pages)):
+                page = doc[page_num]
+                pix = page.get_pixmap(dpi=150)
+                images.append(pix.tobytes("png"))
         return images
 
     async def extract(self, pdf_path: str) -> ExtractionResult:
