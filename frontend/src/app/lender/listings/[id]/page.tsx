@@ -7,6 +7,8 @@ import { ListingDetailResponse, RedactedReportPreview } from "@/types/listing";
 import { PurchaseResponse } from "@/types/listing";
 import { ReportPreviewCard } from "./_components/report-preview-card";
 import { PurchaseDialog } from "./_components/purchase-dialog";
+import { UpdateRequestDialog } from "./_components/update-request-dialog";
+import { NearbyRequestDialog } from "./_components/nearby-request-dialog";
 
 export default function LenderListingDetailPage() {
   const params = useParams<{ id: string }>();
@@ -15,6 +17,9 @@ export default function LenderListingDetailPage() {
   const [error, setError] = useState("");
   const [purchasingReport, setPurchasingReport] = useState<RedactedReportPreview | null>(null);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [updateReportId, setUpdateReportId] = useState<string | null>(null);
+  const [showNearbyDialog, setShowNearbyDialog] = useState(false);
+  const [nearbyRefReportId, setNearbyRefReportId] = useState<string | null>(null);
 
   const fetchDetail = async () => {
     setLoading(true);
@@ -27,6 +32,10 @@ export default function LenderListingDetailPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getReportForUpdate = (reportId: string) => {
+    return data?.reports.find((r) => r.id === reportId) || null;
   };
 
   useEffect(() => {
@@ -76,6 +85,18 @@ export default function LenderListingDetailPage() {
           {listing.report_count} report{listing.report_count !== 1 ? "s" : ""} ·{" "}
           {listing.vendor_count} vendor{listing.vendor_count !== 1 ? "s" : ""}
         </p>
+        <button
+          onClick={() => {
+            const firstReport = reports.length > 0 ? reports[0] : null;
+            if (firstReport) {
+              setNearbyRefReportId(firstReport.id);
+              setShowNearbyDialog(true);
+            }
+          }}
+          className="mt-3 px-4 py-2 text-sm border border-blue-300 text-blue-600 rounded hover:bg-blue-50"
+        >
+          Request Nearby Report
+        </button>
       </div>
 
       <div className="space-y-4">
@@ -88,6 +109,7 @@ export default function LenderListingDetailPage() {
               if (report) setPurchasingReport(report);
             }}
             onDownload={handleDownload}
+            onRequestUpdate={(id) => setUpdateReportId(id)}
           />
         ))}
       </div>
@@ -104,6 +126,36 @@ export default function LenderListingDetailPage() {
           loading={purchaseLoading}
           onConfirm={handlePurchase}
           onCancel={() => setPurchasingReport(null)}
+        />
+      )}
+
+      {updateReportId && (() => {
+        const rpt = getReportForUpdate(updateReportId);
+        return rpt ? (
+          <UpdateRequestDialog
+            reportId={updateReportId}
+            reportCategory={rpt.report_category}
+            locality={rpt.locality}
+            reportDate={rpt.report_date}
+            onSuccess={() => {
+              setUpdateReportId(null);
+              window.location.href = "/lender/requests";
+            }}
+            onCancel={() => setUpdateReportId(null)}
+          />
+        ) : null;
+      })()}
+
+      {showNearbyDialog && nearbyRefReportId && (
+        <NearbyRequestDialog
+          referenceReportId={nearbyRefReportId}
+          listingCity={listing.city}
+          listingPinCode={listing.pin_code}
+          onSuccess={() => {
+            setShowNearbyDialog(false);
+            window.location.href = "/lender/requests";
+          }}
+          onCancel={() => setShowNearbyDialog(false)}
         />
       )}
     </div>

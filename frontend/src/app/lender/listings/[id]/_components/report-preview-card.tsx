@@ -4,6 +4,7 @@ interface Props {
   report: RedactedReportPreview;
   onPurchase: (reportId: string) => void;
   onDownload: (reportId: string) => void;
+  onRequestUpdate: (reportId: string) => void;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -21,7 +22,7 @@ const CONTENT_LABELS: Record<string, string> = {
   property_description: "Description",
 };
 
-export function ReportPreviewCard({ report, onPurchase, onDownload }: Props) {
+export function ReportPreviewCard({ report, onPurchase, onDownload, onRequestUpdate }: Props) {
   const catColor = CATEGORY_COLORS[report.report_category] || "bg-gray-100 text-gray-800";
 
   return (
@@ -66,7 +67,13 @@ export function ReportPreviewCard({ report, onPurchase, onDownload }: Props) {
         </div>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => onRequestUpdate(report.id)}
+          className="px-3 py-2 text-sm border border-orange-300 text-orange-600 rounded hover:bg-orange-50"
+        >
+          Request Update
+        </button>
         {report.is_purchased ? (
           <button
             onClick={() => onDownload(report.id)}

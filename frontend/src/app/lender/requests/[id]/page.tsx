@@ -65,6 +65,44 @@ export default function LenderRequestDetailPage() {
 
       <h1 className="text-2xl font-bold mb-4">Request Detail</h1>
 
+        {request.request_type !== "NEW" && (
+          <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-2 ${
+            request.request_type === "UPDATE"
+              ? "bg-orange-100 text-orange-800"
+              : "bg-blue-100 text-blue-800"
+          }`}>
+            {request.request_type === "UPDATE" ? "Update Request" : "Nearby Request"}
+          </span>
+        )}
+
+        {request.parent_report_id && (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 mb-4">
+            <h3 className="text-sm font-medium text-gray-700 mb-1">Related Report</h3>
+            <p className="text-sm text-gray-600">
+              Report ID: {request.parent_report_id}
+            </p>
+            {request.request_type === "UPDATE" && request.comments && (() => {
+              try {
+                const parsed = JSON.parse(request.comments);
+                if (parsed.checklist) {
+                  return (
+                    <div className="mt-2">
+                      <p className="text-xs font-medium text-gray-500 mb-1">Update items:</p>
+                      <ul className="text-sm text-gray-600 list-disc list-inside">
+                        {parsed.checklist.map((item: string) => (
+                          <li key={item}>{item.replace(/_/g, " ").toLowerCase()}</li>
+                        ))}
+                      </ul>
+                      {parsed.text && <p className="text-sm text-gray-600 mt-1">{parsed.text}</p>}
+                    </div>
+                  );
+                }
+              } catch { /* plain text comments */ }
+              return null;
+            })()}
+          </div>
+        )}
+
       <StatusTimeline status={request.lender_status} />
 
       {error && (
