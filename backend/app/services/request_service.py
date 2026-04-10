@@ -13,10 +13,12 @@ from app.models.enums import (
     RequestType,
     VendorRequestStatus,
 )
+from app.models.enums import NotificationEventType, NotificationReferenceType
 from app.models.listing import Listing, ListingReport
 from app.models.report import Report, ReportRevision
 from app.models.request import ReportRequest, RequestBroadcast
-from app.services import billing_service, broadcast_service, pricing_service
+from app.models.vendor import VendorUser
+from app.services import billing_service, broadcast_service, notification_service, pricing_service
 
 
 class InvalidStatusTransition(Exception):
@@ -186,6 +188,20 @@ async def accept_report(
 
     await db.flush()
 
+    # Notify vendor users that their acceptance was confirmed
+    vendor_users_stmt = select(VendorUser.user_id).where(VendorUser.vendor_id == vendor_id)
+    vendor_user_ids = (await db.execute(vendor_users_stmt)).scalars().all()
+    for user_id in vendor_user_ids:
+        await notification_service.create_notification(
+            db,
+            user_id=user_id,
+            event_type=NotificationEventType.REQUEST_ACCEPTED,
+            title="Request accepted",
+            message=f"Your acceptance for the {request.report_category.value} request has been confirmed",
+            reference_id=request.id,
+            reference_type=NotificationReferenceType.REQUEST,
+        )
+
 
 async def reject_report(
     db: AsyncSession,
@@ -219,6 +235,21 @@ async def reject_report(
     )
     db.add(revision)
     await db.flush()
+
+    # Notify vendor users that a revision has been requested
+    vendor_users_stmt = select(VendorUser.user_id).where(VendorUser.vendor_id == report.vendor_id)
+    vendor_user_ids = (await db.execute(vendor_users_stmt)).scalars().all()
+    for user_id in vendor_user_ids:
+        await notification_service.create_notification(
+            db,
+            user_id=user_id,
+            event_type=NotificationEventType.REVISION_REQUESTED,
+            title="Revision requested",
+            message=f"A revision has been requested for the report at {report.property_address or 'a property'}",
+            reference_id=report.id,
+            reference_type=NotificationReferenceType.REPORT,
+        )
+
     return revision
 
 

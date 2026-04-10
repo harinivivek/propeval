@@ -11,8 +11,10 @@ from app.models.enums import (
     ServiceType,
     VendorRequestStatus,
 )
+from app.models.enums import NotificationEventType, NotificationReferenceType
 from app.models.request import ReportRequest, RequestAcceptance, RequestBroadcast
-from app.models.vendor import ServiceArea, Vendor
+from app.models.vendor import ServiceArea, Vendor, VendorUser
+from app.services import notification_service
 
 
 class NoVendorsAvailableError(Exception):
@@ -105,6 +107,23 @@ async def start_broadcast(
 
     request.vendor_status = VendorRequestStatus.INCOMING
     await db.flush()
+
+    # Notify vendor users about the new broadcast
+    vendor_ids = [v.id for v in batch]
+    for vid in vendor_ids:
+        vendor_users_stmt = select(VendorUser.user_id).where(VendorUser.vendor_id == vid)
+        vendor_user_ids = (await db.execute(vendor_users_stmt)).scalars().all()
+        for user_id in vendor_user_ids:
+            await notification_service.create_notification(
+                db,
+                user_id=user_id,
+                event_type=NotificationEventType.NEW_BROADCAST,
+                title=f"New request broadcast",
+                message=f"{request.report_category.value} report request for {request.property_address or 'a property'}",
+                reference_id=request.id,
+                reference_type=NotificationReferenceType.REQUEST,
+            )
+
     return broadcast
 
 
@@ -143,6 +162,23 @@ async def advance_broadcast_round(
 
     request.vendor_status = VendorRequestStatus.INCOMING
     await db.flush()
+
+    # Notify vendor users about the new broadcast round
+    next_vendor_ids = [v.id for v in batch]
+    for vid in next_vendor_ids:
+        vendor_users_stmt = select(VendorUser.user_id).where(VendorUser.vendor_id == vid)
+        vendor_user_ids = (await db.execute(vendor_users_stmt)).scalars().all()
+        for user_id in vendor_user_ids:
+            await notification_service.create_notification(
+                db,
+                user_id=user_id,
+                event_type=NotificationEventType.NEW_BROADCAST,
+                title=f"New request broadcast",
+                message=f"{request.report_category.value} report request for {request.property_address or 'a property'}",
+                reference_id=request.id,
+                reference_type=NotificationReferenceType.REQUEST,
+            )
+
     return next_broadcast
 
 

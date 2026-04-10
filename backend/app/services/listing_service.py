@@ -9,6 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.enums import (
     EarningType,
     ListingStatus,
+    NotificationEventType,
+    NotificationReferenceType,
     PayableType,
     PropertyType,
     ReportCategory,
@@ -17,6 +19,8 @@ from app.models.enums import (
 from app.models.listing import Listing, ListingReport
 from app.models.purchase import ReportPurchase
 from app.models.report import Report
+from app.models.vendor import VendorUser
+from app.services import notification_service
 from app.schemas.listing import (
     ListingBrowseResponse,
     ListingDetailResponse,
@@ -387,6 +391,20 @@ async def purchase_report(
         lender_id=lender_id,
         amount=price_result.amount,
     )
+
+    # Notify vendor users that their report was purchased/downloaded
+    vendor_users_stmt = select(VendorUser.user_id).where(VendorUser.vendor_id == report.vendor_id)
+    vendor_user_ids = (await db.execute(vendor_users_stmt)).scalars().all()
+    for user_id in vendor_user_ids:
+        await notification_service.create_notification(
+            db,
+            user_id=user_id,
+            event_type=NotificationEventType.LISTING_DOWNLOADED,
+            title="Report downloaded",
+            message=f"A lender has purchased your report for {report.property_address or 'a property'}",
+            reference_id=report.id,
+            reference_type=NotificationReferenceType.REPORT,
+        )
 
     return PurchaseResponse.model_validate(purchase)
 
