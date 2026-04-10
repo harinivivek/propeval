@@ -49,6 +49,11 @@ def process_report_ocr(self, report_id: str):
                 logger.info("Report %s status is %s, skipping", report_id, report.status)
                 return
 
+            # Optimize PDF before OCR
+            from app.jobs.pdf_optimize import optimize_pdf
+            if report.uploaded_file_path:
+                optimize_pdf(report.uploaded_file_path)
+
             await service.process_report(db, report)
             logger.info("OCR complete for report %s: %s", report_id, report.status)
 
