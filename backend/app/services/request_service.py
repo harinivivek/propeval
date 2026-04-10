@@ -261,12 +261,11 @@ async def _create_or_update_listing(
     """Find or create a listing for this report's location."""
     macro = report.macro_location or report.city or "Unknown"
 
+    pin_code = report.pin_code or ""
     result = await db.execute(
         select(Listing).where(
-            Listing.city == report.city,
-            Listing.macro_location == macro,
+            Listing.pin_code == pin_code,
             Listing.property_type == report.property_type,
-            Listing.is_active == True,
         )
     )
     listing = result.scalar_one_or_none()
@@ -274,7 +273,8 @@ async def _create_or_update_listing(
     if not listing:
         listing = Listing(
             macro_location=macro,
-            city=report.city,
+            city=report.city or "",
+            pin_code=pin_code,
             property_type=report.property_type,
             status=ListingStatus.AVAILABLE,
             report_count=0,
