@@ -228,3 +228,279 @@ async def delist_report(
     listing = listing_result.scalar_one_or_none()
     if listing:
         await _update_listing_metadata(db, listing)
+
+
+async def get_listings(
+    db: AsyncSession,
+    *,
+    city: str | None = None,
+    pin_code: str | None = None,
+    property_type: str | None = None,
+    report_category: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+) -> ListingBrowseResponse:
+    stmt = select(Listing).where(
+        Listing.status == ListingStatus.AVAILABLE,
+        Listing.report_count > 0,
+    )
+    if city:
+        stmt = stmt.where(Listing.city == city)
+    if pin_code:
+        stmt = stmt.where(Listing.pin_code == pin_code)
+    if property_type:
+        stmt = stmt.where(Listing.property_type == PropertyType(property_type))
+
+    if report_category:
+        cat = ReportCategory(report_category)
+        stmt = stmt.where(
+            Listing.id.in_(
+                select(ListingReport.listing_id)
+                .join(Report, Report.id == ListingReport.report_id)
+                .where(Report.report_category == cat)
+            )
+        )
+
+    count_result = await db.execute(
+        select(func.count()).select_from(stmt.subquery())
+    )
+    total = count_result.scalar_one()
+
+    stmt = stmt.order_by(Listing.latest_report_date.desc().nullslast())
+    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
+    result = await db.execute(stmt)
+    listings = list(result.scalars().all())
+
+    return ListingBrowseResponse(
+        listings=[ListingResponse.model_validate(l) for l in listings],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+async def get_listing_detail(
+    db: AsyncSession,
+    listing_id: UUID,
+    lender_id: UUID,
+) -> ListingDetailResponse:
+    listing_result = await db.execute(
+        select(Listing).where(Listing.id == listing_id)
+    )
+    listing = listing_result.scalar_one_or_none()
+    if not listing:
+        raise ValueError("Listing not found")
+
+    reports_result = await db.execute(
+        select(Report)
+        .join(ListingReport, ListingReport.report_id == Report.id)
+        .where(
+            ListingReport.listing_id == listing_id,
+            Report.status == ReportStatus.PUBLISHED,
+            Report.is_active == True,
+        )
+        .order_by(Report.report_date.desc().nullslast())
+    )
+    reports = list(reports_result.scalars().all())
+
+    purchased_ids: set = set()
+    if reports:
+        purchased_result = await db.execute(
+            select(ReportPurchase.report_id).where(
+                ReportPurchase.lender_id == lender_id,
+                ReportPurchase.report_id.in_([r.id for r in reports]),
+            )
+        )
+        purchased_ids = set(purchased_result.scalars().all())
+
+    previews = [
+        redact_report_for_listing(r, is_purchased=(r.id in purchased_ids))
+        for r in reports
+    ]
+
+    return ListingDetailResponse(
+        listing=ListingResponse.model_validate(listing),
+        reports=previews,
+    )
+
+
+async def purchase_report(
+    db: AsyncSession,
+    *,
+    report_id: UUID,
+    listing_id: UUID,
+    lender_id: UUID,
+    user_id: UUID,
+) -> PurchaseResponse:
+    lr_result = await db.execute(
+        select(ListingReport).where(
+            ListingReport.listing_id == listing_id,
+            ListingReport.report_id == report_id,
+        )
+    )
+    if not lr_result.scalar_one_or_none():
+        raise ValueError("Report is not in this listing")
+
+    existing = await db.execute(
+        select(ReportPurchase).where(
+            ReportPurchase.report_id == report_id,
+            ReportPurchase.lender_id == lender_id,
+        )
+    )
+    if existing.scalar_one_or_none():
+        raise ValueError("Already purchased")
+
+    report_result = await db.execute(
+        select(Report).where(Report.id == report_id, Report.is_active == True)
+    )
+    report = report_result.scalar_one_or_none()
+    if not report:
+        raise ValueError("Report not found")
+
+    try:
+        price_result = await get_price(
+            db,
+            lender_id=lender_id,
+            report_category=report.report_category.value if hasattr(report.report_category, "value") else str(report.report_category),
+            city=report.city or "",
+            area=None,
+            property_type=report.property_type.value if hasattr(report.property_type, "value") else str(report.property_type),
+            request_type="LISTING_DOWNLOAD",
+        )
+    except PricingNotFoundError:
+        raise ValueError("No pricing rule configured for this report. Contact admin.")
+
+    purchase = ReportPurchase(
+        report_id=report_id,
+        listing_id=listing_id,
+        lender_id=lender_id,
+        purchased_by=user_id,
+        price=price_result.amount,
+    )
+    db.add(purchase)
+    await db.flush()
+
+    await create_listing_purchase_entries(
+        db,
+        report_id=report_id,
+        vendor_id=report.vendor_id,
+        lender_id=lender_id,
+        amount=price_result.amount,
+    )
+
+    return PurchaseResponse.model_validate(purchase)
+
+
+async def get_purchased_reports(
+    db: AsyncSession,
+    lender_id: UUID,
+    *,
+    page: int = 1,
+    page_size: int = 20,
+) -> PurchasedReportsResponse:
+    stmt = select(ReportPurchase).where(
+        ReportPurchase.lender_id == lender_id
+    )
+
+    count_result = await db.execute(
+        select(func.count()).select_from(stmt.subquery())
+    )
+    total = count_result.scalar_one()
+
+    stmt = stmt.order_by(ReportPurchase.created_at.desc())
+    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
+    result = await db.execute(stmt)
+    purchases = list(result.scalars().all())
+
+    items = []
+    for p in purchases:
+        report_result = await db.execute(
+            select(Report).where(Report.id == p.report_id)
+        )
+        report = report_result.scalar_one_or_none()
+        if report:
+            items.append(PurchasedReportItem(
+                purchase=PurchaseResponse.model_validate(p),
+                report=ReportResponse.model_validate(report),
+            ))
+
+    return PurchasedReportsResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+async def get_vendor_listings(
+    db: AsyncSession,
+    vendor_id: UUID,
+    *,
+    city: str | None = None,
+    property_type: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+) -> VendorListingsResponse:
+    listing_ids_stmt = (
+        select(ListingReport.listing_id)
+        .join(Report, Report.id == ListingReport.report_id)
+        .where(Report.vendor_id == vendor_id)
+        .distinct()
+    )
+
+    stmt = select(Listing).where(Listing.id.in_(listing_ids_stmt))
+    if city:
+        stmt = stmt.where(Listing.city == city)
+    if property_type:
+        stmt = stmt.where(Listing.property_type == PropertyType(property_type))
+
+    count_result = await db.execute(
+        select(func.count()).select_from(stmt.subquery())
+    )
+    total = count_result.scalar_one()
+
+    stmt = stmt.order_by(Listing.latest_report_date.desc().nullslast())
+    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
+    result = await db.execute(stmt)
+    listings = list(result.scalars().all())
+
+    groups = []
+    for listing in listings:
+        reports_result = await db.execute(
+            select(Report)
+            .join(ListingReport, ListingReport.report_id == Report.id)
+            .where(
+                ListingReport.listing_id == listing.id,
+                Report.vendor_id == vendor_id,
+            )
+            .order_by(Report.report_date.desc().nullslast())
+        )
+        reports = list(reports_result.scalars().all())
+        groups.append(VendorListingGroup(
+            listing=ListingResponse.model_validate(listing),
+            reports=[VendorListingReportItem.model_validate(r) for r in reports],
+        ))
+
+    return VendorListingsResponse(
+        groups=groups,
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+async def get_listable_reports(
+    db: AsyncSession,
+    vendor_id: UUID,
+) -> list[VendorListingReportItem]:
+    result = await db.execute(
+        select(Report).where(
+            Report.vendor_id == vendor_id,
+            Report.status == ReportStatus.PUBLISHED,
+            Report.listing_approved == False,
+            Report.is_active == True,
+            Report.pin_code.isnot(None),
+        ).order_by(Report.report_date.desc().nullslast())
+    )
+    reports = list(result.scalars().all())
+    return [VendorListingReportItem.model_validate(r) for r in reports]
