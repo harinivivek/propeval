@@ -21,7 +21,6 @@ async def admin_stats(
 @router.get("/vendors")
 async def admin_vendors(
     city: str | None = Query(None),
-    category: str | None = Query(None),
     date_from: str | None = Query(None),
     date_to: str | None = Query(None),
     sort_by: str = Query("vendor_name"),
@@ -34,7 +33,6 @@ async def admin_vendors(
     items, total = await dashboard_service.get_admin_vendors_table(
         db,
         city_filter=city,
-        category_filter=category,
         date_from=date_from,
         date_to=date_to,
         sort_by=sort_by,
@@ -48,14 +46,13 @@ async def admin_vendors(
 @router.get("/vendors/export")
 async def admin_vendors_export(
     city: str | None = Query(None),
-    category: str | None = Query(None),
     date_from: str | None = Query(None),
     date_to: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("ADMIN")),
 ):
     items, _ = await dashboard_service.get_admin_vendors_table(
-        db, city_filter=city, category_filter=category,
+        db, city_filter=city,
         date_from=date_from, date_to=date_to, page=1, page_size=10000,
     )
     columns = [

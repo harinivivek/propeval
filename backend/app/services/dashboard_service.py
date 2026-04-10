@@ -295,7 +295,15 @@ async def get_vendor_reports_table(
     count_stmt = select(func.count()).select_from(base.subquery())
     total = (await db.execute(count_stmt)).scalar_one()
 
-    sort_col = getattr(Report, sort_by, Report.report_date)
+    sort_map = {
+        "report_date": Report.report_date,
+        "property_address": Report.property_address,
+        "status": Report.status,
+        "report_category": Report.report_category,
+        "property_type": Report.property_type,
+        "valuation_amount": Report.valuation_amount,
+    }
+    sort_col = sort_map.get(sort_by, Report.report_date)
     order = sort_col.desc() if sort_order == "desc" else sort_col.asc()
 
     stmt = base.order_by(order).offset((page - 1) * page_size).limit(page_size)
@@ -509,12 +517,20 @@ async def get_admin_vendors_table(
     date_from: str | None = None,
     date_to: str | None = None,
     city_filter: str | None = None,
-    category_filter: str | None = None,
     sort_by: str = "vendor_name",
     sort_order: str = "asc",
     page: int = 1,
     page_size: int = 20,
 ) -> tuple[list[dict], int]:
+    # Compute total_earnings as a scalar subquery to avoid SUM(DISTINCT amount)
+    # deduplication bug caused by multi-table joins.
+    earnings_subq = (
+        select(func.coalesce(func.sum(VendorEarning.amount), Decimal("0")))
+        .where(VendorEarning.vendor_id == Vendor.id)
+        .correlate(Vendor)
+        .scalar_subquery()
+    )
+
     base = (
         select(
             Vendor.id.label("vendor_id"),
@@ -522,20 +538,27 @@ async def get_admin_vendors_table(
             Vendor.office_city.label("city"),
             func.count(distinct(RequestAcceptance.id)).label("requests_served"),
             func.count(distinct(Report.id)).label("reports_uploaded"),
-            func.coalesce(func.sum(distinct(VendorEarning.amount)), Decimal("0")).label("total_earnings"),
+            earnings_subq.label("total_earnings"),
         )
         .outerjoin(RequestAcceptance, RequestAcceptance.vendor_id == Vendor.id)
         .outerjoin(Report, Report.vendor_id == Vendor.id)
-        .outerjoin(VendorEarning, VendorEarning.vendor_id == Vendor.id)
         .group_by(Vendor.id, Vendor.name, Vendor.office_city)
     )
 
     if city_filter:
         base = base.where(Vendor.office_city.ilike(f"%{city_filter}%"))
+    if date_from:
+        base = base.where(Vendor.created_at >= date_from)
+    if date_to:
+        base = base.where(Vendor.created_at <= date_to)
 
     count_stmt = select(func.count()).select_from(Vendor)
     if city_filter:
         count_stmt = count_stmt.where(Vendor.office_city.ilike(f"%{city_filter}%"))
+    if date_from:
+        count_stmt = count_stmt.where(Vendor.created_at >= date_from)
+    if date_to:
+        count_stmt = count_stmt.where(Vendor.created_at <= date_to)
     total = (await db.execute(count_stmt)).scalar_one()
 
     sort_map = {
@@ -599,6 +622,10 @@ async def get_admin_lenders_table(
     count_stmt = select(func.count()).select_from(Lender)
     if city_filter:
         count_stmt = count_stmt.where(Lender.city.ilike(f"%{city_filter}%"))
+    if date_from:
+        count_stmt = count_stmt.where(Lender.created_at >= date_from)
+    if date_to:
+        count_stmt = count_stmt.where(Lender.created_at <= date_to)
     total = (await db.execute(count_stmt)).scalar_one()
 
     base = (
@@ -610,8 +637,19 @@ async def get_admin_lenders_table(
     )
     if city_filter:
         base = base.where(Lender.city.ilike(f"%{city_filter}%"))
+    if date_from:
+        base = base.where(Lender.created_at >= date_from)
+    if date_to:
+        base = base.where(Lender.created_at <= date_to)
 
-    stmt = base.order_by(Lender.name.asc()).offset((page - 1) * page_size).limit(page_size)
+    sort_map = {
+        "lender_name": Lender.name,
+        "city": Lender.city,
+    }
+    sort_col = sort_map.get(sort_by, Lender.name)
+    order = sort_col.desc() if sort_order == "desc" else sort_col.asc()
+
+    stmt = base.order_by(order).offset((page - 1) * page_size).limit(page_size)
     rows = (await db.execute(stmt)).all()
 
     result = []
@@ -708,7 +746,16 @@ async def get_admin_reports_table(
     count_stmt = select(func.count()).select_from(base.subquery())
     total = (await db.execute(count_stmt)).scalar_one()
 
-    sort_col = getattr(Report, sort_by, Report.report_date)
+    sort_map = {
+        "report_date": Report.report_date,
+        "property_address": Report.property_address,
+        "status": Report.status,
+        "report_category": Report.report_category,
+        "property_type": Report.property_type,
+        "valuation_amount": Report.valuation_amount,
+        "vendor_name": Vendor.name,
+    }
+    sort_col = sort_map.get(sort_by, Report.report_date)
     order = sort_col.desc() if sort_order == "desc" else sort_col.asc()
 
     stmt = base.order_by(order).offset((page - 1) * page_size).limit(page_size)
@@ -757,7 +804,13 @@ async def get_admin_open_requests(
     count_stmt = select(func.count()).select_from(base.subquery())
     total = (await db.execute(count_stmt)).scalar_one()
 
-    sort_col = getattr(ReportRequest, sort_by, ReportRequest.created_at)
+    sort_map = {
+        "created_at": ReportRequest.created_at,
+        "property_address": ReportRequest.property_address,
+        "lender_status": ReportRequest.lender_status,
+        "eta_days": ReportRequest.eta_days,
+    }
+    sort_col = sort_map.get(sort_by, ReportRequest.created_at)
     order = sort_col.desc() if sort_order == "desc" else sort_col.asc()
 
     stmt = (

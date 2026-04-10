@@ -26,12 +26,23 @@ export function VendorsTab() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const params = new URLSearchParams();
     if (cityFilter) params.set("city", cityFilter);
     const token = localStorage.getItem("access_token");
     const url = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8020"}/api/admin/dashboard/vendors/export?${params}`;
-    window.open(`${url}&token=${token}`, "_blank");
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = "vendors.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(downloadUrl);
   };
 
   return (

@@ -74,6 +74,11 @@ export default function VendorLayout({
           </div>
         </header>
 
+        {/* Desktop top bar */}
+        <header className="hidden lg:flex items-center justify-end border-b bg-white px-6 py-3">
+          <NotificationBell />
+        </header>
+
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
