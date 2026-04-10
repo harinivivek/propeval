@@ -174,6 +174,11 @@ async def upload_report(
         valuation_amount=valuation_amount,
         report_date=report_date,
     )
+
+    # Dispatch OCR extraction
+    from app.jobs.ocr_tasks import process_report_ocr
+    process_report_ocr.delay(str(report.id))
+
     return report
 
 
@@ -217,4 +222,9 @@ async def revise_report(
     await report_service.submit_revision(
         db, report=report, request=req, file_path=relative_path, comments=comments,
     )
+
+    # Dispatch OCR extraction on revised report
+    from app.jobs.ocr_tasks import process_report_ocr
+    process_report_ocr.delay(str(report.id))
+
     return report

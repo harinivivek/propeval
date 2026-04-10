@@ -9,6 +9,7 @@ from app.api.common.download import router as download_router
 from app.api.common.polling import router as polling_router
 from app.api.lender.requests import router as lender_requests_router
 from app.api.lender.settings import router as lender_settings_router
+from app.api.vendor.reports import router as vendor_reports_router
 from app.api.vendor.requests import router as vendor_requests_router
 from app.api.vendor.settings import router as vendor_settings_router
 
@@ -40,5 +41,6 @@ app.include_router(download_router)
 app.include_router(polling_router)
 app.include_router(lender_requests_router)
 app.include_router(lender_settings_router)
+app.include_router(vendor_reports_router)
 app.include_router(vendor_requests_router)
 app.include_router(vendor_settings_router)
