@@ -15,6 +15,9 @@ from app.api.vendor.requests import router as vendor_requests_router
 from app.api.vendor.settings import router as vendor_settings_router
 from app.api.lender.listings import router as lender_listings_router
 from app.api.notifications import router as notifications_router
+from app.api.vendor.dashboard import router as vendor_dashboard_router
+from app.api.lender.dashboard import router as lender_dashboard_router
+from app.api.admin.dashboard import router as admin_dashboard_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -50,3 +53,6 @@ app.include_router(vendor_requests_router)
 app.include_router(vendor_settings_router)
 app.include_router(lender_listings_router)
 app.include_router(notifications_router)
+app.include_router(vendor_dashboard_router)
+app.include_router(lender_dashboard_router)
+app.include_router(admin_dashboard_router)
