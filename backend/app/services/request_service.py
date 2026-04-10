@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.enums import (
     LenderRequestStatus,
     ListingStatus,
+    PayableType,
     PropertyType,
     ReportCategory,
     RequestType,
@@ -40,6 +41,8 @@ async def create_request(
     vendor_specified_id: UUID | None = None,
     allow_broadcast_on_reject: bool = True,
     comments: str | None = None,
+    request_type: str = "NEW",
+    parent_report_id: UUID | None = None,
 ) -> ReportRequest:
     """Create a new report request with pricing, then assign or broadcast."""
     # Calculate price
@@ -50,14 +53,14 @@ async def create_request(
         city=city,
         area=area,
         property_type=property_type,
-        request_type="NEW",
+        request_type=request_type,
     )
 
     request = ReportRequest(
         lender_id=lender_id,
         lender_user_id=lender_user_id,
         branch_id=branch_id,
-        request_type=RequestType.NEW,
+        request_type=RequestType(request_type),
         report_category=ReportCategory(report_category),
         property_type=PropertyType(property_type),
         property_address=property_address,
@@ -69,6 +72,7 @@ async def create_request(
         vendor_specified_id=vendor_specified_id,
         allow_broadcast_on_reject=allow_broadcast_on_reject,
         comments=comments,
+        parent_report_id=parent_report_id,
         lender_status=LenderRequestStatus.SENT,
     )
     db.add(request)
@@ -165,8 +169,16 @@ async def accept_report(
     report.listing_approved = True
 
     # Create billing entries
+    _PAYABLE_TYPE_MAP = {
+        RequestType.NEW: PayableType.NEW_REQUEST,
+        RequestType.UPDATE: PayableType.UPDATE,
+        RequestType.NEARBY: PayableType.NEARBY,
+    }
+    payable_type = _PAYABLE_TYPE_MAP.get(request.request_type, PayableType.NEW_REQUEST)
+
     await billing_service.create_billing_entries(
         db, request=request, report=report, vendor_id=vendor_id,
+        payable_type=payable_type,
     )
 
     # Create or update listing
