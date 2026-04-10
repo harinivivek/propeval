@@ -31,6 +31,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 **Phase 1 (Auth & Users):** Complete — auth, OTP, RBAC, account management, login UI, responsive design
 **Phase 2 (Pricing & Reports):** Complete — 11 data models, pricing service, admin pricing API + UI
 **Phase 3 (Workflow 1 — New Request):** Complete — 4 backend services (request, broadcast, report, billing), 4 API routers (lender requests, vendor requests, polling, download), 2 Celery jobs (auto-accept, broadcast rotation), 5 frontend pages (lender list/new/detail, vendor list/detail), polling hook, file upload
+**Phase 4 (OCR & Report Processing):** Complete — OCR service abstraction (OcrProvider → ClaudeOcrProvider → OcrService), Celery tasks (single + batch), PDF compression (pikepdf), BulkUploadJob model, vendor reports API (7 endpoints), extraction review UI with confidence indicators, bulk upload page, bulk job status page
 
 ## Seed Data (local)
 
@@ -149,6 +150,12 @@ make lint            # Lint backend + frontend
 - `frontend/src/lib/api.ts` — Typed API client (includes upload for multipart)
 - `frontend/src/hooks/use-auth.ts` — Auth state management
 - `frontend/src/hooks/use-polling.ts` — 30s polling for request notifications
+- `backend/app/services/ocr/base.py` — OcrProvider ABC + ExtractionResult dataclass
+- `backend/app/services/ocr/claude_provider.py` — Claude API vision extraction
+- `backend/app/services/ocr/ocr_service.py` — OCR orchestration (provider → content_json)
+- `backend/app/jobs/ocr_tasks.py` — Celery tasks for single + bulk OCR processing
+- `backend/app/jobs/pdf_optimize.py` — PDF lossless compression with pikepdf
+- `backend/app/api/vendor/reports.py` — Vendor report endpoints (bulk upload, edit, publish, retry, PDF)
 - `docker-compose.local.yml` — Local dev environment
 - `.env.local` — Environment variables (ports, secrets, config)
 - `ARCHITECTURE.md` — Full architecture design
