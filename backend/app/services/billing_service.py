@@ -16,6 +16,7 @@ async def create_billing_entries(
     request: ReportRequest,
     report: Report,
     vendor_id: UUID,
+    payable_type: PayableType | None = None,
 ) -> tuple[VendorEarning, LenderPayable]:
     """Create VendorEarning + LenderPayable on report acceptance."""
     month = datetime.utcnow().strftime("%Y-%m")
@@ -31,12 +32,13 @@ async def create_billing_entries(
     )
     db.add(earning)
 
+    resolved_payable_type = payable_type or PayableType.NEW_REQUEST
     payable = LenderPayable(
         lender_id=request.lender_id,
         report_id=report.id,
         request_id=request.id,
         amount=request.price,
-        payable_type=PayableType.NEW_REQUEST,
+        payable_type=resolved_payable_type,
         status=PaymentStatus.PENDING,
         month=month,
     )
