@@ -1,3 +1,4 @@
+import os
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -5,6 +6,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.constants import MEDIA_ROOT
 from app.core.database import get_db
 from app.core.deps import require_role
 from app.models.lender import LenderUser
@@ -91,8 +93,12 @@ async def download_purchased_report(
     if not report or not report.uploaded_file_path:
         raise HTTPException(status_code=404, detail="Report file not found")
 
+    full_path = os.path.join(MEDIA_ROOT, report.uploaded_file_path)
+    if not os.path.exists(full_path):
+        raise HTTPException(status_code=404, detail="File not found on disk")
+
     return FileResponse(
-        report.uploaded_file_path,
+        full_path,
         media_type="application/pdf",
         filename=f"report-{report.id}.pdf",
     )

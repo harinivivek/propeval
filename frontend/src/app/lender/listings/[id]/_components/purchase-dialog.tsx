@@ -24,9 +24,13 @@ export function PurchaseDialog({
           Purchase this {reportCategory.toLowerCase()} report
           {locality ? ` for ${locality}` : ""}?
         </p>
-        {price && (
+        {price ? (
           <p className="text-lg font-bold mb-4">
             Price: <span className="text-green-700">₹{price}</span>
+          </p>
+        ) : (
+          <p className="text-sm text-gray-500 mb-4">
+            Price per your lender pricing agreement.
           </p>
         )}
         <div className="flex gap-3 justify-end">

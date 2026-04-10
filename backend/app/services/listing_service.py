@@ -412,12 +412,15 @@ async def get_purchased_reports(
     result = await db.execute(stmt)
     purchases = list(result.scalars().all())
 
+    report_ids = [p.report_id for p in purchases]
+    reports_result = await db.execute(
+        select(Report).where(Report.id.in_(report_ids))
+    ) if report_ids else None
+    reports_map = {r.id: r for r in (reports_result.scalars().all() if reports_result else [])}
+
     items = []
     for p in purchases:
-        report_result = await db.execute(
-            select(Report).where(Report.id == p.report_id)
-        )
-        report = report_result.scalar_one_or_none()
+        report = reports_map.get(p.report_id)
         if report:
             items.append(PurchasedReportItem(
                 purchase=PurchaseResponse.model_validate(p),
@@ -464,18 +467,25 @@ async def get_vendor_listings(
     result = await db.execute(stmt)
     listings = list(result.scalars().all())
 
+    listing_ids = [l.id for l in listings]
+    all_reports_result = await db.execute(
+        select(Report, ListingReport.listing_id)
+        .join(ListingReport, ListingReport.report_id == Report.id)
+        .where(
+            ListingReport.listing_id.in_(listing_ids),
+            Report.vendor_id == vendor_id,
+        )
+        .order_by(Report.report_date.desc().nullslast())
+    ) if listing_ids else None
+
+    reports_by_listing: dict[UUID, list[Report]] = {lid: [] for lid in listing_ids}
+    if all_reports_result:
+        for report, lid in all_reports_result.all():
+            reports_by_listing.setdefault(lid, []).append(report)
+
     groups = []
     for listing in listings:
-        reports_result = await db.execute(
-            select(Report)
-            .join(ListingReport, ListingReport.report_id == Report.id)
-            .where(
-                ListingReport.listing_id == listing.id,
-                Report.vendor_id == vendor_id,
-            )
-            .order_by(Report.report_date.desc().nullslast())
-        )
-        reports = list(reports_result.scalars().all())
+        reports = reports_by_listing.get(listing.id, [])
         groups.append(VendorListingGroup(
             listing=ListingResponse.model_validate(listing),
             reports=[VendorListingReportItem.model_validate(r) for r in reports],
