@@ -61,6 +61,13 @@ class Settings(BaseSettings):
     # Auto-accept
     AUTO_ACCEPT_DAYS: int = 7
 
+    # OCR
+    ANTHROPIC_API_KEY: str = ""
+    OCR_MODEL: str = "claude-sonnet-4-6"
+    OCR_MAX_PAGES: int = 20
+    OCR_BATCH_SIZE: int = 5
+    OCR_TASK_TIMEOUT: int = 300
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 

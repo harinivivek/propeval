@@ -69,6 +69,7 @@ class VendorRequestStatus(str, Enum):
 class ReportStatus(str, Enum):
     UPLOADED = "UPLOADED"
     PROCESSING = "PROCESSING"
+    EXTRACTION_FAILED = "EXTRACTION_FAILED"
     READY_TO_PUBLISH = "READY_TO_PUBLISH"
     PUBLISHED = "PUBLISHED"
     ARCHIVED = "ARCHIVED"
@@ -113,3 +114,10 @@ class BroadcastStatus(str, Enum):
     ACTIVE = "ACTIVE"
     EXPIRED = "EXPIRED"
     ACCEPTED = "ACCEPTED"
+
+
+class BulkUploadStatus(str, Enum):
+    PENDING = "PENDING"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    PARTIALLY_FAILED = "PARTIALLY_FAILED"

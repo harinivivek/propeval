@@ -13,3 +13,8 @@ MEDIA_ROOT = "/app/media"
 REPORTS_DIR = "reports"
 MAX_UPLOAD_SIZE_MB = 20
 ALLOWED_CONTENT_TYPES = ["application/pdf"]
+
+# OCR & extraction
+REQUIRED_REPORT_FIELDS = ["property_address", "property_type", "valuation_amount"]
+OCR_BATCH_DELAY_SECONDS = 2
+MAX_BULK_UPLOAD_FILES = 50

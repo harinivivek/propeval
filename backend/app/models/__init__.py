@@ -2,6 +2,7 @@ from app.models.base import Base, BaseModel
 from app.models.enums import (
     AdminRole,
     BroadcastStatus,
+    BulkUploadStatus,
     EarningType,
     InvoiceType,
     LenderRequestStatus,
@@ -73,4 +74,6 @@ __all__ = [
     "PayableType",
     "InvoiceType",
     "BroadcastStatus",
+    # Phase 4 enums
+    "BulkUploadStatus",
 ]
