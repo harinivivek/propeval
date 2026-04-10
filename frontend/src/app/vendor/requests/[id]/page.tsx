@@ -96,6 +96,46 @@ export default function VendorRequestDetailPage() {
         <div className="bg-red-50 text-red-700 px-4 py-3 rounded mb-4 text-sm">{error}</div>
       )}
 
+      {request.parent_report_id && (request.request_type === "UPDATE" || request.request_type === "NEARBY") && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 mb-4">
+          <h3 className="text-sm font-semibold text-amber-800 mb-2">
+            {request.request_type === "UPDATE"
+              ? "Update request for previous report"
+              : "Nearby property request"}
+          </h3>
+          <div className="text-sm text-amber-900 space-y-1">
+            <p><span className="font-medium">Original property:</span> {request.property_address}</p>
+            <p><span className="font-medium">City:</span> {request.city} · {request.pin_code || ""}</p>
+            <p><span className="font-medium">Type:</span> {request.property_type} · {request.report_category}</p>
+          </div>
+
+          {request.request_type === "UPDATE" && request.comments && (() => {
+            try {
+              const parsed = JSON.parse(request.comments);
+              if (parsed.checklist) {
+                return (
+                  <div className="mt-3 border-t border-amber-200 pt-3">
+                    <p className="text-xs font-semibold text-amber-700 mb-1">Lender requested updates:</p>
+                    <ul className="text-sm text-amber-900 space-y-1">
+                      {parsed.checklist.map((item: string) => (
+                        <li key={item} className="flex items-center gap-2">
+                          <span className="text-amber-500">●</span>
+                          {item.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                        </li>
+                      ))}
+                    </ul>
+                    {parsed.text && (
+                      <p className="text-sm text-amber-900 mt-2 italic">&quot;{parsed.text}&quot;</p>
+                    )}
+                  </div>
+                );
+              }
+            } catch { /* plain text comments */ }
+            return null;
+          })()}
+        </div>
+      )}
+
       {/* Property Details */}
       <div className="border rounded-lg p-4 mb-4">
         <h2 className="font-semibold mb-3">Property Details</h2>

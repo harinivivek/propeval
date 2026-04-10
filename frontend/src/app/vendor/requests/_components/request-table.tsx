@@ -27,6 +27,7 @@ export function VendorRequestTable({ requests }: { requests: ReportRequest[] }) 
               <th className="text-left px-4 py-3 font-medium">Applicant</th>
               <th className="text-left px-4 py-3 font-medium">City</th>
               <th className="text-left px-4 py-3 font-medium">Category</th>
+              <th className="text-left px-4 py-3 font-medium">Type</th>
               <th className="text-left px-4 py-3 font-medium">Status</th>
               <th className="text-right px-4 py-3 font-medium">Price</th>
               <th className="px-4 py-3"></th>
@@ -39,6 +40,17 @@ export function VendorRequestTable({ requests }: { requests: ReportRequest[] }) 
                 <td className="px-4 py-3">{r.loan_applicant_name || "\u2014"}</td>
                 <td className="px-4 py-3">{r.city || "\u2014"}</td>
                 <td className="px-4 py-3">{r.report_category}</td>
+                <td className="px-4 py-3">
+                  {r.request_type !== "NEW" && (
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      r.request_type === "UPDATE"
+                        ? "bg-orange-100 text-orange-800"
+                        : "bg-blue-100 text-blue-800"
+                    }`}>
+                      {r.request_type === "UPDATE" ? "Update" : "Nearby"}
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${STATUS_COLORS[r.vendor_status || ""] || "bg-gray-100"}`}>
                     {(r.vendor_status || "\u2014").replace(/_/g, " ")}
@@ -62,7 +74,18 @@ export function VendorRequestTable({ requests }: { requests: ReportRequest[] }) 
           <a key={r.id} href={`/vendor/requests/${r.id}`}
             className="block border rounded-lg p-4 hover:bg-gray-50">
             <div className="flex justify-between items-start mb-2">
-              <span className="font-medium text-sm">{r.loan_applicant_name || "\u2014"}</span>
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-sm">{r.loan_applicant_name || "\u2014"}</span>
+                {r.request_type !== "NEW" && (
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    r.request_type === "UPDATE"
+                      ? "bg-orange-100 text-orange-800"
+                      : "bg-blue-100 text-blue-800"
+                  }`}>
+                    {r.request_type === "UPDATE" ? "Update" : "Nearby"}
+                  </span>
+                )}
+              </div>
               <span className={`px-2 py-1 rounded text-xs font-medium ${STATUS_COLORS[r.vendor_status || ""] || "bg-gray-100"}`}>
                 {(r.vendor_status || "\u2014").replace(/_/g, " ")}
               </span>
