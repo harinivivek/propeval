@@ -54,6 +54,9 @@ class Report(BaseModel):
     longitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
     listing_approved: Mapped[bool] = mapped_column(Boolean, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    bulk_upload_job_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("bulk_upload_jobs.id"), nullable=True
+    )
 
     revisions: Mapped[list["ReportRevision"]] = relationship(back_populates="report")
 

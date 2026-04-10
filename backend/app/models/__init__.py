@@ -28,6 +28,7 @@ from app.models.report import Report, ReportRevision
 from app.models.listing import Listing, ListingReport
 from app.models.request import ReportRequest, RequestBroadcast, RequestAcceptance
 from app.models.billing import VendorEarning, LenderPayable, Invoice
+from app.models.bulk_upload import BulkUploadJob
 
 __all__ = [
     "Base",
@@ -76,4 +77,6 @@ __all__ = [
     "BroadcastStatus",
     # Phase 4 enums
     "BulkUploadStatus",
+    # Phase 4 models
+    "BulkUploadJob",
 ]
