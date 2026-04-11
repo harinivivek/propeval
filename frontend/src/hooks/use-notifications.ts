@@ -47,7 +47,7 @@ export function useNotifications() {
 
   const markAsRead = useCallback(async (id: string) => {
     try {
-      await api.patch(`/api/notifications/${id}/read`);
+      await api.patch(`/api/notifications/${id}/read`, {});
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
@@ -59,7 +59,7 @@ export function useNotifications() {
 
   const markAllAsRead = useCallback(async () => {
     try {
-      await api.patch("/api/notifications/read-all");
+      await api.patch("/api/notifications/read-all", {});
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch {

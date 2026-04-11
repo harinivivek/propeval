@@ -28,9 +28,9 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
   const [connected, setConnected] = useState(false);
   const [lastNotification, setLastNotification] = useState<unknown | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const reconnectDelayRef = useRef(1000);
-  const pingIntervalRef = useRef<ReturnType<typeof setInterval>>();
+  const pingIntervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const mountedRef = useRef(true);
 
   const getToken = useCallback(() => {
