@@ -2,10 +2,12 @@
 import { useState } from "react";
 import UsersTab from "./_components/users-tab";
 import TemplateBuilder from "./_components/template-builder";
+import { NotificationPrefs } from "./_components/notification-prefs";
 
 const TABS = [
   { key: "users", label: "Users" },
   { key: "template", label: "Report Template" },
+  { key: "notifications", label: "Notifications" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -42,6 +44,7 @@ export default function LenderSettingsPage() {
       {/* Tab content */}
       {activeTab === "users" && <UsersTab />}
       {activeTab === "template" && <TemplateBuilder />}
+      {activeTab === "notifications" && <NotificationPrefs />}
     </div>
   );
 }
