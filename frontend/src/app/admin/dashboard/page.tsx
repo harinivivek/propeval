@@ -6,12 +6,14 @@ import { VendorsTab } from "./_components/vendors-tab";
 import { LendersTab } from "./_components/lenders-tab";
 import { ReportsTab } from "./_components/reports-tab";
 import { OpenRequestsTab } from "./_components/open-requests-tab";
+import { ActivityTab } from "./_components/activity-tab";
 
 const TABS = [
   { key: "vendors", label: "Vendors" },
   { key: "lenders", label: "Lenders" },
   { key: "reports", label: "Reports" },
   { key: "open-requests", label: "Open Requests" },
+  { key: "activity", label: "Activity" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -68,6 +70,7 @@ export default function AdminDashboardPage() {
         {activeTab === "lenders" && <LendersTab />}
         {activeTab === "reports" && <ReportsTab />}
         {activeTab === "open-requests" && <OpenRequestsTab />}
+        {activeTab === "activity" && <ActivityTab />}
       </div>
     </div>
   );
