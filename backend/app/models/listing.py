@@ -1,5 +1,6 @@
 import uuid
 from datetime import date
+from decimal import Decimal
 
 from sqlalchemy import (
     Boolean,
@@ -7,6 +8,7 @@ from sqlalchemy import (
     Enum as SQLEnum,
     ForeignKey,
     Integer,
+    Numeric,
     String,
     UniqueConstraint,
 )
@@ -29,6 +31,8 @@ class Listing(BaseModel):
     report_count: Mapped[int] = mapped_column(Integer, default=0)
     vendor_count: Mapped[int] = mapped_column(Integer, default=0)
     latest_report_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    longitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     listing_reports: Mapped[list["ListingReport"]] = relationship(
