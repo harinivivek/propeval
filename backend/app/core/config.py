@@ -39,6 +39,11 @@ class Settings(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # JWT VAPID (Web Push)
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_SUBJECT: str = "mailto:admin@getitright.com"
+
     # OTP
     OTP_EXPIRE_MINUTES: int = 5
     DEV_OTP: str = "123456"
