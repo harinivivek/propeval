@@ -37,6 +37,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 **Phase 7 (Dashboards & Analytics):** Complete — Notification model + service + API (4 endpoints), dashboard service (13 aggregation functions), CSV export service, 3 dashboard API routers (vendor 5 endpoints, lender 3 endpoints, admin 8 endpoints incl. CSV exports), NotificationBell component with polling, 3 dashboard pages (vendor: stats/receivables/earnings/pending/reports, lender: stats/payables/recent, admin: stats/vendors/lenders/reports/open-requests tabs), notification wiring in broadcast/request/listing services
 **Phase 8 (Templates & Report Formatting):** Complete — ReportTemplate model + CRUD service, form-based template builder (header/logo/colors, drag-and-drop field selection/ordering, footer), PDF render service (Jinja2 + WeasyPrint HTML→PDF), template/original download choice via split button, lender settings tabs (Users | Report Template), cached rendered PDFs, download endpoints with ?format=template param
 **Phase 9 (Map Views):** Complete — Leaflet + React Leaflet map views, lender listings page map/list toggle with markers and popups, vendor coverage map (/vendor/map) with own reports (green markers) vs competitor density (red circles), listing model lat/lng with coordinate averaging, seed data with geocoordinates across 4 cities (Bengaluru/Mumbai/Delhi/Chennai), vendor map API with competitor area aggregation
+**Phase 10 (Notifications & Real-Time):** Complete — Native FastAPI WebSocket with Redis pub/sub for real-time notification delivery, WebSocket connection manager with auto-reconnect and heartbeat, notification preferences (per-event-type opt-out toggles in lender/vendor settings), ActivityLog model with 18 action types, activity log service with admin API (list + CSV export), admin dashboard Activity tab with filters, WebSocketProvider React context wrapping all portal layouts, polling fallback reduced to 60s
 
 ## Seed Data (local)
 
@@ -192,6 +193,13 @@ make lint            # Lint backend + frontend
 - `backend/app/api/vendor/map.py` — Vendor coverage map endpoint (own reports + competitor areas)
 - `frontend/src/app/vendor/map/page.tsx` — Vendor coverage map page
 - `frontend/src/app/lender/listings/_components/listings-map.tsx` — Lender listings map component
+- `backend/app/core/ws_manager.py` — WebSocket connection manager + Redis pub/sub
+- `backend/app/api/ws_notifications.py` — WebSocket notification endpoint
+- `backend/app/models/activity_log.py` — ActivityLog model (audit trail)
+- `backend/app/services/activity_log_service.py` — Activity log write + query
+- `backend/app/services/notification_preference_service.py` — Preference CRUD
+- `backend/app/api/admin/activity.py` — Admin activity log API + CSV export
+- `frontend/src/contexts/websocket-provider.tsx` — WebSocket context provider
 - `docker-compose.local.yml` — Local dev environment
 - `.env.local` — Environment variables (ports, secrets, config)
 - `ARCHITECTURE.md` — Full architecture design
