@@ -38,6 +38,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 **Phase 8 (Templates & Report Formatting):** Complete — ReportTemplate model + CRUD service, form-based template builder (header/logo/colors, drag-and-drop field selection/ordering, footer), PDF render service (Jinja2 + WeasyPrint HTML→PDF), template/original download choice via split button, lender settings tabs (Users | Report Template), cached rendered PDFs, download endpoints with ?format=template param
 **Phase 9 (Map Views):** Complete — Leaflet + React Leaflet map views, lender listings page map/list toggle with markers and popups, vendor coverage map (/vendor/map) with own reports (green markers) vs competitor density (red circles), listing model lat/lng with coordinate averaging, seed data with geocoordinates across 4 cities (Bengaluru/Mumbai/Delhi/Chennai), vendor map API with competitor area aggregation
 **Phase 10 (Notifications & Real-Time):** Complete — Native FastAPI WebSocket with Redis pub/sub for real-time notification delivery, WebSocket connection manager with auto-reconnect and heartbeat, notification preferences (per-event-type opt-out toggles in lender/vendor settings), ActivityLog model with 18 action types, activity log service with admin API (list + CSV export), admin dashboard Activity tab with filters, WebSocketProvider React context wrapping all portal layouts, polling fallback reduced to 60s
+**Phase 11 (Mobile PWA):** Complete — @serwist/next service worker with asset caching and push event handlers, PWA manifest with standalone display mode, Web Push notifications via VAPID + pywebpush (triggered on NEW_BROADCAST), PushSubscription model with per-device storage, push API (subscribe/unsubscribe/vapid-key), install banner on vendor dashboard (smart beforeinstallprompt with 7-day dismiss), notification permission banner (3 states: prompt/denied/granted)
 
 ## Seed Data (local)
 
@@ -200,6 +201,11 @@ make lint            # Lint backend + frontend
 - `backend/app/services/notification_preference_service.py` — Preference CRUD
 - `backend/app/api/admin/activity.py` — Admin activity log API + CSV export
 - `frontend/src/contexts/websocket-provider.tsx` — WebSocket context provider
+- `backend/app/models/push_subscription.py` — PushSubscription model (per-device push)
+- `backend/app/services/push_service.py` — Web Push send via pywebpush + VAPID
+- `backend/app/api/push.py` — Push API endpoints (subscribe/unsubscribe/vapid-key)
+- `frontend/src/sw.ts` — Service worker with push + notificationclick handlers
+- `frontend/src/hooks/use-push-subscription.ts` — Push subscription management hook
 - `docker-compose.local.yml` — Local dev environment
 - `.env.local` — Environment variables (ports, secrets, config)
 - `ARCHITECTURE.md` — Full architecture design
