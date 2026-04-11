@@ -42,3 +42,7 @@ celerybeat-schedule.db
 # Coverage
 .coverage
 htmlcov/
+
+# PWA / Service Worker (generated at build time)
+frontend/public/sw.js
+frontend/public/swe-worker-*.js
