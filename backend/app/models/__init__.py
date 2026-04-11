@@ -38,6 +38,7 @@ from app.models.bulk_upload import BulkUploadJob
 from app.models.notification import Notification, NotificationPreference
 from app.models.activity_log import ActivityLog
 from app.models.template import ReportTemplate
+from app.models.push_subscription import PushSubscription
 
 __all__ = [
     "Base",
@@ -104,4 +105,6 @@ __all__ = [
     # Phase 10 models
     "NotificationPreference",
     "ActivityLog",
+    # Phase 11 models
+    "PushSubscription",
 ]
