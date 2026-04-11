@@ -19,6 +19,7 @@ from app.models.report import Report, ReportRevision
 from app.models.request import ReportRequest, RequestBroadcast
 from app.models.vendor import VendorUser
 from app.services import billing_service, broadcast_service, notification_service, pricing_service
+from app.services.activity_log_service import log_activity
 
 
 class InvalidStatusTransition(Exception):
@@ -87,6 +88,16 @@ async def create_request(
         )
     else:
         await broadcast_service.start_broadcast(db, request=request)
+
+    await log_activity(
+        db,
+        actor_id=lender_user_id,
+        actor_type="LENDER",
+        action="REQUEST_CREATED",
+        target_type="REQUEST",
+        target_id=request.id,
+        metadata={"request_type": request.request_type.value},
+    )
 
     await db.refresh(request)
     return request
@@ -202,6 +213,15 @@ async def accept_report(
             reference_type=NotificationReferenceType.REQUEST,
         )
 
+    await log_activity(
+        db,
+        actor_id=vendor_id,
+        actor_type="VENDOR",
+        action="REQUEST_ACCEPTED",
+        target_type="REQUEST",
+        target_id=request.id,
+    )
+
 
 async def reject_report(
     db: AsyncSession,
@@ -249,6 +269,15 @@ async def reject_report(
             reference_id=report.id,
             reference_type=NotificationReferenceType.REPORT,
         )
+
+    await log_activity(
+        db,
+        actor_id=request.lender_user_id,
+        actor_type="LENDER",
+        action="REPORT_REVISION_REQUESTED",
+        target_type="REPORT",
+        target_id=report.id,
+    )
 
     return revision
 

@@ -15,6 +15,7 @@ from app.models.enums import NotificationEventType, NotificationReferenceType
 from app.models.request import ReportRequest, RequestAcceptance, RequestBroadcast
 from app.models.vendor import ServiceArea, Vendor, VendorUser
 from app.services import notification_service
+from app.services.activity_log_service import log_activity
 
 
 class NoVendorsAvailableError(Exception):
@@ -124,6 +125,16 @@ async def start_broadcast(
                 reference_type=NotificationReferenceType.REQUEST,
             )
 
+    await log_activity(
+        db,
+        actor_id=None,
+        actor_type="SYSTEM",
+        action="REQUEST_CREATED",
+        target_type="REQUEST",
+        target_id=request.id,
+        metadata={"broadcast_round": 1},
+    )
+
     return broadcast
 
 
@@ -178,6 +189,16 @@ async def advance_broadcast_round(
                 reference_id=request.id,
                 reference_type=NotificationReferenceType.REQUEST,
             )
+
+    await log_activity(
+        db,
+        actor_id=None,
+        actor_type="SYSTEM",
+        action="REQUEST_CREATED",
+        target_type="REQUEST",
+        target_id=request.id,
+        metadata={"broadcast_round": next_broadcast.broadcast_round},
+    )
 
     return next_broadcast
 

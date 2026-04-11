@@ -21,6 +21,7 @@ from app.models.purchase import ReportPurchase
 from app.models.report import Report
 from app.models.vendor import VendorUser
 from app.services import notification_service
+from app.services.activity_log_service import log_activity
 from app.schemas.listing import (
     ListingBrowseResponse,
     ListingDetailResponse,
@@ -133,6 +134,17 @@ async def _find_or_create_listing(
     )
     db.add(listing)
     await db.flush()
+
+    await log_activity(
+        db,
+        actor_id=None,
+        actor_type="SYSTEM",
+        action="LISTING_CREATED",
+        target_type="LISTING",
+        target_id=listing.id,
+        metadata={"pin_code": listing.pin_code, "property_type": listing.property_type.value if listing.property_type else None},
+    )
+
     return listing
 
 
@@ -404,6 +416,20 @@ async def purchase_report(
             message=f"A lender has purchased your report for {report.property_address or 'a property'}",
             reference_id=report.id,
             reference_type=NotificationReferenceType.REPORT,
+        )
+
+    listing_result = await db.execute(
+        select(Listing).where(Listing.id == listing_id)
+    )
+    purchased_listing = listing_result.scalar_one_or_none()
+    if purchased_listing:
+        await log_activity(
+            db,
+            actor_id=purchase.purchased_by,
+            actor_type="LENDER",
+            action="LISTING_PURCHASED",
+            target_type="LISTING",
+            target_id=purchased_listing.id,
         )
 
     return PurchaseResponse.model_validate(purchase)

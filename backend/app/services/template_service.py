@@ -17,6 +17,7 @@ from app.core.constants import (
 )
 from app.models.template import ReportTemplate
 from app.schemas.template import TemplateConfig
+from app.services.activity_log_service import log_activity
 
 
 async def create_template(
@@ -35,6 +36,16 @@ async def create_template(
     )
     db.add(template)
     await db.flush()
+
+    await log_activity(
+        db,
+        actor_id=lender_id,
+        actor_type="LENDER",
+        action="TEMPLATE_CREATED",
+        target_type="TEMPLATE",
+        target_id=template.id,
+    )
+
     return template
 
 
@@ -54,6 +65,16 @@ async def update_template(
         _invalidate_cache_for_template(template_id)
 
     await db.flush()
+
+    await log_activity(
+        db,
+        actor_id=lender_id,
+        actor_type="LENDER",
+        action="TEMPLATE_UPDATED",
+        target_type="TEMPLATE",
+        target_id=template.id,
+    )
+
     return template
 
 

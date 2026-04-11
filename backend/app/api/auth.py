@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.requests import Request
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
@@ -29,17 +30,27 @@ from app.services.auth_service import (
     reset_password,
 )
 from app.services.otp_service import send_otp
+from app.services.activity_log_service import log_activity
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=LoginResponse)
-async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
+async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
     user = await authenticate_email(db, body.email, body.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     tokens = generate_tokens(user)
     is_dual = await check_dual_role(db, user)
+    await log_activity(
+        db,
+        actor_id=user.id,
+        actor_type=user.user_type.value,
+        action="USER_LOGIN",
+        target_type="USER",
+        target_id=user.id,
+        ip_address=request.client.host if request.client else None,
+    )
     return LoginResponse(
         access_token=tokens["access_token"],
         refresh_token=tokens["refresh_token"],
