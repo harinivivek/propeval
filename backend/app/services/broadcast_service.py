@@ -14,7 +14,7 @@ from app.models.enums import (
 from app.models.enums import NotificationEventType, NotificationReferenceType
 from app.models.request import ReportRequest, RequestAcceptance, RequestBroadcast
 from app.models.vendor import ServiceArea, Vendor, VendorUser
-from app.services import notification_service
+from app.services import notification_service, push_service
 from app.services.activity_log_service import log_activity
 
 
@@ -111,6 +111,7 @@ async def start_broadcast(
 
     # Notify vendor users about the new broadcast
     vendor_ids = [v.id for v in batch]
+    all_notified_user_ids = []
     for vid in vendor_ids:
         vendor_users_stmt = select(VendorUser.user_id).where(VendorUser.vendor_id == vid)
         vendor_user_ids = (await db.execute(vendor_users_stmt)).scalars().all()
@@ -124,6 +125,15 @@ async def start_broadcast(
                 reference_id=request.id,
                 reference_type=NotificationReferenceType.REQUEST,
             )
+            all_notified_user_ids.append(user_id)
+
+    await push_service.send_push_to_users(
+        db,
+        user_ids=all_notified_user_ids,
+        title="New Request Available",
+        body=f"{request.report_category.value} report request",
+        url="/vendor/requests",
+    )
 
     await log_activity(
         db,
@@ -176,6 +186,7 @@ async def advance_broadcast_round(
 
     # Notify vendor users about the new broadcast round
     next_vendor_ids = [v.id for v in batch]
+    all_notified_user_ids = []
     for vid in next_vendor_ids:
         vendor_users_stmt = select(VendorUser.user_id).where(VendorUser.vendor_id == vid)
         vendor_user_ids = (await db.execute(vendor_users_stmt)).scalars().all()
@@ -189,6 +200,15 @@ async def advance_broadcast_round(
                 reference_id=request.id,
                 reference_type=NotificationReferenceType.REQUEST,
             )
+            all_notified_user_ids.append(user_id)
+
+    await push_service.send_push_to_users(
+        db,
+        user_ids=all_notified_user_ids,
+        title="New Request Available",
+        body=f"{request.report_category.value} report request",
+        url="/vendor/requests",
+    )
 
     await log_activity(
         db,
