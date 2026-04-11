@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { ReportRequest } from "@/types/request";
 import { StatusTimeline } from "./_components/status-timeline";
+import DownloadButton from "@/components/download-button";
 
 export default function LenderRequestDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -136,10 +137,11 @@ export default function LenderRequestDetailPage() {
               className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-600 disabled:opacity-50">
               Send Back for Revision
             </button>
-            <a href={`/api/reports/${id}/download`} target="_blank" rel="noopener noreferrer"
-              className="border px-4 py-2 rounded-lg text-sm hover:bg-gray-50">
-              Download PDF
-            </a>
+            <DownloadButton
+              downloadUrl={`/api/reports/${id}/download`}
+              filename={`report-${id}.pdf`}
+              className="border px-4 py-2 rounded-lg text-sm hover:bg-gray-50"
+            />
           </div>
         </div>
       )}

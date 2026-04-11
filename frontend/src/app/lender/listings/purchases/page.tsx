@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { PurchasedReportsResponse } from "@/types/listing";
 import { UpdateRequestDialog } from "../[id]/_components/update-request-dialog";
+import DownloadButton from "@/components/download-button";
 
 export default function PurchasedReportsPage() {
   const [data, setData] = useState<PurchasedReportsResponse | null>(null);
@@ -30,26 +31,6 @@ export default function PurchasedReportsPage() {
     };
     fetchPurchases();
   }, [page]);
-
-  const handleDownload = async (purchaseId: string) => {
-    try {
-      const token = localStorage.getItem("access_token");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8020"}/api/lender/listings/purchases/${purchaseId}/download`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!response.ok) throw new Error("Download failed");
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `report-${purchaseId}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      alert("Failed to download report");
-    }
-  };
 
   return (
     <div>
@@ -86,12 +67,11 @@ export default function PurchasedReportsPage() {
                     <td className="p-3">{new Date(item.purchase.created_at).toLocaleDateString()}</td>
                     <td className="p-3 text-right">₹{item.purchase.price}</td>
                     <td className="p-3 text-right">
-                      <button
-                        onClick={() => handleDownload(item.purchase.id)}
-                        className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-                      >
-                        Download
-                      </button>
+                      <DownloadButton
+                        downloadUrl={`/api/lender/listings/purchases/${item.purchase.id}/download`}
+                        filename={`report-${item.report.id}.pdf`}
+                        className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                      />
                     </td>
                     <td className="p-3 text-right">
                       <button
@@ -144,12 +124,11 @@ export default function PurchasedReportsPage() {
                     >
                       Update
                     </button>
-                    <button
-                      onClick={() => handleDownload(item.purchase.id)}
-                      className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-                    >
-                      Download
-                    </button>
+                    <DownloadButton
+                      downloadUrl={`/api/lender/listings/purchases/${item.purchase.id}/download`}
+                      filename={`report-${item.report.id}.pdf`}
+                      className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                    />
                   </div>
                 </div>
               </div>
