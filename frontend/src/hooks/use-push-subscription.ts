@@ -41,7 +41,7 @@ export function usePushSubscription() {
       const registration = await navigator.serviceWorker.ready;
 
       const vapidRes = await api.get<{ public_key: string }>("/api/push/vapid-key");
-      const applicationServerKey = urlBase64ToUint8Array(vapidRes.public_key);
+      const applicationServerKey = urlBase64ToUint8Array(vapidRes.public_key).buffer as ArrayBuffer;
 
       let subscription = await registration.pushManager.getSubscription();
 
