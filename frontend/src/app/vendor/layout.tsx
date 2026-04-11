@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { NotificationBell } from "@/components/notification-bell";
+import { WebSocketProvider } from "@/contexts/websocket-provider";
 
 export default function VendorLayout({
   children,
@@ -10,6 +11,7 @@ export default function VendorLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
+    <WebSocketProvider>
     <div className="flex min-h-screen">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:w-64 border-r bg-gray-50 p-4 flex-col">
@@ -84,5 +86,6 @@ export default function VendorLayout({
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
+    </WebSocketProvider>
   );
 }
