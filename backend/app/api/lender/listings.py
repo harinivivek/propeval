@@ -122,6 +122,26 @@ async def download_purchased_report(
     )
 
 
+@router.get("/map")
+async def listings_map(
+    city: str | None = Query(None),
+    pin_code: str | None = Query(None),
+    property_type: str | None = Query(None),
+    report_category: str | None = Query(None),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("LENDER")),
+):
+    from app.services.listing_service import get_listings_map_data
+
+    return await get_listings_map_data(
+        db,
+        city=city,
+        pin_code=pin_code,
+        property_type=property_type,
+        report_category=report_category,
+    )
+
+
 @router.get("/{listing_id}", response_model=ListingDetailResponse)
 async def get_listing_detail(
     listing_id: UUID,

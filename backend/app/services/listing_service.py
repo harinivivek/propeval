@@ -517,6 +517,57 @@ async def get_vendor_listings(
     )
 
 
+async def get_listings_map_data(
+    db: AsyncSession,
+    city: str | None = None,
+    pin_code: str | None = None,
+    property_type: str | None = None,
+    report_category: str | None = None,
+) -> dict:
+    query = select(Listing).where(
+        Listing.status == ListingStatus.AVAILABLE,
+        Listing.report_count > 0,
+        Listing.latitude.isnot(None),
+        Listing.longitude.isnot(None),
+    )
+
+    if city:
+        query = query.where(Listing.city == city)
+    if pin_code:
+        query = query.where(Listing.pin_code == pin_code)
+    if property_type:
+        query = query.where(Listing.property_type == property_type)
+    if report_category:
+        query = query.where(
+            Listing.id.in_(
+                select(ListingReport.listing_id)
+                .join(Report, Report.id == ListingReport.report_id)
+                .where(Report.report_category == report_category)
+            )
+        )
+
+    result = await db.execute(query)
+    listings = result.scalars().all()
+
+    return {
+        "items": [
+            {
+                "listing_id": str(lst.id),
+                "latitude": float(lst.latitude),
+                "longitude": float(lst.longitude),
+                "macro_location": lst.macro_location,
+                "city": lst.city,
+                "pin_code": lst.pin_code,
+                "property_type": lst.property_type.value if lst.property_type else None,
+                "report_count": lst.report_count,
+                "vendor_count": lst.vendor_count,
+                "latest_report_date": lst.latest_report_date.isoformat() if lst.latest_report_date else None,
+            }
+            for lst in listings
+        ]
+    }
+
+
 async def get_listable_reports(
     db: AsyncSession,
     vendor_id: UUID,
