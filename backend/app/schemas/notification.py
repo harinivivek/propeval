@@ -27,3 +27,17 @@ class NotificationListResponse(BaseModel):
 
 class UnreadCountResponse(BaseModel):
     count: int
+
+
+class NotificationPreferenceItem(BaseModel):
+    event_type: str
+    enabled: bool
+
+
+class NotificationPreferencesResponse(BaseModel):
+    preferences: list[NotificationPreferenceItem]
+
+
+class NotificationPreferenceUpdate(BaseModel):
+    event_type: str
+    enabled: bool
