@@ -1,33 +1,54 @@
+import uuid
 from uuid import UUID
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.ws_manager import ws_manager
 from app.models.enums import NotificationEventType, NotificationReferenceType
 from app.models.notification import Notification
+from app.services.notification_preference_service import is_event_enabled
 
 
 async def create_notification(
     db: AsyncSession,
-    *,
-    user_id: UUID,
+    user_id: uuid.UUID,
     event_type: NotificationEventType,
     title: str,
     message: str,
-    reference_id: UUID,
+    reference_id: uuid.UUID,
     reference_type: NotificationReferenceType,
-) -> Notification:
+) -> Notification | None:
+    if not await is_event_enabled(db, user_id, event_type.value):
+        return None
+
     notification = Notification(
         user_id=user_id,
-        event_type=event_type.value,
+        event_type=event_type,
         title=title,
         message=message,
         reference_id=reference_id,
-        reference_type=reference_type.value,
-        is_read=False,
+        reference_type=reference_type,
     )
     db.add(notification)
     await db.flush()
+
+    await ws_manager.publish(
+        str(user_id),
+        {
+            "type": "notification",
+            "data": {
+                "id": str(notification.id),
+                "event_type": event_type.value,
+                "title": title,
+                "message": message,
+                "reference_id": str(reference_id),
+                "reference_type": reference_type.value,
+                "created_at": notification.created_at.isoformat(),
+            },
+        },
+    )
+
     return notification
 
 

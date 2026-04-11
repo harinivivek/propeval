@@ -7,10 +7,13 @@ from app.core.deps import get_current_user, get_db
 from app.models.user import User
 from app.schemas.notification import (
     NotificationListResponse,
+    NotificationPreferenceItem,
+    NotificationPreferenceUpdate,
+    NotificationPreferencesResponse,
     NotificationResponse,
     UnreadCountResponse,
 )
-from app.services import notification_service
+from app.services import notification_preference_service, notification_service
 
 router = APIRouter(prefix="/api/notifications", tags=["notifications"])
 
@@ -61,3 +64,26 @@ async def mark_all_read(
 ):
     await notification_service.mark_all_as_read(db, user_id=current_user.id)
     return {"status": "ok"}
+
+
+@router.get("/preferences", response_model=NotificationPreferencesResponse)
+async def get_preferences(
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    prefs = await notification_preference_service.get_preferences(db, current_user.id)
+    return NotificationPreferencesResponse(
+        preferences=[NotificationPreferenceItem(**p) for p in prefs]
+    )
+
+
+@router.patch("/preferences")
+async def update_preference(
+    body: NotificationPreferenceUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    result = await notification_preference_service.update_preference(
+        db, current_user.id, body.event_type, body.enabled
+    )
+    return result
