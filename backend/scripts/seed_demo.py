@@ -229,51 +229,51 @@ async def seed_demo() -> None:
         # ── 30+ reports ───────────────────────────────────────────────────────
         print("\n[4/8] Creating reports…")
 
-        # (vendor, category, city, pin_code, property_type, status, valuation_amount, days_ago, listing_approved, applicant, address, macro_location)
+        # (vendor, category, city, pin_code, property_type, status, valuation_amount, days_ago, listing_approved, applicant, address, macro_location, latitude, longitude)
         report_specs = [
             # ValuePro — Bengaluru
-            (valuepro_vendor, "VALUATION", "Bengaluru", "560034", "RESIDENTIAL", "PUBLISHED", "4500000", 180, True, "Rajesh Kumar", "12/3, 5th Cross, Koramangala 4th Block", "Koramangala"),
-            (valuepro_vendor, "VALUATION", "Bengaluru", "560034", "RESIDENTIAL", "PUBLISHED", "7800000", 150, True, "Priya Sharma", "45, 8th Main, Koramangala 6th Block", "Koramangala"),
-            (valuepro_vendor, "VALUATION", "Bengaluru", "560038", "COMMERCIAL", "PUBLISHED", "25000000", 120, True, "Sunita Patel", "103, HSR Layout, Sector 2", "HSR Layout"),
-            (valuepro_vendor, "LEGAL", "Bengaluru", "560034", "RESIDENTIAL", "PUBLISHED", None, 90, True, "Amit Verma", "78, 3rd Main, Koramangala 5th Block", "Koramangala"),
-            (valuepro_vendor, "VALUATION", "Bengaluru", "560071", "RESIDENTIAL", "PUBLISHED", "3200000", 60, True, "Deepa Nair", "22, 15th Cross, Jayanagar 4th Block", "Jayanagar"),
-            (valuepro_vendor, "VALUATION", "Bengaluru", "560038", "RESIDENTIAL", "READY_TO_PUBLISH", "5500000", 30, False, "Mohan Rao", "56, Sector 7, HSR Layout", "HSR Layout"),
-            (valuepro_vendor, "LEGAL", "Bengaluru", "560071", "COMMERCIAL", "PROCESSING", None, 10, False, "Kavitha Reddy", "88, 2nd Main, Jayanagar 3rd Block", "Jayanagar"),
-            (valuepro_vendor, "VALUATION", "Bengaluru", "560008", "RESIDENTIAL", "UPLOADED", "2800000", 5, False, "Suresh Babu", "14/A, Indiranagar 1st Stage", "Indiranagar"),
-            (valuepro_vendor, "VALUATION", "Bengaluru", "560034", "INDUSTRIAL", "PUBLISHED", "18000000", 200, True, "Ganesh Iyer", "Plot 7, Industrial Estate, Koramangala", "Koramangala"),
-            (valuepro_vendor, "LEGAL", "Bengaluru", "560038", "RESIDENTIAL", "ARCHIVED", None, 365, False, "Lakshmi Devi", "33, 10th Main, HSR Layout", "HSR Layout"),
+            (valuepro_vendor, "VALUATION", "Bengaluru", "560034", "RESIDENTIAL", "PUBLISHED", "4500000", 180, True, "Rajesh Kumar", "12/3, 5th Cross, Koramangala 4th Block", "Koramangala", "12.9352", "77.6245"),
+            (valuepro_vendor, "VALUATION", "Bengaluru", "560034", "RESIDENTIAL", "PUBLISHED", "7800000", 150, True, "Priya Sharma", "45, 8th Main, Koramangala 6th Block", "Koramangala", "12.9340", "77.6218"),
+            (valuepro_vendor, "VALUATION", "Bengaluru", "560038", "COMMERCIAL", "PUBLISHED", "25000000", 120, True, "Sunita Patel", "103, HSR Layout, Sector 2", "HSR Layout", "12.9116", "77.6389"),
+            (valuepro_vendor, "LEGAL", "Bengaluru", "560034", "RESIDENTIAL", "PUBLISHED", None, 90, True, "Amit Verma", "78, 3rd Main, Koramangala 5th Block", "Koramangala", "12.9346", "77.6230"),
+            (valuepro_vendor, "VALUATION", "Bengaluru", "560071", "RESIDENTIAL", "PUBLISHED", "3200000", 60, True, "Deepa Nair", "22, 15th Cross, Jayanagar 4th Block", "Jayanagar", "12.9250", "77.5838"),
+            (valuepro_vendor, "VALUATION", "Bengaluru", "560038", "RESIDENTIAL", "READY_TO_PUBLISH", "5500000", 30, False, "Mohan Rao", "56, Sector 7, HSR Layout", "HSR Layout", "12.9081", "77.6476"),
+            (valuepro_vendor, "LEGAL", "Bengaluru", "560071", "COMMERCIAL", "PROCESSING", None, 10, False, "Kavitha Reddy", "88, 2nd Main, Jayanagar 3rd Block", "Jayanagar", "12.9263", "77.5821"),
+            (valuepro_vendor, "VALUATION", "Bengaluru", "560008", "RESIDENTIAL", "UPLOADED", "2800000", 5, False, "Suresh Babu", "14/A, Indiranagar 1st Stage", "Indiranagar", "12.9784", "77.6408"),
+            (valuepro_vendor, "VALUATION", "Bengaluru", "560034", "INDUSTRIAL", "PUBLISHED", "18000000", 200, True, "Ganesh Iyer", "Plot 7, Industrial Estate, Koramangala", "Koramangala", "12.9310", "77.6195"),
+            (valuepro_vendor, "LEGAL", "Bengaluru", "560038", "RESIDENTIAL", "ARCHIVED", None, 365, False, "Lakshmi Devi", "33, 10th Main, HSR Layout", "HSR Layout", "12.9135", "77.6412"),
 
             # PropAssess — Mumbai
-            (propassess, "VALUATION", "Mumbai", "400050", "RESIDENTIAL", "PUBLISHED", "9500000", 160, True, "Anil Mehta", "B-204, Sea View Apartments, Bandra West", "Bandra"),
-            (propassess, "VALUATION", "Mumbai", "400050", "RESIDENTIAL", "PUBLISHED", "12000000", 130, True, "Neha Joshi", "A-301, Sai Kripa, Bandra East", "Bandra"),
-            (propassess, "VALUATION", "Mumbai", "400053", "COMMERCIAL", "PUBLISHED", "45000000", 100, True, "Ramesh Shah", "Unit 5, Andheri Industrial Area", "Andheri"),
-            (propassess, "LEGAL", "Mumbai", "400050", "RESIDENTIAL", "PUBLISHED", None, 80, True, "Pooja Kulkarni", "C-102, Palm Grove, Bandra", "Bandra"),
-            (propassess, "VALUATION", "Mumbai", "400092", "RESIDENTIAL", "PUBLISHED", "6800000", 55, True, "Vijay Patil", "12, Borivali East, Sector 4", "Borivali"),
-            (propassess, "VALUATION", "Mumbai", "400053", "RESIDENTIAL", "READY_TO_PUBLISH", "8200000", 25, False, "Suman Ghosh", "301, Skyline Heights, Andheri West", "Andheri"),
-            (propassess, "LEGAL", "Mumbai", "400092", "COMMERCIAL", "PROCESSING", None, 12, False, "Hema Sawant", "Office 7, Borivali Commercial Plaza", "Borivali"),
-            (propassess, "VALUATION", "Mumbai", "400028", "RESIDENTIAL", "UPLOADED", "15000000", 3, False, "Prakash Desai", "5A, Dadar Tilak Bridge Road", "Dadar"),
+            (propassess, "VALUATION", "Mumbai", "400050", "RESIDENTIAL", "PUBLISHED", "9500000", 160, True, "Anil Mehta", "B-204, Sea View Apartments, Bandra West", "Bandra", "19.0596", "72.8295"),
+            (propassess, "VALUATION", "Mumbai", "400050", "RESIDENTIAL", "PUBLISHED", "12000000", 130, True, "Neha Joshi", "A-301, Sai Kripa, Bandra East", "Bandra", "19.0544", "72.8402"),
+            (propassess, "VALUATION", "Mumbai", "400053", "COMMERCIAL", "PUBLISHED", "45000000", 100, True, "Ramesh Shah", "Unit 5, Andheri Industrial Area", "Andheri", "19.1136", "72.8697"),
+            (propassess, "LEGAL", "Mumbai", "400050", "RESIDENTIAL", "PUBLISHED", None, 80, True, "Pooja Kulkarni", "C-102, Palm Grove, Bandra", "Bandra", "19.0570", "72.8350"),
+            (propassess, "VALUATION", "Mumbai", "400092", "RESIDENTIAL", "PUBLISHED", "6800000", 55, True, "Vijay Patil", "12, Borivali East, Sector 4", "Borivali", "19.2307", "72.8567"),
+            (propassess, "VALUATION", "Mumbai", "400053", "RESIDENTIAL", "READY_TO_PUBLISH", "8200000", 25, False, "Suman Ghosh", "301, Skyline Heights, Andheri West", "Andheri", "19.1197", "72.8463"),
+            (propassess, "LEGAL", "Mumbai", "400092", "COMMERCIAL", "PROCESSING", None, 12, False, "Hema Sawant", "Office 7, Borivali Commercial Plaza", "Borivali", "19.2283", "72.8591"),
+            (propassess, "VALUATION", "Mumbai", "400028", "RESIDENTIAL", "UPLOADED", "15000000", 3, False, "Prakash Desai", "5A, Dadar Tilak Bridge Road", "Dadar", "19.0178", "72.8478"),
 
             # LegalEye — Delhi
-            (legaleye, "LEGAL", "Delhi", "110017", "RESIDENTIAL", "PUBLISHED", None, 170, True, "Manish Gupta", "14, Saket Block C, South Delhi", "Saket"),
-            (legaleye, "LEGAL", "Delhi", "110045", "RESIDENTIAL", "PUBLISHED", None, 140, True, "Reema Singh", "8, Pocket 3, Dwarka Sector 10", "Dwarka"),
-            (legaleye, "LEGAL", "Delhi", "110085", "COMMERCIAL", "PUBLISHED", None, 110, True, "Alok Sharma", "Shop 22, Rohini Sector 7 Market", "Rohini"),
-            (legaleye, "LEGAL", "Delhi", "110070", "RESIDENTIAL", "PUBLISHED", None, 75, True, "Sunita Tiwari", "Block A, Vasant Kunj Flat 203", "Vasant Kunj"),
-            (legaleye, "LEGAL", "Delhi", "110017", "COMMERCIAL", "READY_TO_PUBLISH", None, 20, False, "Ashok Yadav", "Office 15, Saket District Centre", "Saket"),
-            (legaleye, "LEGAL", "Delhi", "110045", "RESIDENTIAL", "PROCESSING", None, 8, False, "Meena Kapoor", "Flat 506, Dwarka Sector 12", "Dwarka"),
+            (legaleye, "LEGAL", "Delhi", "110017", "RESIDENTIAL", "PUBLISHED", None, 170, True, "Manish Gupta", "14, Saket Block C, South Delhi", "Saket", "28.5244", "77.2090"),
+            (legaleye, "LEGAL", "Delhi", "110045", "RESIDENTIAL", "PUBLISHED", None, 140, True, "Reema Singh", "8, Pocket 3, Dwarka Sector 10", "Dwarka", "28.5823", "77.0500"),
+            (legaleye, "LEGAL", "Delhi", "110085", "COMMERCIAL", "PUBLISHED", None, 110, True, "Alok Sharma", "Shop 22, Rohini Sector 7 Market", "Rohini", "28.7150", "77.1144"),
+            (legaleye, "LEGAL", "Delhi", "110070", "RESIDENTIAL", "PUBLISHED", None, 75, True, "Sunita Tiwari", "Block A, Vasant Kunj Flat 203", "Vasant Kunj", "28.5205", "77.1567"),
+            (legaleye, "LEGAL", "Delhi", "110017", "COMMERCIAL", "READY_TO_PUBLISH", None, 20, False, "Ashok Yadav", "Office 15, Saket District Centre", "Saket", "28.5270", "77.2127"),
+            (legaleye, "LEGAL", "Delhi", "110045", "RESIDENTIAL", "PROCESSING", None, 8, False, "Meena Kapoor", "Flat 506, Dwarka Sector 12", "Dwarka", "28.5890", "77.0378"),
 
             # SouthVal — Chennai
-            (southval, "VALUATION", "Chennai", "600017", "RESIDENTIAL", "PUBLISHED", "5200000", 190, True, "Krishnamurthy R", "23, T. Nagar 3rd Lane", "T. Nagar"),
-            (southval, "VALUATION", "Chennai", "600020", "RESIDENTIAL", "PUBLISHED", "4800000", 145, True, "Saranya K", "6/2, Adyar Lattice Bridge Road", "Adyar"),
-            (southval, "VALUATION", "Chennai", "600042", "COMMERCIAL", "PUBLISHED", "28000000", 105, True, "Venkat S", "Plot 44, Velachery Main Road", "Velachery"),
-            (southval, "VALUATION", "Chennai", "600004", "RESIDENTIAL", "PUBLISHED", "6100000", 70, True, "Usha Rajan", "18, Mylapore 4th Street", "Mylapore"),
-            (southval, "VALUATION", "Chennai", "600017", "AGRICULTURAL", "READY_TO_PUBLISH", "12000000", 22, False, "Balasubramaniam P", "Survey No 45, Poonamallee Road", "T. Nagar"),
-            (southval, "VALUATION", "Chennai", "600020", "RESIDENTIAL", "UPLOADED", "3900000", 4, False, "Padma Vijay", "44, Adyar River View Apartments", "Adyar"),
-            (southval, "VALUATION", "Chennai", "600042", "INDUSTRIAL", "PUBLISHED", "55000000", 230, True, "Raghunath T", "Industrial Plot 9, Velachery Industrial Estate", "Velachery"),
+            (southval, "VALUATION", "Chennai", "600017", "RESIDENTIAL", "PUBLISHED", "5200000", 190, True, "Krishnamurthy R", "23, T. Nagar 3rd Lane", "T. Nagar", "13.0418", "80.2341"),
+            (southval, "VALUATION", "Chennai", "600020", "RESIDENTIAL", "PUBLISHED", "4800000", 145, True, "Saranya K", "6/2, Adyar Lattice Bridge Road", "Adyar", "13.0067", "80.2565"),
+            (southval, "VALUATION", "Chennai", "600042", "COMMERCIAL", "PUBLISHED", "28000000", 105, True, "Venkat S", "Plot 44, Velachery Main Road", "Velachery", "12.9815", "80.2180"),
+            (southval, "VALUATION", "Chennai", "600004", "RESIDENTIAL", "PUBLISHED", "6100000", 70, True, "Usha Rajan", "18, Mylapore 4th Street", "Mylapore", "13.0339", "80.2691"),
+            (southval, "VALUATION", "Chennai", "600017", "AGRICULTURAL", "READY_TO_PUBLISH", "12000000", 22, False, "Balasubramaniam P", "Survey No 45, Poonamallee Road", "T. Nagar", "13.0450", "80.2290"),
+            (southval, "VALUATION", "Chennai", "600020", "RESIDENTIAL", "UPLOADED", "3900000", 4, False, "Padma Vijay", "44, Adyar River View Apartments", "Adyar", "13.0035", "80.2598"),
+            (southval, "VALUATION", "Chennai", "600042", "INDUSTRIAL", "PUBLISHED", "55000000", 230, True, "Raghunath T", "Industrial Plot 9, Velachery Industrial Estate", "Velachery", "12.9780", "80.2210"),
         ]
 
         reports = []
         for spec in report_specs:
-            (vendor_obj, cat, city_name, pin, ptype, status, val_amt, days, lst_approved, applicant, address, macro) = spec
+            (vendor_obj, cat, city_name, pin, ptype, status, val_amt, days, lst_approved, applicant, address, macro, lat, lng) = spec
             r = Report(
                 vendor_id=vendor_obj.id,
                 report_category=ReportCategory(cat),
@@ -287,6 +287,8 @@ async def seed_demo() -> None:
                 loan_applicant_name=applicant,
                 report_date=date_ago(days),
                 listing_approved=lst_approved,
+                latitude=Decimal(lat),
+                longitude=Decimal(lng),
                 is_active=True,
             )
             db.add(r)
@@ -299,6 +301,7 @@ async def seed_demo() -> None:
 
         listing_map: dict[tuple, Listing] = {}
         listing_report_entries = []
+        listing_report_entries_by_key: list[tuple] = []
 
         for rpt in reports:
             if rpt.status == ReportStatus.PUBLISHED and rpt.listing_approved:
@@ -324,6 +327,7 @@ async def seed_demo() -> None:
 
                 lst.report_count += 1
                 listing_report_entries.append((lst, rpt))
+                listing_report_entries_by_key.append((key, rpt))
 
         await db.flush()
 
@@ -334,6 +338,14 @@ async def seed_demo() -> None:
             vendor_counts[key].add(rpt.vendor_id)
         for key, lst in listing_map.items():
             lst.vendor_count = len(vendor_counts[key])
+
+        # Compute averaged coordinates per listing
+        for key, lst in listing_map.items():
+            related_reports = [rpt for (k, rpt) in listing_report_entries_by_key if k == key]
+            coords = [(rpt.latitude, rpt.longitude) for rpt in related_reports if rpt.latitude and rpt.longitude]
+            if coords:
+                lst.latitude = sum(c[0] for c in coords) / len(coords)
+                lst.longitude = sum(c[1] for c in coords) / len(coords)
 
         for order, (lst, rpt) in enumerate(listing_report_entries):
             lr = ListingReport(listing_id=lst.id, report_id=rpt.id, display_order=order)
