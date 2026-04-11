@@ -33,6 +33,7 @@ from app.models.request import ReportRequest, RequestBroadcast, RequestAcceptanc
 from app.models.billing import VendorEarning, LenderPayable, Invoice
 from app.models.bulk_upload import BulkUploadJob
 from app.models.notification import Notification
+from app.models.template import ReportTemplate
 
 __all__ = [
     "Base",
@@ -90,4 +91,6 @@ __all__ = [
     "NotificationReferenceType",
     # Phase 7 models
     "Notification",
+    # Phase 8 models
+    "ReportTemplate",
 ]
