@@ -20,6 +20,8 @@ from app.api.lender.dashboard import router as lender_dashboard_router
 from app.api.admin.dashboard import router as admin_dashboard_router
 from app.api.lender.templates import router as lender_templates_router
 from app.api.vendor.map import router as vendor_map_router
+from app.api.ws_notifications import router as ws_notifications_router
+from app.core.ws_manager import ws_manager
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -35,6 +37,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    await ws_manager.start_subscriber()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await ws_manager.shutdown()
 
 
 @app.get("/api/health")
@@ -60,3 +72,4 @@ app.include_router(lender_dashboard_router)
 app.include_router(admin_dashboard_router)
 app.include_router(lender_templates_router)
 app.include_router(vendor_map_router)
+app.include_router(ws_notifications_router)
