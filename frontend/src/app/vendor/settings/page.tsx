@@ -101,6 +101,13 @@ export default function VendorSettingsPage() {
           </div>
         ))}
       </div>
+
+      {/* Template info */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+        <p className="text-sm text-blue-700">
+          Reports you upload are stored in their original PDF format. Lenders with custom templates will see a formatted version when they download.
+        </p>
+      </div>
     </div>
   );
 }
