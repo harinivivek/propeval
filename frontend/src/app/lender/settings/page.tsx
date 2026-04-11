@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import UsersTab from "./_components/users-tab";
+import TemplateBuilder from "./_components/template-builder";
 
 const TABS = [
   { key: "users", label: "Users" },
@@ -40,11 +41,7 @@ export default function LenderSettingsPage() {
 
       {/* Tab content */}
       {activeTab === "users" && <UsersTab />}
-      {activeTab === "template" && (
-        <div className="text-sm text-gray-400 py-8 text-center">
-          Template builder loading…
-        </div>
-      )}
+      {activeTab === "template" && <TemplateBuilder />}
     </div>
   );
 }
