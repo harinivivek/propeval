@@ -604,6 +604,80 @@ async def seed_demo() -> None:
         await db.flush()
         print(f"  Created {notif_count} notifications.")
 
+        # ── Sample report templates ──────────────────────────────────────
+        from app.models.template import ReportTemplate
+
+        template_configs = [
+            {
+                "lender": lenders[0],
+                "name": "ABCL Standard Template",
+                "config": {
+                    "header": {
+                        "bank_name": "ABCL Bank",
+                        "primary_color": "#1a3b5c",
+                        "secondary_color": "#f0f4f8",
+                        "show_logo": True,
+                        "subtitle": "Property Valuation Report",
+                    },
+                    "sections": [
+                        {"key": "property_address", "label": "Property Address", "enabled": True, "order": 1},
+                        {"key": "property_type", "label": "Property Type", "enabled": True, "order": 2},
+                        {"key": "valuation_amount", "label": "Valuation Amount", "enabled": True, "order": 3},
+                        {"key": "loan_applicant_name", "label": "Applicant Name", "enabled": True, "order": 4},
+                        {"key": "report_date", "label": "Report Date", "enabled": True, "order": 5},
+                        {"key": "city", "label": "City", "enabled": True, "order": 6},
+                        {"key": "pin_code", "label": "PIN Code", "enabled": True, "order": 7},
+                        {"key": "plot_extent_sqft", "label": "Plot Area (sq ft)", "enabled": False, "order": 8},
+                        {"key": "built_up_sqft", "label": "Built-up Area (sq ft)", "enabled": False, "order": 9},
+                        {"key": "expiry_date", "label": "Expiry Date", "enabled": False, "order": 10},
+                    ],
+                    "footer": {
+                        "text": "Confidential - ABCL Bank Internal Use Only",
+                        "show_page_numbers": True,
+                    },
+                },
+            },
+            {
+                "lender": lenders[1],
+                "name": "HDFC Valuation Format",
+                "config": {
+                    "header": {
+                        "bank_name": "HDFC Home Loans",
+                        "primary_color": "#004b87",
+                        "secondary_color": "#e8f0fe",
+                        "show_logo": True,
+                        "subtitle": "Property Assessment Report",
+                    },
+                    "sections": [
+                        {"key": "loan_applicant_name", "label": "Borrower Name", "enabled": True, "order": 1},
+                        {"key": "property_address", "label": "Property Location", "enabled": True, "order": 2},
+                        {"key": "city", "label": "City", "enabled": True, "order": 3},
+                        {"key": "property_type", "label": "Property Category", "enabled": True, "order": 4},
+                        {"key": "valuation_amount", "label": "Assessed Market Value", "enabled": True, "order": 5},
+                        {"key": "plot_extent_sqft", "label": "Plot Extent (sq ft)", "enabled": True, "order": 6},
+                        {"key": "built_up_sqft", "label": "Built-up Area (sq ft)", "enabled": True, "order": 7},
+                        {"key": "report_date", "label": "Assessment Date", "enabled": True, "order": 8},
+                        {"key": "expiry_date", "label": "Valid Until", "enabled": True, "order": 9},
+                    ],
+                    "footer": {
+                        "text": "HDFC Home Loans - Confidential Document",
+                        "show_page_numbers": True,
+                    },
+                },
+            },
+        ]
+
+        for tc in template_configs:
+            t = ReportTemplate(
+                lender_id=tc["lender"].id,
+                name=tc["name"],
+                is_active=True,
+                config_json=tc["config"],
+            )
+            db.add(t)
+        await db.flush()
+        print(f"  Created {len(template_configs)} report templates.")
+
         print("\nDemo seed complete!")
         print(f"  Lenders:   4 (ABCL Bank, HDFC Home Loans, SBI Housing, ICICI Bank)")
         print(f"  Vendors:   4 (ValuePro Consultants, PropAssess India, LegalEye Associates, SouthVal Services)")

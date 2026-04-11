@@ -35,6 +35,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 **Phase 5 (Listings Marketplace):** Complete — listing service (auto-grouping by pin_code + property_type, PII redaction), ReportPurchase model, vendor listings API (4 endpoints: list/delist/browse/listable), lender listings API (5 endpoints: browse/detail/purchase/purchases/download), billing integration (LISTING_DOWNLOAD entries), 5 frontend pages (vendor listings management, lender browse/detail/purchases), sidebar navigation updates
 **Phase 6 (Update & Nearby Requests):** Complete — extended request service for UPDATE/NEARBY types with parent_report_id, dynamic billing payable types, 2 new lender API endpoints (update/nearby), update request dialog with predefined checklist, nearby request dialog with address form, parent report context on vendor request detail, request type badges
 **Phase 7 (Dashboards & Analytics):** Complete — Notification model + service + API (4 endpoints), dashboard service (13 aggregation functions), CSV export service, 3 dashboard API routers (vendor 5 endpoints, lender 3 endpoints, admin 8 endpoints incl. CSV exports), NotificationBell component with polling, 3 dashboard pages (vendor: stats/receivables/earnings/pending/reports, lender: stats/payables/recent, admin: stats/vendors/lenders/reports/open-requests tabs), notification wiring in broadcast/request/listing services
+**Phase 8 (Templates & Report Formatting):** Complete — ReportTemplate model + CRUD service, form-based template builder (header/logo/colors, drag-and-drop field selection/ordering, footer), PDF render service (Jinja2 + WeasyPrint HTML→PDF), template/original download choice via split button, lender settings tabs (Users | Report Template), cached rendered PDFs, download endpoints with ?format=template param
 
 ## Seed Data (local)
 
@@ -182,6 +183,11 @@ make lint            # Lint backend + frontend
 - `backend/app/api/vendor/dashboard.py` — Vendor dashboard endpoints (5)
 - `backend/app/api/lender/dashboard.py` — Lender dashboard endpoints (3)
 - `backend/app/api/admin/dashboard.py` — Admin dashboard endpoints (8, incl. 3 CSV exports)
+- `backend/app/models/template.py` — ReportTemplate model (config_json JSONB)
+- `backend/app/services/template_service.py` — Template CRUD + logo upload
+- `backend/app/services/pdf_render_service.py` — Jinja2 + WeasyPrint PDF rendering with caching
+- `backend/app/api/lender/templates.py` — Lender template endpoints (8)
+- `backend/app/templates/report_master.html` — Jinja2 HTML master template for PDF output
 - `docker-compose.local.yml` — Local dev environment
 - `.env.local` — Environment variables (ports, secrets, config)
 - `ARCHITECTURE.md` — Full architecture design
