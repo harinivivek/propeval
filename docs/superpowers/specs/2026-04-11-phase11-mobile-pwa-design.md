@@ -169,7 +169,7 @@ Unique constraint on `endpoint` — same device can't register twice. Multiple d
 |--------|------|-------------|
 | GET | `/api/push/vapid-key` | Returns `{ public_key: "<base64url>" }` |
 | POST | `/api/push/subscribe` | Body: `{ endpoint, keys: { p256dh, auth } }`. Upserts subscription. |
-| DELETE | `/api/push/unsubscribe` | Body: `{ endpoint }`. Removes subscription. |
+| POST | `/api/push/unsubscribe` | Body: `{ endpoint }`. Removes subscription. |
 
 All endpoints require authentication via `get_current_user`.
 
