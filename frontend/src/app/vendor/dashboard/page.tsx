@@ -9,6 +9,8 @@ import { ReceivablesSection } from "./_components/receivables-section";
 import { EarningsCharts } from "./_components/earnings-charts";
 import { PendingRequestsTable } from "./_components/pending-requests-table";
 import { ReportsTable } from "./_components/reports-table";
+import { InstallBanner } from "./_components/install-banner";
+import { NotificationBanner } from "./_components/notification-banner";
 
 function getCurrentFY(): number {
   const now = new Date();
@@ -20,6 +22,8 @@ export default function VendorDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <InstallBanner />
+      <NotificationBanner />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <div className="flex items-center gap-3">
