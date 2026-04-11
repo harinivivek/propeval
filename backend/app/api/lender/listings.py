@@ -71,6 +71,7 @@ async def get_purchased_reports(
 @router.get("/purchases/{purchase_id}/download")
 async def download_purchased_report(
     purchase_id: UUID,
+    format: str = Query("original", pattern="^(original|template)$"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("LENDER")),
 ):
@@ -92,6 +93,23 @@ async def download_purchased_report(
     report = report_result.scalar_one_or_none()
     if not report or not report.uploaded_file_path:
         raise HTTPException(status_code=404, detail="Report file not found")
+
+    if format == "template":
+        from app.services.template_service import get_active_template
+        from app.services.pdf_render_service import render_report_pdf
+
+        template = await get_active_template(db, lender_id)
+        if template:
+            from fastapi.responses import Response
+
+            pdf_bytes = render_report_pdf(report, template)
+            return Response(
+                content=pdf_bytes,
+                media_type="application/pdf",
+                headers={
+                    "Content-Disposition": f'attachment; filename="report-{report.id}.pdf"'
+                },
+            )
 
     full_path = os.path.join(MEDIA_ROOT, report.uploaded_file_path)
     if not os.path.exists(full_path):
