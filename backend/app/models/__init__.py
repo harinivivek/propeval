@@ -1,5 +1,8 @@
 from app.models.base import Base, BaseModel
 from app.models.enums import (
+    ActivityAction,
+    ActivityActorType,
+    ActivityTargetType,
     AdminRole,
     BroadcastStatus,
     BulkUploadStatus,
@@ -32,7 +35,8 @@ from app.models.purchase import ReportPurchase
 from app.models.request import ReportRequest, RequestBroadcast, RequestAcceptance
 from app.models.billing import VendorEarning, LenderPayable, Invoice
 from app.models.bulk_upload import BulkUploadJob
-from app.models.notification import Notification
+from app.models.notification import Notification, NotificationPreference
+from app.models.activity_log import ActivityLog
 from app.models.template import ReportTemplate
 
 __all__ = [
@@ -93,4 +97,11 @@ __all__ = [
     "Notification",
     # Phase 8 models
     "ReportTemplate",
+    # Phase 10 enums
+    "ActivityAction",
+    "ActivityActorType",
+    "ActivityTargetType",
+    # Phase 10 models
+    "NotificationPreference",
+    "ActivityLog",
 ]
