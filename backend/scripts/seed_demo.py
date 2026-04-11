@@ -609,7 +609,7 @@ async def seed_demo() -> None:
 
         template_configs = [
             {
-                "lender": lenders[0],
+                "lender": abcl_lender,
                 "name": "ABCL Standard Template",
                 "config": {
                     "header": {
@@ -638,7 +638,7 @@ async def seed_demo() -> None:
                 },
             },
             {
-                "lender": lenders[1],
+                "lender": hdfc,
                 "name": "HDFC Valuation Format",
                 "config": {
                     "header": {
