@@ -126,14 +126,12 @@ async def generate_invoice_number(
 async def generate_invoices_for_month(
     db: AsyncSession, month: str
 ) -> list[Invoice]:
-    existing = await db.execute(
+    existing_result = await db.execute(
         select(Invoice).where(Invoice.month == month)
     )
-    if existing.scalars().first():
-        all_invoices = await db.execute(
-            select(Invoice).where(Invoice.month == month)
-        )
-        return list(all_invoices.scalars().all())
+    existing_invoices = list(existing_result.scalars().all())
+    if existing_invoices:
+        return existing_invoices
 
     invoices: list[Invoice] = []
 
