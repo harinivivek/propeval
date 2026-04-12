@@ -22,13 +22,13 @@ class InvalidFileError(Exception):
     pass
 
 
-def validate_upload(content_type: str, size: int) -> None:
+def validate_upload(content_type: str, size: int, max_upload_size_mb: int = MAX_UPLOAD_SIZE_MB) -> None:
     """Validate file type and size."""
     if content_type not in ALLOWED_CONTENT_TYPES:
         raise InvalidFileError(f"File type '{content_type}' not allowed. Only PDF accepted.")
-    max_bytes = MAX_UPLOAD_SIZE_MB * 1024 * 1024
+    max_bytes = max_upload_size_mb * 1024 * 1024
     if size > max_bytes:
-        raise InvalidFileError(f"File too large. Maximum {MAX_UPLOAD_SIZE_MB}MB allowed.")
+        raise InvalidFileError(f"File too large. Maximum {max_upload_size_mb}MB allowed.")
 
 
 def generate_report_path(vendor_id: UUID, report_id: UUID, suffix: str = "") -> str:

@@ -255,6 +255,7 @@ async def get_listings(
     report_category: str | None = None,
     page: int = 1,
     page_size: int = 20,
+    lender_id: UUID | None = None,
 ) -> ListingBrowseResponse:
     stmt = select(Listing).where(
         Listing.status == ListingStatus.AVAILABLE,
@@ -276,6 +277,18 @@ async def get_listings(
                 .where(Report.report_category == cat)
             )
         )
+
+    # Filter out listings from vendors that have excluded this lender
+    if lender_id:
+        from app.services.vendor_config_service import get_excluded_vendor_ids_for_lender
+        excluded_vendor_ids = await get_excluded_vendor_ids_for_lender(db, lender_id)
+        if excluded_vendor_ids:
+            excluded_listing_ids_subq = (
+                select(ListingReport.listing_id)
+                .join(Report, Report.id == ListingReport.report_id)
+                .where(Report.vendor_id.in_(excluded_vendor_ids))
+            )
+            stmt = stmt.where(Listing.id.notin_(excluded_listing_ids_subq))
 
     count_result = await db.execute(
         select(func.count()).select_from(stmt.subquery())

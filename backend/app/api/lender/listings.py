@@ -41,6 +41,12 @@ async def browse_listings(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("LENDER")),
 ):
+    from app.models.lender import LenderUser
+    lender_result = await db.execute(
+        select(LenderUser.lender_id).where(LenderUser.user_id == current_user.id)
+    )
+    lender_id = lender_result.scalar_one_or_none()
+
     return await listing_service.get_listings(
         db,
         city=city,
@@ -49,6 +55,7 @@ async def browse_listings(
         report_category=report_category,
         page=page,
         page_size=page_size,
+        lender_id=lender_id,
     )
 
 

@@ -58,11 +58,14 @@ async def bulk_upload(
     db.add(job)
     await db.flush()
 
+    from app.services.system_config_service import get_config_values
+    config = await get_config_values()
+
     report_ids = []
     for upload_file in files:
         try:
             content = await upload_file.read()
-            report_service.validate_upload(upload_file.content_type, len(content))
+            report_service.validate_upload(upload_file.content_type, len(content), max_upload_size_mb=config["max_upload_size_mb"])
         except InvalidFileError as e:
             raise HTTPException(status_code=400, detail=f"{upload_file.filename}: {e}")
 
