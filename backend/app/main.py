@@ -24,6 +24,8 @@ from app.api.ws_notifications import router as ws_notifications_router
 from app.api.admin.activity import router as admin_activity_router
 from app.api.push import router as push_router
 from app.api.admin.billing import router as admin_billing_router
+from app.api.vendor.billing import router as vendor_billing_router
+from app.api.lender.billing import router as lender_billing_router
 from app.core.ws_manager import ws_manager
 
 app = FastAPI(
@@ -79,3 +81,5 @@ app.include_router(ws_notifications_router)
 app.include_router(admin_activity_router)
 app.include_router(push_router)
 app.include_router(admin_billing_router)
+app.include_router(vendor_billing_router)
+app.include_router(lender_billing_router)
