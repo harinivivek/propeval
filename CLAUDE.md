@@ -39,6 +39,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 **Phase 9 (Map Views):** Complete — Leaflet + React Leaflet map views, lender listings page map/list toggle with markers and popups, vendor coverage map (/vendor/map) with own reports (green markers) vs competitor density (red circles), listing model lat/lng with coordinate averaging, seed data with geocoordinates across 4 cities (Bengaluru/Mumbai/Delhi/Chennai), vendor map API with competitor area aggregation
 **Phase 10 (Notifications & Real-Time):** Complete — Native FastAPI WebSocket with Redis pub/sub for real-time notification delivery, WebSocket connection manager with auto-reconnect and heartbeat, notification preferences (per-event-type opt-out toggles in lender/vendor settings), ActivityLog model with 18 action types, activity log service with admin API (list + CSV export), admin dashboard Activity tab with filters, WebSocketProvider React context wrapping all portal layouts, polling fallback reduced to 60s
 **Phase 11 (Mobile PWA):** Complete — @serwist/next service worker with asset caching and push event handlers, PWA manifest with standalone display mode, Web Push notifications via VAPID + pywebpush (triggered on NEW_BROADCAST), PushSubscription model with per-device storage, push API (subscribe/unsubscribe/vapid-key), install banner on vendor dashboard (smart beforeinstallprompt with 7-day dismiss), notification permission banner (3 states: prompt/denied/granted)
+**Phase 12A (Billing & Invoicing):** Complete — Monthly invoice generation Celery job (1st of month), structured invoice numbering (GTR-PAY/RCV-YYYY-MM-NNNN), invoice lifecycle management (PENDING → BILLED → PAID), dedicated admin billing page with bulk status updates and CSV export, enhanced vendor receivables with invoice status drill-down and CSV, enhanced lender payables with invoice status drill-down and CSV, notifications on invoice generation and payment confirmation, activity logging for billing events
 
 ## Seed Data (local)
 
@@ -206,6 +207,11 @@ make lint            # Lint backend + frontend
 - `backend/app/api/push.py` — Push API endpoints (subscribe/unsubscribe/vapid-key)
 - `frontend/src/sw.ts` — Service worker with push + notificationclick handlers
 - `frontend/src/hooks/use-push-subscription.ts` — Push subscription management hook
+- `backend/app/api/admin/billing.py` — Admin billing API (6 endpoints)
+- `backend/app/api/vendor/billing.py` — Vendor billing entries + CSV export
+- `backend/app/api/lender/billing.py` — Lender billing entries + CSV export
+- `backend/app/jobs/billing_tasks.py` — Monthly invoice generation Celery task
+- `frontend/src/app/admin/billing/page.tsx` — Admin billing page
 - `docker-compose.local.yml` — Local dev environment
 - `.env.local` — Environment variables (ports, secrets, config)
 - `ARCHITECTURE.md` — Full architecture design
