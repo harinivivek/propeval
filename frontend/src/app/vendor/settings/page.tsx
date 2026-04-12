@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { UserResponse } from "@/types/auth";
 import { NotificationPrefs } from "./_components/notification-prefs";
+import { VendorConfigTab } from "./_components/vendor-config-tab";
 
 const TABS = [
   { key: "general", label: "General" },
   { key: "notifications", label: "Notifications" },
+  { key: "configuration", label: "Configuration" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -149,6 +151,7 @@ export default function VendorSettingsPage() {
       )}
 
       {activeTab === "notifications" && <NotificationPrefs />}
+      {activeTab === "configuration" && <VendorConfigTab />}
     </div>
   );
 }
