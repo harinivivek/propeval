@@ -52,4 +52,4 @@ class LenderUserResponse(BaseModel):
     user_id: UUID
     lender_id: UUID
     role: str
-    branch_ids: list[str] | None = None
+    branch_ids: list[UUID] | None = None

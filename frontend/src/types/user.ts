@@ -18,6 +18,26 @@ export interface Vendor {
   services: string[] | null;
   organization_id: string;
 }
+export interface LenderUser {
+  id: string;
+  user_id: string;
+  lender_id: string;
+  role: string;
+  branch_ids: string[] | null;
+}
+export interface VendorUser {
+  id: string;
+  user_id: string;
+  vendor_id: string;
+  role: string;
+}
+export interface ServiceArea {
+  id: string;
+  vendor_id: string;
+  city: string;
+  areas: string[] | null;
+  service_type: string;
+}
 export interface UserCreate {
   email: string;
   mobile: string;
