@@ -16,6 +16,8 @@ export interface LenderEarning {
 export interface MonthlyAmount {
   month: string;
   total_amount: string;
+  invoice_number?: string | null;
+  invoice_status?: string | null;
 }
 
 export interface VendorReceivablesResponse {
