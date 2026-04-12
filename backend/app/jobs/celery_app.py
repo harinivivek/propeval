@@ -30,6 +30,10 @@ celery_app.conf.beat_schedule = {
         "task": "app.jobs.broadcast_tasks.check_broadcast_rounds",
         "schedule": 300.0,  # Every 5 minutes
     },
+    "generate-monthly-invoices": {
+        "task": "app.jobs.billing_tasks.generate_monthly_invoices",
+        "schedule": crontab(day_of_month=1, hour=2, minute=0),
+    },
 }
 
 # Auto-discover tasks in app.jobs package
