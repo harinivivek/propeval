@@ -34,6 +34,10 @@ celery_app.conf.beat_schedule = {
         "task": "app.jobs.billing_tasks.generate_monthly_invoices",
         "schedule": crontab(day_of_month=1, hour=2, minute=0),
     },
+    "cleanup-orphaned-files": {
+        "task": "app.jobs.cleanup_tasks.cleanup_orphaned_files",
+        "schedule": crontab(day_of_week=0, hour=3, minute=0),
+    },
 }
 
 # Auto-discover tasks in app.jobs package
