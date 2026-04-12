@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.activity_log import ActivityLog
@@ -34,7 +35,7 @@ async def log_activity(
         )
         db.add(entry)
         await db.flush()
-    except Exception:
+    except SQLAlchemyError:
         logger.exception("Failed to log activity: %s %s", action, target_id)
 
 

@@ -20,6 +20,8 @@ router = APIRouter(prefix="/api/notifications", tags=["notifications"])
 async def poll(
     since: datetime | None = Query(None),
     db: AsyncSession = Depends(get_db),
+    # Intentionally uses get_current_user (not require_role) — serves all
+    # authenticated users and filters data by user_type at runtime.
     current_user: User = Depends(get_current_user),
 ):
     now = datetime.now(timezone.utc)

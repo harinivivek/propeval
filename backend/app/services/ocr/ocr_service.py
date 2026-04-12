@@ -33,8 +33,8 @@ class OcrService:
                 "OCR extraction succeeded for report %s (%d pages)",
                 report.id, result.page_count,
             )
-        except Exception:
-            logger.exception("OCR extraction failed for report %s", report.id)
+        except Exception as e:
+            logger.exception("OCR extraction failed for report %s: %s", report.id, e)
             report.status = ReportStatus.EXTRACTION_FAILED
 
         await db.flush()

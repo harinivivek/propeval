@@ -90,8 +90,6 @@ async def send_push_to_users(
                 dead_endpoints.append(sub.endpoint)
             else:
                 logger.exception("Push failed for endpoint %s", sub.endpoint[:50])
-        except Exception:
-            logger.exception("Push failed for endpoint %s", sub.endpoint[:50])
 
     if dead_endpoints:
         await db.execute(
