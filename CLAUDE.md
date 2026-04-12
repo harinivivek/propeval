@@ -40,6 +40,7 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 **Phase 10 (Notifications & Real-Time):** Complete — Native FastAPI WebSocket with Redis pub/sub for real-time notification delivery, WebSocket connection manager with auto-reconnect and heartbeat, notification preferences (per-event-type opt-out toggles in lender/vendor settings), ActivityLog model with 18 action types, activity log service with admin API (list + CSV export), admin dashboard Activity tab with filters, WebSocketProvider React context wrapping all portal layouts, polling fallback reduced to 60s
 **Phase 11 (Mobile PWA):** Complete — @serwist/next service worker with asset caching and push event handlers, PWA manifest with standalone display mode, Web Push notifications via VAPID + pywebpush (triggered on NEW_BROADCAST), PushSubscription model with per-device storage, push API (subscribe/unsubscribe/vapid-key), install banner on vendor dashboard (smart beforeinstallprompt with 7-day dismiss), notification permission banner (3 states: prompt/denied/granted)
 **Phase 12A (Billing & Invoicing):** Complete — Monthly invoice generation Celery job (1st of month), structured invoice numbering (GTR-PAY/RCV-YYYY-MM-NNNN), invoice lifecycle management (PENDING → BILLED → PAID), dedicated admin billing page with bulk status updates and CSV export, enhanced vendor receivables with invoice status drill-down and CSV, enhanced lender payables with invoice status drill-down and CSV, notifications on invoice generation and payment confirmation, activity logging for billing events
+**Phase 12B (System & Entity Config):** Complete — SystemConfig model with Redis cache (60s TTL) for broadcast/acceptance/upload params, VendorConfig model with auto-listing toggle and price threshold, LenderConfig with per-vendor auto-approve preferences, VendorLenderExclusion for listings visibility filtering, admin system config page (/admin/settings), vendor/lender configuration tabs in settings, workflow wiring (auto-approve in request service, auto-listing on acceptance, price threshold in broadcast, exclusion filter in listings browse, upload size from config)
 
 ## Seed Data (local)
 
@@ -212,6 +213,14 @@ make lint            # Lint backend + frontend
 - `backend/app/api/lender/billing.py` — Lender billing entries + CSV export
 - `backend/app/jobs/billing_tasks.py` — Monthly invoice generation Celery task
 - `frontend/src/app/admin/billing/page.tsx` — Admin billing page
+- `backend/app/models/system_config.py` — SystemConfig model (global platform params)
+- `backend/app/models/vendor_config.py` — VendorConfig + VendorLenderExclusion models
+- `backend/app/models/lender_config.py` — LenderConfig + LenderVendorPreference models
+- `backend/app/services/system_config_service.py` — System config CRUD + Redis cache
+- `backend/app/services/vendor_config_service.py` — Vendor config + exclusion CRUD
+- `backend/app/services/lender_config_service.py` — Lender config + vendor preferences
+- `backend/app/api/admin/system_config.py` — Admin system config endpoints
+- `frontend/src/app/admin/settings/page.tsx` — Admin system config page
 - `docker-compose.local.yml` — Local dev environment
 - `.env.local` — Environment variables (ports, secrets, config)
 - `ARCHITECTURE.md` — Full architecture design
