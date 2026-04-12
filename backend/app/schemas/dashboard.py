@@ -24,6 +24,8 @@ class LenderEarning(BaseModel):
 class MonthlyAmount(BaseModel):
     month: str
     total_amount: str
+    invoice_number: str | None = None
+    invoice_status: str | None = None
 
 
 class VendorReceivablesResponse(BaseModel):

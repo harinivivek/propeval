@@ -5,7 +5,8 @@ from uuid import UUID
 from sqlalchemy import case, distinct, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.billing import LenderPayable, VendorEarning
+from app.models.billing import Invoice, LenderPayable, VendorEarning
+from app.models.enums import InvoiceType as InvType
 from app.models.lender import Lender
 from app.models.listing import Listing, ListingReport
 from app.models.purchase import ReportPurchase
@@ -117,15 +118,36 @@ async def get_vendor_receivables(
     )
     month_rows = (await db.execute(month_wise_stmt)).all()
 
+    month_wise = [
+        {"month": r.month, "total_amount": str(r.total_amount)}
+        for r in month_rows
+    ]
+
+    # Enrich month_wise with invoice data
+    vendor_org_result = await db.execute(
+        select(Vendor.organization_id).where(Vendor.id == vendor_id)
+    )
+    vendor_org_id = vendor_org_result.scalar_one_or_none()
+
+    if vendor_org_id:
+        for item in month_wise:
+            inv_result = await db.execute(
+                select(Invoice).where(
+                    Invoice.organization_id == vendor_org_id,
+                    Invoice.month == item["month"],
+                    Invoice.invoice_type == InvType.RECEIVABLE,
+                )
+            )
+            inv = inv_result.scalar_one_or_none()
+            item["invoice_number"] = inv.invoice_number if inv else None
+            item["invoice_status"] = inv.status.value if inv else None
+
     return {
         "lender_wise": [
             {"lender_id": str(r.lender_id), "lender_name": r.lender_name, "total_amount": str(r.total_amount)}
             for r in lender_rows
         ],
-        "month_wise": [
-            {"month": r.month, "total_amount": str(r.total_amount)}
-            for r in month_rows
-        ],
+        "month_wise": month_wise,
     }
 
 
@@ -417,16 +439,37 @@ async def get_lender_payables_summary(
     )
     type_rows = (await db.execute(type_stmt)).all()
 
+    month_wise = [
+        {"month": r.month, "total_amount": str(r.total_amount)}
+        for r in month_rows
+    ]
+
+    # Enrich month_wise with invoice data
+    lender_org_result = await db.execute(
+        select(Lender.organization_id).where(Lender.id == lender_id)
+    )
+    lender_org_id = lender_org_result.scalar_one_or_none()
+
+    if lender_org_id:
+        for item in month_wise:
+            inv_result = await db.execute(
+                select(Invoice).where(
+                    Invoice.organization_id == lender_org_id,
+                    Invoice.month == item["month"],
+                    Invoice.invoice_type == InvType.PAYABLE,
+                )
+            )
+            inv = inv_result.scalar_one_or_none()
+            item["invoice_number"] = inv.invoice_number if inv else None
+            item["invoice_status"] = inv.status.value if inv else None
+
     return {
         "totals": {
             "pending": str(totals.pending),
             "billed": str(totals.billed),
             "paid": str(totals.paid),
         },
-        "month_wise": [
-            {"month": r.month, "total_amount": str(r.total_amount)}
-            for r in month_rows
-        ],
+        "month_wise": month_wise,
         "type_breakdown": [
             {
                 "payable_type": r.payable_type.value if hasattr(r.payable_type, "value") else str(r.payable_type),

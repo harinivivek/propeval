@@ -46,3 +46,14 @@ htmlcov/
 # PWA / Service Worker (generated at build time)
 frontend/public/sw.js
 frontend/public/swe-worker-*.js
+
+# Screenshots
+*.png
+
+# Tooling
+.playwright-mcp/
+.specstory/
+.superpowers/
+
+# TypeScript build info
+frontend/tsconfig.tsbuildinfo
