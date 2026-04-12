@@ -63,15 +63,21 @@ async def get_eligible_vendors(
     result = await db.execute(stmt)
     vendors = list(result.scalars().all())
 
-    # Filter by vendor price threshold
+    # Filter by vendor price threshold (batch query instead of N+1)
     if request_price is not None:
-        from app.services.vendor_config_service import get_vendor_config
-        filtered = []
-        for vendor in vendors:
-            vc = await get_vendor_config(db, vendor.id)
-            if vc.price_threshold is None or request_price >= vc.price_threshold:
-                filtered.append(vendor)
-        vendors = filtered
+        from app.models.vendor_config import VendorConfig
+        vendor_ids = [v.id for v in vendors]
+        if vendor_ids:
+            config_result = await db.execute(
+                select(VendorConfig).where(VendorConfig.vendor_id.in_(vendor_ids))
+            )
+            config_map = {c.vendor_id: c for c in config_result.scalars().all()}
+            vendors = [
+                v for v in vendors
+                if v.id not in config_map
+                or config_map[v.id].price_threshold is None
+                or request_price >= config_map[v.id].price_threshold
+            ]
 
     return vendors
 
@@ -126,18 +132,24 @@ async def start_broadcast(
     request.vendor_status = VendorRequestStatus.INCOMING
     await db.flush()
 
-    # Notify vendor users about the new broadcast
+    # Batch-fetch all vendor users for notification
     vendor_ids = [v.id for v in batch]
+    vu_result = await db.execute(
+        select(VendorUser.vendor_id, VendorUser.user_id)
+        .where(VendorUser.vendor_id.in_(vendor_ids))
+    )
+    vendor_user_map: dict = {}
+    for row in vu_result.all():
+        vendor_user_map.setdefault(row.vendor_id, []).append(row.user_id)
+
     all_notified_user_ids = []
     for vid in vendor_ids:
-        vendor_users_stmt = select(VendorUser.user_id).where(VendorUser.vendor_id == vid)
-        vendor_user_ids = (await db.execute(vendor_users_stmt)).scalars().all()
-        for user_id in vendor_user_ids:
+        for user_id in vendor_user_map.get(vid, []):
             await notification_service.create_notification(
                 db,
                 user_id=user_id,
                 event_type=NotificationEventType.NEW_BROADCAST,
-                title=f"New request broadcast",
+                title="New request broadcast",
                 message=f"{request.report_category.value} report request for {request.property_address or 'a property'}",
                 reference_id=request.id,
                 reference_type=NotificationReferenceType.REQUEST,
@@ -204,18 +216,24 @@ async def advance_broadcast_round(
     request.vendor_status = VendorRequestStatus.INCOMING
     await db.flush()
 
-    # Notify vendor users about the new broadcast round
+    # Batch-fetch all vendor users for notification
     next_vendor_ids = [v.id for v in batch]
+    vu_result = await db.execute(
+        select(VendorUser.vendor_id, VendorUser.user_id)
+        .where(VendorUser.vendor_id.in_(next_vendor_ids))
+    )
+    vendor_user_map: dict = {}
+    for row in vu_result.all():
+        vendor_user_map.setdefault(row.vendor_id, []).append(row.user_id)
+
     all_notified_user_ids = []
     for vid in next_vendor_ids:
-        vendor_users_stmt = select(VendorUser.user_id).where(VendorUser.vendor_id == vid)
-        vendor_user_ids = (await db.execute(vendor_users_stmt)).scalars().all()
-        for user_id in vendor_user_ids:
+        for user_id in vendor_user_map.get(vid, []):
             await notification_service.create_notification(
                 db,
                 user_id=user_id,
                 event_type=NotificationEventType.NEW_BROADCAST,
-                title=f"New request broadcast",
+                title="New request broadcast",
                 message=f"{request.report_category.value} report request for {request.property_address or 'a property'}",
                 reference_id=request.id,
                 reference_type=NotificationReferenceType.REQUEST,
