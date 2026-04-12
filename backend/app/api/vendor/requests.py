@@ -175,6 +175,10 @@ async def upload_report(
         report_date=report_date,
     )
 
+    # Auto-approve if lender has preference set for this vendor
+    from app.services.request_service import check_auto_approve
+    await check_auto_approve(db, request=req, report=report, vendor_id=vendor_id)
+
     # Dispatch OCR extraction
     from app.jobs.ocr_tasks import process_report_ocr
     process_report_ocr.delay(str(report.id))
@@ -248,6 +252,10 @@ async def revise_report(
     await report_service.submit_revision(
         db, report=report, request=req, file_path=relative_path, comments=comments,
     )
+
+    # Auto-approve if lender has preference set for this vendor
+    from app.services.request_service import check_auto_approve
+    await check_auto_approve(db, request=req, report=report, vendor_id=vendor_id)
 
     # Dispatch OCR extraction on revised report
     from app.jobs.ocr_tasks import process_report_ocr

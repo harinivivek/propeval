@@ -17,6 +17,7 @@ from app.models.enums import NotificationEventType, NotificationReferenceType
 from app.models.listing import Listing, ListingReport
 from app.models.report import Report, ReportRevision
 from app.models.request import ReportRequest, RequestBroadcast
+from app.models.lender import LenderUser
 from app.models.vendor import VendorUser
 from app.services import billing_service, broadcast_service, notification_service, pricing_service
 from app.services.activity_log_service import log_activity
@@ -221,6 +222,87 @@ async def accept_report(
         target_type="REQUEST",
         target_id=request.id,
     )
+
+
+async def check_auto_approve(
+    db: AsyncSession,
+    *,
+    request: ReportRequest,
+    report: Report,
+    vendor_id: UUID,
+) -> bool:
+    """Check if lender has auto-approve enabled for this vendor. If yes, auto-accept."""
+    from app.services.lender_config_service import is_auto_approve
+
+    if not await is_auto_approve(db, request.lender_id, vendor_id):
+        return False
+
+    # Auto-accept: same logic as manual accept
+    request.lender_status = LenderRequestStatus.ACCEPTED
+    request.vendor_status = VendorRequestStatus.ACCEPTED
+    report.listing_approved = True
+
+    _PAYABLE_TYPE_MAP = {
+        RequestType.NEW: PayableType.NEW_REQUEST,
+        RequestType.UPDATE: PayableType.UPDATE,
+        RequestType.NEARBY: PayableType.NEARBY,
+    }
+    payable_type = _PAYABLE_TYPE_MAP.get(request.request_type, PayableType.NEW_REQUEST)
+
+    await billing_service.create_billing_entries(
+        db, request=request, report=report, vendor_id=vendor_id,
+        payable_type=payable_type,
+    )
+
+    await _create_or_update_listing(db, report=report)
+    await db.flush()
+
+    # Notify lender users about auto-approve
+    lender_users_stmt = select(LenderUser.user_id).where(
+        LenderUser.lender_id == request.lender_id
+    )
+    lender_user_ids = (await db.execute(lender_users_stmt)).scalars().all()
+    for user_id in lender_user_ids:
+        await notification_service.create_notification(
+            db,
+            user_id=user_id,
+            event_type=NotificationEventType.REQUEST_ACCEPTED,
+            title="Report auto-approved",
+            message="Report was auto-approved based on your vendor preferences",
+            reference_id=request.id,
+            reference_type=NotificationReferenceType.REQUEST,
+        )
+
+    await log_activity(
+        db,
+        actor_id=vendor_id,
+        actor_type="SYSTEM",
+        action="REPORT_AUTO_APPROVED",
+        target_type="REQUEST",
+        target_id=request.id,
+    )
+
+    # Check auto-listing
+    await _check_auto_listing(db, report=report, vendor_id=vendor_id)
+
+    return True
+
+
+async def _check_auto_listing(
+    db: AsyncSession,
+    *,
+    report: Report,
+    vendor_id: UUID,
+) -> None:
+    """If vendor has auto-listing enabled, auto-list the accepted report."""
+    from app.services.vendor_config_service import get_vendor_config
+
+    config = await get_vendor_config(db, vendor_id)
+    if not config.auto_listing_enabled:
+        return
+
+    # Reuse existing listing logic
+    await _create_or_update_listing(db, report=report)
 
 
 async def reject_report(
