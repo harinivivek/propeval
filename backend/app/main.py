@@ -26,6 +26,9 @@ from app.api.push import router as push_router
 from app.api.admin.billing import router as admin_billing_router
 from app.api.vendor.billing import router as vendor_billing_router
 from app.api.lender.billing import router as lender_billing_router
+from app.api.admin.system_config import router as admin_system_config_router
+from app.api.vendor.config import router as vendor_config_router
+from app.api.lender.config import router as lender_config_router
 from app.core.ws_manager import ws_manager
 
 app = FastAPI(
@@ -83,3 +86,6 @@ app.include_router(push_router)
 app.include_router(admin_billing_router)
 app.include_router(vendor_billing_router)
 app.include_router(lender_billing_router)
+app.include_router(admin_system_config_router)
+app.include_router(vendor_config_router)
+app.include_router(lender_config_router)
