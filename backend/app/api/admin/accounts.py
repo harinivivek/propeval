@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -34,10 +34,14 @@ router = APIRouter(prefix="/api/admin", tags=["admin-accounts"])
 
 @router.get("/lenders", response_model=list[LenderResponse])
 async def list_lenders(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_role("ADMIN")),
 ):
-    return await lender_service.list_lenders(db)
+    all_results = await lender_service.list_lenders(db)
+    start = (page - 1) * page_size
+    return all_results[start : start + page_size]
 
 
 @router.post("/lenders", response_model=LenderResponse, status_code=status.HTTP_201_CREATED)
@@ -79,10 +83,14 @@ async def update_lender(
 @router.get("/lenders/{lender_id}/branches", response_model=list[BranchResponse])
 async def list_branches(
     lender_id: UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_role("ADMIN")),
 ):
-    return await lender_service.list_branches(db, lender_id)
+    all_results = await lender_service.list_branches(db, lender_id)
+    start = (page - 1) * page_size
+    return all_results[start : start + page_size]
 
 
 @router.post(
@@ -107,10 +115,14 @@ async def create_branch(
 @router.get("/lenders/{lender_id}/users", response_model=list[LenderUserResponse])
 async def list_lender_users(
     lender_id: UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_role("ADMIN")),
 ):
-    return await lender_service.list_lender_users(db, lender_id)
+    all_results = await lender_service.list_lender_users(db, lender_id)
+    start = (page - 1) * page_size
+    return all_results[start : start + page_size]
 
 
 @router.post(
@@ -149,10 +161,14 @@ async def create_lender_user(
 
 @router.get("/vendors", response_model=list[VendorResponse])
 async def list_vendors(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_role("ADMIN")),
 ):
-    return await vendor_service.list_vendors(db)
+    all_results = await vendor_service.list_vendors(db)
+    start = (page - 1) * page_size
+    return all_results[start : start + page_size]
 
 
 @router.post("/vendors", response_model=VendorResponse, status_code=status.HTTP_201_CREATED)
@@ -200,10 +216,14 @@ async def update_vendor(
 @router.get("/vendors/{vendor_id}/users", response_model=list[VendorUserResponse])
 async def list_vendor_users(
     vendor_id: UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_role("ADMIN")),
 ):
-    return await vendor_service.list_vendor_users(db, vendor_id)
+    all_results = await vendor_service.list_vendor_users(db, vendor_id)
+    start = (page - 1) * page_size
+    return all_results[start : start + page_size]
 
 
 @router.post(
@@ -242,10 +262,14 @@ async def create_vendor_user(
 @router.get("/vendors/{vendor_id}/service-areas", response_model=list[ServiceAreaResponse])
 async def list_service_areas(
     vendor_id: UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_role("ADMIN")),
 ):
-    return await vendor_service.list_service_areas(db, vendor_id)
+    all_results = await vendor_service.list_service_areas(db, vendor_id)
+    start = (page - 1) * page_size
+    return all_results[start : start + page_size]
 
 
 @router.post(

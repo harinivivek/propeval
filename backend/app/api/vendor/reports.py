@@ -1,7 +1,7 @@
 import uuid as uuid_mod
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -94,6 +94,8 @@ async def bulk_upload(
 
 @router.get("/bulk-jobs", response_model=list[BulkUploadJobResponse])
 async def list_bulk_jobs(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("VENDOR")),
 ):
@@ -102,6 +104,8 @@ async def list_bulk_jobs(
         select(BulkUploadJob)
         .where(BulkUploadJob.vendor_id == vendor_id)
         .order_by(BulkUploadJob.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     )
     return list(result.scalars().all())
 
@@ -127,6 +131,8 @@ async def get_bulk_job(
 @router.get("/bulk-jobs/{job_id}/reports", response_model=list[BulkUploadReportStatus])
 async def get_bulk_job_reports(
     job_id: UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("VENDOR")),
 ):
@@ -141,6 +147,8 @@ async def get_bulk_job_reports(
         select(Report)
         .where(Report.bulk_upload_job_id == job_id)
         .order_by(Report.created_at)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     )
     reports = result.scalars().all()
     return [

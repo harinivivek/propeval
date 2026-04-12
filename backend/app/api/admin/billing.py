@@ -26,6 +26,8 @@ async def list_invoices(
     month: str | None = Query(None),
     invoice_type: str | None = Query(None),
     invoice_status: str | None = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("ADMIN")),
 ):
@@ -57,7 +59,8 @@ async def list_invoices(
                 org_name=org_name,
             )
         )
-    return results
+    start = (page - 1) * page_size
+    return results[start : start + page_size]
 
 
 @router.get("/invoices/{invoice_id}", response_model=InvoiceDetailResponse)

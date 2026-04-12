@@ -24,16 +24,20 @@ async def list_rules(
     city: str | None = Query(None),
     report_category: str | None = Query(None),
     property_type: str | None = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_role("ADMIN")),
 ):
-    return await pricing_service.list_pricing_rules(
+    all_results = await pricing_service.list_pricing_rules(
         db,
         lender_id=lender_id,
         city=city,
         report_category=report_category,
         property_type=property_type,
     )
+    start = (page - 1) * page_size
+    return all_results[start : start + page_size]
 
 
 @router.post(
