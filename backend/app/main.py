@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
+from app.core.rate_limit import limiter
 from app.api.admin.accounts import router as admin_accounts_router
 from app.api.admin.pricing import router as admin_pricing_router
 from app.api.auth import router as auth_router
@@ -36,6 +39,9 @@ app = FastAPI(
     version="0.1.0",
     description="Property Valuation & Legal Reports Marketplace",
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS
 app.add_middleware(

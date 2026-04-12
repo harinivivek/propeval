@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from app.core.database import get_db
+from app.core.rate_limit import limiter
 from app.core.deps import get_current_user
 from app.core.security import create_access_token, verify_token
 from app.models.user import User
@@ -36,7 +37,8 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=LoginResponse)
-async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)):
     user = await authenticate_email(db, body.email, body.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
@@ -60,7 +62,8 @@ async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends
 
 
 @router.post("/login-otp", response_model=MessageResponse)
-async def login_otp(body: OTPRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def login_otp(request: Request, body: OTPRequest, db: AsyncSession = Depends(get_db)):
     sent = await request_otp(db, body.mobile)
     if not sent:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mobile not found")
@@ -68,7 +71,8 @@ async def login_otp(body: OTPRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/verify-otp", response_model=LoginResponse)
-async def verify_otp_endpoint(body: OTPVerifyRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def verify_otp_endpoint(request: Request, body: OTPVerifyRequest, db: AsyncSession = Depends(get_db)):
     user = await authenticate_otp(db, body.mobile, body.otp)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired OTP")
@@ -91,7 +95,8 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/forgot-password", response_model=MessageResponse)
-async def forgot_password(body: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("3/minute")
+async def forgot_password(request: Request, body: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)):
     user = None
     if body.email:
         user = await get_user_by_email(db, body.email)
@@ -125,7 +130,8 @@ async def forgot_password(body: ForgotPasswordRequest, db: AsyncSession = Depend
 
 
 @router.post("/reset-password", response_model=MessageResponse)
-async def reset_password_endpoint(body: ResetPasswordRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def reset_password_endpoint(request: Request, body: ResetPasswordRequest, db: AsyncSession = Depends(get_db)):
     success = await reset_password(db, body.token, body.new_password)
     if not success:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token")
