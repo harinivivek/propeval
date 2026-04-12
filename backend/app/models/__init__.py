@@ -39,6 +39,9 @@ from app.models.notification import Notification, NotificationPreference
 from app.models.activity_log import ActivityLog
 from app.models.template import ReportTemplate
 from app.models.push_subscription import PushSubscription
+from app.models.system_config import SystemConfig
+from app.models.vendor_config import VendorConfig, VendorLenderExclusion
+from app.models.lender_config import LenderConfig, LenderVendorPreference
 
 __all__ = [
     "Base",
@@ -107,4 +110,10 @@ __all__ = [
     "ActivityLog",
     # Phase 11 models
     "PushSubscription",
+    # Phase 12B — Config
+    "SystemConfig",
+    "VendorConfig",
+    "VendorLenderExclusion",
+    "LenderConfig",
+    "LenderVendorPreference",
 ]
