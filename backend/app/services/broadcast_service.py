@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 from uuid import UUID
 
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.constants import BROADCAST_ACCEPT_WINDOW_MINUTES, VENDORS_PER_BROADCAST_ROUND
+from app.services.system_config_service import get_config_values
 from app.models.enums import (
     BroadcastStatus,
     LenderRequestStatus,
@@ -29,6 +30,7 @@ async def get_eligible_vendors(
     area: str | None = None,
     report_category: str,
     exclude_request_id: UUID | None = None,
+    request_price: Decimal | None = None,
 ) -> list[Vendor]:
     """Find vendors matching city/area/service_type, excluding already-broadcast ones."""
     service_type = ServiceType(report_category)
@@ -59,7 +61,19 @@ async def get_eligible_vendors(
 
     stmt = stmt.distinct().order_by(Vendor.created_at)
     result = await db.execute(stmt)
-    return list(result.scalars().all())
+    vendors = list(result.scalars().all())
+
+    # Filter by vendor price threshold
+    if request_price is not None:
+        from app.services.vendor_config_service import get_vendor_config
+        filtered = []
+        for vendor in vendors:
+            vc = await get_vendor_config(db, vendor.id)
+            if vc.price_threshold is None or request_price >= vc.price_threshold:
+                filtered.append(vendor)
+        vendors = filtered
+
+    return vendors
 
 
 async def assign_direct(
@@ -80,12 +94,15 @@ async def start_broadcast(
     request: ReportRequest,
 ) -> RequestBroadcast:
     """Start broadcast round 1 for a request."""
+    config = await get_config_values()
+
     vendors = await get_eligible_vendors(
         db,
         city=request.city,
         area=request.area,
         report_category=request.report_category.value,
         exclude_request_id=request.id,
+        request_price=request.price,
     )
 
     if not vendors:
@@ -94,8 +111,8 @@ async def start_broadcast(
             f"area={request.area}, category={request.report_category}"
         )
 
-    batch = vendors[:VENDORS_PER_BROADCAST_ROUND]
-    deadline = datetime.now(timezone.utc) + timedelta(minutes=BROADCAST_ACCEPT_WINDOW_MINUTES)
+    batch = vendors[:config["vendors_per_broadcast_round"]]
+    deadline = datetime.now(timezone.utc) + timedelta(minutes=config["broadcast_accept_window_minutes"])
 
     broadcast = RequestBroadcast(
         request_id=request.id,
@@ -155,6 +172,8 @@ async def advance_broadcast_round(
     current_broadcast: RequestBroadcast,
 ) -> RequestBroadcast | None:
     """Expire current round and start next if vendors available."""
+    config = await get_config_values()
+
     current_broadcast.status = BroadcastStatus.EXPIRED
     await db.flush()
 
@@ -164,13 +183,14 @@ async def advance_broadcast_round(
         area=request.area,
         report_category=request.report_category.value,
         exclude_request_id=request.id,
+        request_price=request.price,
     )
 
     if not vendors:
         return None
 
-    batch = vendors[:VENDORS_PER_BROADCAST_ROUND]
-    deadline = datetime.now(timezone.utc) + timedelta(minutes=BROADCAST_ACCEPT_WINDOW_MINUTES)
+    batch = vendors[:config["vendors_per_broadcast_round"]]
+    deadline = datetime.now(timezone.utc) + timedelta(minutes=config["broadcast_accept_window_minutes"])
 
     next_broadcast = RequestBroadcast(
         request_id=request.id,
