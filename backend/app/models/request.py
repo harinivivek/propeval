@@ -33,7 +33,7 @@ class ReportRequest(BaseModel):
     lender_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lenders.id"))
     lender_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     branch_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("lender_branches.id"), nullable=True
+        ForeignKey("lender_branches.id"), nullable=True, index=True
     )
     request_type: Mapped[RequestType] = mapped_column(SQLEnum(RequestType))
     report_category: Mapped[ReportCategory] = mapped_column(SQLEnum(ReportCategory))
@@ -51,7 +51,7 @@ class ReportRequest(BaseModel):
     eta_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
     price: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     vendor_specified_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("vendors.id"), nullable=True
+        ForeignKey("vendors.id"), nullable=True, index=True
     )
     allow_broadcast_on_reject: Mapped[bool] = mapped_column(Boolean, default=True)
     parent_report_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -98,7 +98,7 @@ class RequestAcceptance(BaseModel):
         DateTime(timezone=True), server_default=func.now()
     )
     report_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("reports.id"), nullable=True
+        ForeignKey("reports.id"), nullable=True, index=True
     )
 
     request: Mapped[ReportRequest] = relationship(back_populates="acceptances")

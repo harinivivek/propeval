@@ -20,12 +20,12 @@ from app.models.enums import EarningType, InvoiceType, PayableType, PaymentStatu
 class VendorEarning(BaseModel):
     __tablename__ = "vendor_earnings"
 
-    vendor_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("vendors.id"))
-    report_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("reports.id"))
+    vendor_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("vendors.id"), index=True)
+    report_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("reports.id"), index=True)
     request_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("report_requests.id"), nullable=True
     )
-    lender_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lenders.id"))
+    lender_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lenders.id"), index=True)
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     earning_type: Mapped[EarningType] = mapped_column(SQLEnum(EarningType))
     month: Mapped[str] = mapped_column(String(7))  # "2026-04"
@@ -34,8 +34,8 @@ class VendorEarning(BaseModel):
 class LenderPayable(BaseModel):
     __tablename__ = "lender_payables"
 
-    lender_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lenders.id"))
-    report_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("reports.id"))
+    lender_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lenders.id"), index=True)
+    report_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("reports.id"), index=True)
     request_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("report_requests.id"), nullable=True
     )
