@@ -1,8 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, Save } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface VendorPricingItem {
   id: string;
@@ -44,62 +60,86 @@ export default function VendorPricingPage() {
     } finally { setSaving(false); }
   };
 
+  const selectClassName = "flex h-9 w-full rounded-md border border-border bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">My Pricing</h1>
-          <p className="text-sm text-muted-foreground mt-1">Set your prices for marketplace visibility</p>
-        </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
-        >
-          {showForm ? "Cancel" : "Add Price"}
-        </button>
-      </div>
+      <PageHeader title="My Pricing" description="Set your prices for marketplace visibility">
+        <Button onClick={() => setShowForm(!showForm)} variant={showForm ? "outline" : "default"}>
+          {showForm ? "Cancel" : (
+            <>
+              <Plus className="h-4 w-4 mr-1" />
+              Add Price
+            </>
+          )}
+        </Button>
+      </PageHeader>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white border rounded-lg p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-          <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="border rounded-md p-2 text-sm" required />
-          <select value={form.property_type} onChange={(e) => setForm({ ...form, property_type: e.target.value })} className="border rounded-md p-2 text-sm">
-            <option value="RESIDENTIAL">Residential</option>
-            <option value="COMMERCIAL">Commercial</option>
-            <option value="INDUSTRIAL">Industrial</option>
-            <option value="AGRICULTURAL">Agricultural</option>
-          </select>
-          <select value={form.report_category} onChange={(e) => setForm({ ...form, report_category: e.target.value })} className="border rounded-md p-2 text-sm">
-            <option value="VALUATION">Valuation</option>
-            <option value="LEGAL">Legal</option>
-          </select>
-          <div className="flex gap-2">
-            <input placeholder="Price (INR)" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="border rounded-md p-2 text-sm flex-1" required />
-            <button type="submit" disabled={saving} className="bg-green-600 text-white px-3 py-2 rounded-md text-sm hover:bg-green-700 disabled:opacity-50">
-              {saving ? "..." : "Save"}
-            </button>
-          </div>
-        </form>
+        <Card>
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
+                <Label className="mb-1">City</Label>
+                <Input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
+              </div>
+              <div>
+                <Label className="mb-1">Property Type</Label>
+                <select value={form.property_type} onChange={(e) => setForm({ ...form, property_type: e.target.value })} className={selectClassName}>
+                  <option value="RESIDENTIAL">Residential</option>
+                  <option value="COMMERCIAL">Commercial</option>
+                  <option value="INDUSTRIAL">Industrial</option>
+                  <option value="AGRICULTURAL">Agricultural</option>
+                </select>
+              </div>
+              <div>
+                <Label className="mb-1">Category</Label>
+                <select value={form.report_category} onChange={(e) => setForm({ ...form, report_category: e.target.value })} className={selectClassName}>
+                  <option value="VALUATION">Valuation</option>
+                  <option value="LEGAL">Legal</option>
+                </select>
+              </div>
+              <div>
+                <Label className="mb-1">Price (INR)</Label>
+                <div className="flex gap-2">
+                  <Input placeholder="Price" type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+                  <Button type="submit" disabled={saving} size="sm" className="shrink-0 h-9">
+                    <Save className="h-4 w-4 mr-1" />
+                    {saving ? "..." : "Save"}
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       )}
 
       {loading ? (
-        <div className="text-center py-8 text-muted-foreground">Loading...</div>
-      ) : items.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          No pricing set yet. Add pricing to appear in marketplace search.
+        <div className="space-y-3">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
         </div>
+      ) : items.length === 0 ? (
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            No pricing set yet. Add pricing to appear in marketplace search.
+          </CardContent>
+        </Card>
       ) : (
-        <div className="bg-white border rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="text-left p-3 font-medium">City</th>
-                <th className="text-left p-3 font-medium">Property Type</th>
-                <th className="text-left p-3 font-medium">Category</th>
-                <th className="text-right p-3 font-medium">Your Price</th>
-                <th className="text-right p-3 font-medium">Band (Min-Max)</th>
-              </tr>
-            </thead>
-            <tbody>
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>City</TableHead>
+                <TableHead>Property Type</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead className="text-right">Your Price</TableHead>
+                <TableHead className="text-right">Band (Min-Max)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {items.map((item) => {
                 const price = parseFloat(item.price);
                 const min = item.min_price ? parseFloat(item.min_price) : null;
@@ -108,24 +148,30 @@ export default function VendorPricingPage() {
                 const nearCeiling = max && price >= max * 0.9;
 
                 return (
-                  <tr key={item.id} className="border-b last:border-0 hover:bg-gray-50">
-                    <td className="p-3">{item.city}</td>
-                    <td className="p-3">{item.property_type}</td>
-                    <td className="p-3">{item.report_category}</td>
-                    <td className={`p-3 text-right font-medium ${nearFloor ? "text-amber-600" : nearCeiling ? "text-red-600" : ""}`}>
-                      INR {price.toLocaleString()}
-                      {nearFloor && <span className="text-xs ml-1">(near floor)</span>}
-                      {nearCeiling && <span className="text-xs ml-1">(near ceiling)</span>}
-                    </td>
-                    <td className="p-3 text-right text-muted-foreground">
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.city}</TableCell>
+                    <TableCell>{item.property_type}</TableCell>
+                    <TableCell>{item.report_category}</TableCell>
+                    <TableCell className="text-right">
+                      <span className={nearFloor ? "text-amber-600 font-medium" : nearCeiling ? "text-destructive font-medium" : "font-medium"}>
+                        INR {price.toLocaleString()}
+                      </span>
+                      {nearFloor && (
+                        <Badge variant="outline" className="ml-2 bg-amber-50 text-amber-700 border-amber-200 text-xs">near floor</Badge>
+                      )}
+                      {nearCeiling && (
+                        <Badge variant="outline" className="ml-2 bg-red-50 text-red-700 border-red-200 text-xs">near ceiling</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">
                       {min && max ? `INR ${min.toLocaleString()} — ${max.toLocaleString()}` : "No band set"}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       )}
     </div>
   );
