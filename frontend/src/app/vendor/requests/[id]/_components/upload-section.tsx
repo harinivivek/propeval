@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { api } from "@/lib/api";
 import type { Report } from "@/types/report";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
   requestId: string;
@@ -42,55 +47,66 @@ export function UploadSection({ requestId, isRevision = false, onUploaded }: Pro
     }
   };
 
-  const inputClass = "w-full border rounded-lg px-3 py-2 text-sm";
-
   return (
-    <div className="border rounded-lg p-4 space-y-4">
-      <h3 className="font-semibold">
-        {isRevision ? "Re-upload Revised Report" : "Upload Report"}
-      </h3>
+    <Card>
+      <CardHeader>
+        <CardTitle>{isRevision ? "Re-upload Revised Report" : "Upload Report"}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {error && (
+          <div className="bg-destructive/10 text-destructive px-3 py-2 rounded-md text-sm">{error}</div>
+        )}
 
-      {error && (
-        <div className="bg-red-50 text-red-700 px-3 py-2 rounded text-sm">{error}</div>
-      )}
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Report PDF *</label>
-        <input
-          type="file"
-          accept=".pdf,application/pdf"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="text-sm"
-        />
-        <p className="text-xs text-gray-500 mt-1">PDF only, max 20MB</p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Valuation Amount</label>
-          <input type="number" className={inputClass} value={valuationAmount}
-            onChange={(e) => setValuationAmount(e.target.value)} placeholder="e.g. 5000000" />
+        <div className="space-y-2">
+          <Label htmlFor="report-pdf">Report PDF *</Label>
+          <Input
+            id="report-pdf"
+            type="file"
+            accept=".pdf,application/pdf"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+          />
+          <p className="text-xs text-muted-foreground">PDF only, max 20MB</p>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
-          <input type="date" className={inputClass} value={reportDate}
-            onChange={(e) => setReportDate(e.target.value)} />
-        </div>
-      </div>
 
-      {isRevision && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Revision Comments</label>
-          <textarea className={inputClass} rows={3} value={comments}
-            onChange={(e) => setComments(e.target.value)}
-            placeholder="Describe what was changed..." />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="valuation-amount">Valuation Amount</Label>
+            <Input
+              id="valuation-amount"
+              type="number"
+              value={valuationAmount}
+              onChange={(e) => setValuationAmount(e.target.value)}
+              placeholder="e.g. 5000000"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="report-date">Report Date</Label>
+            <Input
+              id="report-date"
+              type="date"
+              value={reportDate}
+              onChange={(e) => setReportDate(e.target.value)}
+            />
+          </div>
         </div>
-      )}
 
-      <button onClick={handleUpload} disabled={!file || uploading}
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
-        {uploading ? "Uploading..." : isRevision ? "Submit Revision" : "Upload Report"}
-      </button>
-    </div>
+        {isRevision && (
+          <div className="space-y-2">
+            <Label htmlFor="revision-comments">Revision Comments</Label>
+            <Textarea
+              id="revision-comments"
+              rows={3}
+              value={comments}
+              onChange={(e) => setComments(e.target.value)}
+              placeholder="Describe what was changed..."
+            />
+          </div>
+        )}
+
+        <Button onClick={handleUpload} disabled={!file || uploading}>
+          {uploading ? "Uploading..." : isRevision ? "Submit Revision" : "Upload Report"}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

@@ -7,6 +7,19 @@ import type { ReportRequest, RejectionReason } from "@/types/request";
 import type { Report } from "@/types/report";
 import { ExtractionReview } from "./_components/extraction-review";
 import { UploadSection } from "./_components/upload-section";
+import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 const REJECTION_REASONS: { value: RejectionReason; label: string }[] = [
   { value: "LOW_PRICE", label: "Price too low" },
@@ -77,8 +90,23 @@ export default function VendorRequestDetailPage() {
     }
   };
 
-  if (loading) return <p className="text-gray-500 py-8">Loading...</p>;
-  if (!request) return <p className="text-red-500 py-8">{error || "Request not found"}</p>;
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    );
+  }
+
+  if (!request) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <p className="text-destructive py-8">{error || "Request not found"}</p>
+      </div>
+    );
+  }
 
   const isIncoming = request.vendor_status === "INCOMING";
   const isPending = request.vendor_status === "PENDING";
@@ -86,91 +114,104 @@ export default function VendorRequestDetailPage() {
   const isCompleted = request.vendor_status === "SENT" || request.vendor_status === "ACCEPTED";
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <button onClick={() => router.push("/vendor/requests")}
-        className="text-sm text-blue-600 hover:underline mb-4 block">&larr; Back to Requests</button>
+    <div className="max-w-3xl mx-auto space-y-4">
+      <Button
+        variant="link"
+        onClick={() => router.push("/vendor/requests")}
+        className="px-0 text-primary"
+      >
+        &larr; Back to Requests
+      </Button>
 
-      <h1 className="text-2xl font-bold mb-4">Request Detail</h1>
+      <PageHeader title="Request Detail" />
 
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded mb-4 text-sm">{error}</div>
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md text-sm">{error}</div>
       )}
 
       {request.parent_report_id && (request.request_type === "UPDATE" || request.request_type === "NEARBY") && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 mb-4">
-          <h3 className="text-sm font-semibold text-amber-800 mb-2">
-            {request.request_type === "UPDATE"
-              ? "Update request for previous report"
-              : "Nearby property request"}
-          </h3>
-          <div className="text-sm text-amber-900 space-y-1">
+        <Card className="border-amber-200 bg-amber-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-amber-800">
+              {request.request_type === "UPDATE"
+                ? "Update request for previous report"
+                : "Nearby property request"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-amber-900 space-y-1">
             <p><span className="font-medium">Original property:</span> {request.property_address}</p>
-            <p><span className="font-medium">City:</span> {request.city} · {request.pin_code || ""}</p>
-            <p><span className="font-medium">Type:</span> {request.property_type} · {request.report_category}</p>
-          </div>
+            <p><span className="font-medium">City:</span> {request.city} &middot; {request.pin_code || ""}</p>
+            <p><span className="font-medium">Type:</span> {request.property_type} &middot; {request.report_category}</p>
 
-          {request.request_type === "UPDATE" && request.comments && (() => {
-            try {
-              const parsed = JSON.parse(request.comments);
-              if (parsed.checklist) {
-                return (
-                  <div className="mt-3 border-t border-amber-200 pt-3">
-                    <p className="text-xs font-semibold text-amber-700 mb-1">Lender requested updates:</p>
-                    <ul className="text-sm text-amber-900 space-y-1">
-                      {parsed.checklist.map((item: string) => (
-                        <li key={item} className="flex items-center gap-2">
-                          <span className="text-amber-500">●</span>
-                          {item.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
-                        </li>
-                      ))}
-                    </ul>
-                    {parsed.text && (
-                      <p className="text-sm text-amber-900 mt-2 italic">&quot;{parsed.text}&quot;</p>
-                    )}
-                  </div>
-                );
-              }
-            } catch { /* plain text comments */ }
-            return null;
-          })()}
-        </div>
+            {request.request_type === "UPDATE" && request.comments && (() => {
+              try {
+                const parsed = JSON.parse(request.comments);
+                if (parsed.checklist) {
+                  return (
+                    <div className="mt-3 border-t border-amber-200 pt-3">
+                      <p className="text-xs font-semibold text-amber-700 mb-1">Lender requested updates:</p>
+                      <ul className="text-sm text-amber-900 space-y-1">
+                        {parsed.checklist.map((item: string) => (
+                          <li key={item} className="flex items-center gap-2">
+                            <span className="text-amber-500">&#9679;</span>
+                            {item.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                          </li>
+                        ))}
+                      </ul>
+                      {parsed.text && (
+                        <p className="text-sm text-amber-900 mt-2 italic">&quot;{parsed.text}&quot;</p>
+                      )}
+                    </div>
+                  );
+                }
+              } catch { /* plain text comments */ }
+              return null;
+            })()}
+          </CardContent>
+        </Card>
       )}
 
       {/* Property Details */}
-      <div className="border rounded-lg p-4 mb-4">
-        <h2 className="font-semibold mb-3">Property Details</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-          <div><span className="text-gray-500">Address:</span> {request.property_address || "\u2014"}</div>
-          <div><span className="text-gray-500">City:</span> {request.city}{request.area ? `, ${request.area}` : ""}</div>
-          <div><span className="text-gray-500">Type:</span> {request.property_type}</div>
-          <div><span className="text-gray-500">Category:</span> {request.report_category}</div>
-          <div><span className="text-gray-500">Applicant:</span> {request.loan_applicant_name || "\u2014"}</div>
-          <div><span className="text-gray-500">Price:</span> {request.price ? `\u20B9${request.price}` : "\u2014"}</div>
-        </div>
-        {request.comments && (
-          <div className="mt-3 pt-3 border-t">
-            <span className="text-gray-500 text-sm">Comments:</span>
-            <p className="text-sm mt-1">{request.comments}</p>
+      <Card>
+        <CardHeader>
+          <CardTitle>Property Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+            <div><span className="text-muted-foreground">Address:</span> {request.property_address || "\u2014"}</div>
+            <div><span className="text-muted-foreground">City:</span> {request.city}{request.area ? `, ${request.area}` : ""}</div>
+            <div><span className="text-muted-foreground">Type:</span> {request.property_type}</div>
+            <div><span className="text-muted-foreground">Category:</span> {request.report_category}</div>
+            <div><span className="text-muted-foreground">Applicant:</span> {request.loan_applicant_name || "\u2014"}</div>
+            <div><span className="text-muted-foreground">Price:</span> {request.price ? `\u20B9${request.price}` : "\u2014"}</div>
           </div>
-        )}
-      </div>
+          {request.comments && (
+            <div className="mt-3 pt-3 border-t border-border">
+              <span className="text-muted-foreground text-sm">Comments:</span>
+              <p className="text-sm mt-1">{request.comments}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Incoming: Accept/Reject */}
       {isIncoming && (
-        <div className="border rounded-lg p-4 mb-4 bg-blue-50">
-          <h2 className="font-semibold mb-3">Action Required</h2>
-          <p className="text-sm text-gray-700 mb-4">You have a new request. Accept to proceed or reject with a reason.</p>
-          <div className="flex gap-3">
-            <button onClick={handleAccept} disabled={actionLoading}
-              className="bg-green-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-green-700 disabled:opacity-50">
-              {actionLoading ? "Processing..." : "Accept"}
-            </button>
-            <button onClick={() => setShowRejectDialog(true)} disabled={actionLoading}
-              className="bg-red-500 text-white px-6 py-2 rounded-lg text-sm hover:bg-red-600 disabled:opacity-50">
-              Reject
-            </button>
-          </div>
-        </div>
+        <Card className="bg-primary/5 border-primary/20">
+          <CardHeader>
+            <CardTitle>Action Required</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">You have a new request. Accept to proceed or reject with a reason.</p>
+            <div className="flex gap-3">
+              <Button onClick={handleAccept} disabled={actionLoading} className="bg-emerald-600 hover:bg-emerald-700">
+                {actionLoading ? "Processing..." : "Accept"}
+              </Button>
+              <Button variant="destructive" onClick={() => setShowRejectDialog(true)} disabled={actionLoading}>
+                Reject
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Pending: Upload */}
@@ -181,10 +222,14 @@ export default function VendorRequestDetailPage() {
       {/* Revision: Re-upload */}
       {isRevision && (
         <>
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
-            <h3 className="font-semibold text-orange-800 mb-2">Revision Requested</h3>
-            <p className="text-sm text-orange-700">The lender has requested revisions. Please re-upload an updated report.</p>
-          </div>
+          <Card className="border-orange-200 bg-orange-50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-orange-800">Revision Requested</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-orange-700">The lender has requested revisions. Please re-upload an updated report.</p>
+            </CardContent>
+          </Card>
           <UploadSection requestId={id} isRevision onUploaded={fetchRequest} />
         </>
       )}
@@ -193,35 +238,41 @@ export default function VendorRequestDetailPage() {
       {isCompleted && report && (
         <>
           {report.status === "PROCESSING" && (
-            <div className="border rounded-lg p-4 mb-4 bg-blue-50">
-              <div className="flex items-center gap-3">
-                <div className="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full" />
-                <div>
-                  <p className="font-medium text-blue-800">Extracting report data...</p>
-                  <p className="text-sm text-blue-600">This usually takes 30-60 seconds.</p>
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="py-4">
+                <div className="flex items-center gap-3">
+                  <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
+                  <div>
+                    <p className="font-medium text-primary">Extracting report data...</p>
+                    <p className="text-sm text-muted-foreground">This usually takes 30-60 seconds.</p>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
 
           {report.status === "EXTRACTION_FAILED" && (
-            <div className="border rounded-lg p-4 mb-4 bg-red-50">
-              <h3 className="font-semibold text-red-800 mb-2">Extraction Failed</h3>
-              <p className="text-sm text-red-700 mb-3">
-                We couldn&apos;t extract data from this report. You can retry or fill in the fields manually.
-              </p>
-              <button
-                onClick={async () => {
-                  try {
-                    await api.post(`/api/vendor/reports/${report.id}/retry-extraction`, {});
-                    fetchReport();
-                  } catch {}
-                }}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700"
-              >
-                Retry Extraction
-              </button>
-            </div>
+            <Card className="border-destructive/30 bg-destructive/5">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-destructive">Extraction Failed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-destructive/80 mb-3">
+                  We couldn&apos;t extract data from this report. You can retry or fill in the fields manually.
+                </p>
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
+                    try {
+                      await api.post(`/api/vendor/reports/${report.id}/retry-extraction`, {});
+                      fetchReport();
+                    } catch {}
+                  }}
+                >
+                  Retry Extraction
+                </Button>
+              </CardContent>
+            </Card>
           )}
 
           {(report.status === "READY_TO_PUBLISH" || report.status === "PUBLISHED") && (
@@ -229,53 +280,58 @@ export default function VendorRequestDetailPage() {
           )}
 
           {report.status === "UPLOADED" && (
-            <div className="border rounded-lg p-4 mb-4 bg-gray-50">
-              <p className="text-gray-600">Report uploaded. Waiting for processing to start...</p>
-            </div>
+            <Card className="bg-muted">
+              <CardContent className="py-4">
+                <p className="text-muted-foreground">Report uploaded. Waiting for processing to start...</p>
+              </CardContent>
+            </Card>
           )}
         </>
       )}
 
       {/* Completed (no report yet) */}
       {isCompleted && !report && (
-        <div className="border rounded-lg p-4 mb-4 bg-emerald-50">
-          <p className="text-emerald-800 font-medium">
-            {request.vendor_status === "ACCEPTED" ? "Report accepted by lender." : "Report submitted."}
-          </p>
-        </div>
+        <Card className="border-emerald-200 bg-emerald-50">
+          <CardContent className="py-4">
+            <p className="text-emerald-800 font-medium">
+              {request.vendor_status === "ACCEPTED" ? "Report accepted by lender." : "Report submitted."}
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Reject Dialog */}
-      {showRejectDialog && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="font-semibold mb-3">Reject Request</h3>
-            <div className="space-y-2 mb-4">
-              {REJECTION_REASONS.map((r) => (
-                <label key={r.value} className="flex items-center gap-2 text-sm">
-                  <input type="radio" name="reason" value={r.value}
-                    checked={rejectReason === r.value}
-                    onChange={() => setRejectReason(r.value)} />
-                  {r.label}
-                </label>
-              ))}
-            </div>
-            {rejectReason === "LOW_PRICE" && (
-              <p className="text-sm text-amber-700 bg-amber-50 p-2 rounded mb-4">
-                Consider discussing pricing with the lender before rejecting.
-              </p>
-            )}
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setShowRejectDialog(false)}
-                className="border px-4 py-2 rounded-lg text-sm">Cancel</button>
-              <button onClick={handleReject} disabled={actionLoading}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50">
-                {actionLoading ? "Rejecting..." : "Confirm Reject"}
-              </button>
-            </div>
+      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Request</DialogTitle>
+            <DialogDescription>Select a reason for rejecting this request.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {REJECTION_REASONS.map((r) => (
+              <Label key={r.value} className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="radio" name="reason" value={r.value}
+                  checked={rejectReason === r.value}
+                  onChange={() => setRejectReason(r.value)}
+                  className="accent-primary"
+                />
+                {r.label}
+              </Label>
+            ))}
           </div>
-        </div>
-      )}
+          {rejectReason === "LOW_PRICE" && (
+            <p className="text-sm text-amber-700 bg-amber-50 p-2 rounded-md">
+              Consider discussing pricing with the lender before rejecting.
+            </p>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleReject} disabled={actionLoading}>
+              {actionLoading ? "Rejecting..." : "Confirm Reject"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
