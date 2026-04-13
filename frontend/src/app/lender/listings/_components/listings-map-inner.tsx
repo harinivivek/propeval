@@ -49,21 +49,21 @@ export default function ListingsMapInner({ items }: { items: ListingMapItem[] })
           <Popup>
             <div className="text-sm space-y-1 min-w-[180px]">
               <div className="font-semibold">{item.macro_location}</div>
-              <div className="text-gray-500">{item.city} — {item.pin_code}</div>
+              <div className="text-muted-foreground">{item.city} — {item.pin_code}</div>
               <div>
-                <span className="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                <span className="inline-block px-1.5 py-0.5 bg-primary/10 text-primary text-xs rounded">
                   {item.property_type}
                 </span>
               </div>
-              <div className="text-xs text-gray-600">
+              <div className="text-xs text-muted-foreground">
                 {item.report_count} reports · {item.vendor_count} vendors
               </div>
               {item.latest_report_date && (
-                <div className="text-xs text-gray-400">Latest: {item.latest_report_date}</div>
+                <div className="text-xs text-muted-foreground/60">Latest: {item.latest_report_date}</div>
               )}
               <a
                 href={`/lender/listings/${item.listing_id}`}
-                className="text-xs text-blue-600 hover:underline block mt-1"
+                className="text-xs text-primary hover:underline block mt-1"
               >
                 View Details →
               </a>

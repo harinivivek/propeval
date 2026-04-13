@@ -5,6 +5,19 @@ import { api } from "@/lib/api";
 import { PurchasedReportsResponse } from "@/types/listing";
 import { UpdateRequestDialog } from "../[id]/_components/update-request-dialog";
 import DownloadButton from "@/components/download-button";
+import { PageHeader } from "@/components/page-header";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function PurchasedReportsPage() {
   const [data, setData] = useState<PurchasedReportsResponse | null>(null);
@@ -34,47 +47,96 @@ export default function PurchasedReportsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Purchased Reports</h1>
+      <PageHeader title="Purchased Reports" />
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
+      {error && <p className="text-destructive mb-4">{error}</p>}
 
       {loading ? (
-        <p className="text-gray-500">Loading...</p>
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-xl" />
+          ))}
+        </div>
       ) : data && data.items.length > 0 ? (
         <>
           {/* Desktop table */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="border-b bg-gray-50">
-                  <th className="text-left p-3 font-medium">Location</th>
-                  <th className="text-left p-3 font-medium">City</th>
-                  <th className="text-left p-3 font-medium">Type</th>
-                  <th className="text-left p-3 font-medium">Category</th>
-                  <th className="text-left p-3 font-medium">Purchased</th>
-                  <th className="text-right p-3 font-medium">Price</th>
-                  <th className="text-right p-3 font-medium">Action</th>
-                  <th className="text-right p-3 font-medium">Update</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {data.items.map((item) => (
-                  <tr key={item.purchase.id} className="hover:bg-gray-50">
-                    <td className="p-3">{item.report.property_address || "—"}</td>
-                    <td className="p-3">{item.report.city || "—"}</td>
-                    <td className="p-3">{item.report.property_type || "—"}</td>
-                    <td className="p-3">{item.report.report_category}</td>
-                    <td className="p-3">{new Date(item.purchase.created_at).toLocaleDateString()}</td>
-                    <td className="p-3 text-right">₹{item.purchase.price}</td>
-                    <td className="p-3 text-right">
-                      <DownloadButton
-                        downloadUrl={`/api/lender/listings/purchases/${item.purchase.id}/download`}
-                        filename={`report-${item.report.id}.pdf`}
-                        className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-                      />
-                    </td>
-                    <td className="p-3 text-right">
-                      <button
+          <div className="hidden md:block">
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Location</TableHead>
+                      <TableHead>City</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Purchased</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                      <TableHead className="text-right">Update</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data.items.map((item) => (
+                      <TableRow key={item.purchase.id}>
+                        <TableCell>{item.report.property_address || "—"}</TableCell>
+                        <TableCell>{item.report.city || "—"}</TableCell>
+                        <TableCell>{item.report.property_type || "—"}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{item.report.report_category}</Badge>
+                        </TableCell>
+                        <TableCell>{new Date(item.purchase.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">₹{item.purchase.price}</TableCell>
+                        <TableCell className="text-right">
+                          <DownloadButton
+                            downloadUrl={`/api/lender/listings/purchases/${item.purchase.id}/download`}
+                            filename={`report-${item.report.id}.pdf`}
+                            className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 disabled:opacity-50"
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            onClick={() => {
+                              setUpdateReportId(item.report.id);
+                              setUpdateReportMeta({
+                                category: item.report.report_category,
+                                address: item.report.property_address,
+                                date: item.report.report_date,
+                              });
+                            }}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Update
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {data.items.map((item) => (
+              <Card key={item.purchase.id}>
+                <CardContent>
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="font-medium text-sm text-foreground">{item.report.property_address || "—"}</p>
+                      <p className="text-xs text-muted-foreground">{item.report.city} · {item.report.property_type}</p>
+                    </div>
+                    <Badge variant="secondary">{item.report.report_category}</Badge>
+                  </div>
+                  <div className="flex justify-between items-center mt-3">
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">₹{item.purchase.price}</span>
+                      <span className="text-muted-foreground/60 ml-2">{new Date(item.purchase.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
                         onClick={() => {
                           setUpdateReportId(item.report.id);
                           setUpdateReportMeta({
@@ -83,83 +145,50 @@ export default function PurchasedReportsPage() {
                             date: item.report.report_date,
                           });
                         }}
-                        className="px-3 py-1.5 text-sm border border-orange-300 text-orange-600 rounded hover:bg-orange-50"
+                        variant="outline"
+                        size="sm"
                       >
                         Update
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile cards */}
-          <div className="md:hidden space-y-3">
-            {data.items.map((item) => (
-              <div key={item.purchase.id} className="border rounded-lg p-4 bg-white">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="font-medium text-sm">{item.report.property_address || "—"}</p>
-                    <p className="text-xs text-gray-500">{item.report.city} · {item.report.property_type}</p>
+                      </Button>
+                      <DownloadButton
+                        downloadUrl={`/api/lender/listings/purchases/${item.purchase.id}/download`}
+                        filename={`report-${item.report.id}.pdf`}
+                        className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 disabled:opacity-50"
+                      />
+                    </div>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded bg-gray-100">{item.report.report_category}</span>
-                </div>
-                <div className="flex justify-between items-center mt-3">
-                  <div className="text-sm">
-                    <span className="text-gray-500">₹{item.purchase.price}</span>
-                    <span className="text-gray-400 ml-2">{new Date(item.purchase.created_at).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setUpdateReportId(item.report.id);
-                        setUpdateReportMeta({
-                          category: item.report.report_category,
-                          address: item.report.property_address,
-                          date: item.report.report_date,
-                        });
-                      }}
-                      className="px-3 py-2 text-sm border border-orange-300 text-orange-600 rounded hover:bg-orange-50"
-                    >
-                      Update
-                    </button>
-                    <DownloadButton
-                      downloadUrl={`/api/lender/listings/purchases/${item.purchase.id}/download`}
-                      filename={`report-${item.report.id}.pdf`}
-                      className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-                    />
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
 
           {/* Pagination */}
           {data.total > data.page_size && (
-            <div className="flex justify-center gap-2 mt-6">
-              <button
+            <div className="flex justify-center items-center gap-2 mt-6">
+              <Button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-2 border rounded text-sm disabled:opacity-50"
+                variant="outline"
+                size="sm"
               >
                 Previous
-              </button>
-              <span className="px-3 py-2 text-sm text-gray-500">
+              </Button>
+              <span className="px-3 py-2 text-sm text-muted-foreground">
                 Page {page} of {Math.ceil(data.total / data.page_size)}
               </span>
-              <button
+              <Button
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page * data.page_size >= data.total}
-                className="px-3 py-2 border rounded text-sm disabled:opacity-50"
+                variant="outline"
+                size="sm"
               >
                 Next
-              </button>
+              </Button>
             </div>
           )}
         </>
       ) : (
-        <p className="text-gray-500">No purchased reports yet. Browse the <a href="/lender/listings" className="text-blue-600 hover:underline">listings marketplace</a> to find reports.</p>
+        <p className="text-muted-foreground">No purchased reports yet. Browse the <a href="/lender/listings" className="text-primary hover:underline">listings marketplace</a> to find reports.</p>
       )}
       {updateReportId && updateReportMeta && (
         <UpdateRequestDialog

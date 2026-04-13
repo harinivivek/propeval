@@ -1,4 +1,6 @@
 import { ListingResponse } from "@/types/listing";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   listing: ListingResponse;
@@ -15,39 +17,40 @@ function formatAge(dateStr: string | null): string {
   return months === 1 ? "1 month ago" : `${months} months ago`;
 }
 
-const PROPERTY_COLORS: Record<string, string> = {
-  RESIDENTIAL: "bg-green-100 text-green-800",
-  COMMERCIAL: "bg-blue-100 text-blue-800",
-  INDUSTRIAL: "bg-orange-100 text-orange-800",
-  AGRICULTURAL: "bg-yellow-100 text-yellow-800",
+const PROPERTY_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
+  RESIDENTIAL: "default",
+  COMMERCIAL: "secondary",
+  INDUSTRIAL: "outline",
+  AGRICULTURAL: "outline",
 };
 
 export function ListingCard({ listing }: Props) {
-  const colorClass = PROPERTY_COLORS[listing.property_type] || "bg-gray-100 text-gray-800";
+  const variant = PROPERTY_VARIANTS[listing.property_type] || "outline";
 
   return (
-    <a
-      href={`/lender/listings/${listing.id}`}
-      className="block border rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
-    >
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="font-semibold text-gray-900">{listing.macro_location}</h3>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium ${colorClass}`}>
-          {listing.property_type}
-        </span>
-      </div>
-      <p className="text-sm text-gray-500 mb-3">
-        {listing.city} · {listing.pin_code}
-      </p>
-      <div className="flex items-center justify-between text-sm">
-        <div className="flex gap-4 text-gray-600">
-          <span>{listing.report_count} report{listing.report_count !== 1 ? "s" : ""}</span>
-          <span>{listing.vendor_count} vendor{listing.vendor_count !== 1 ? "s" : ""}</span>
-        </div>
-        <span className="text-gray-400 text-xs">
-          {formatAge(listing.latest_report_date)}
-        </span>
-      </div>
+    <a href={`/lender/listings/${listing.id}`} className="block">
+      <Card className="hover:shadow-md transition-shadow">
+        <CardContent>
+          <div className="flex items-start justify-between mb-2">
+            <h3 className="font-semibold text-foreground">{listing.macro_location}</h3>
+            <Badge variant={variant}>
+              {listing.property_type}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mb-3">
+            {listing.city} · {listing.pin_code}
+          </p>
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex gap-4 text-muted-foreground">
+              <span>{listing.report_count} report{listing.report_count !== 1 ? "s" : ""}</span>
+              <span>{listing.vendor_count} vendor{listing.vendor_count !== 1 ? "s" : ""}</span>
+            </div>
+            <span className="text-muted-foreground/60 text-xs">
+              {formatAge(listing.latest_report_date)}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </a>
   );
 }

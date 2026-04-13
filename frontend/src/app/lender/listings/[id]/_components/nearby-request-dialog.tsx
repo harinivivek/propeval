@@ -2,6 +2,18 @@
 
 import { useState } from "react";
 import { api } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Props {
   referenceReportId: string;
@@ -54,66 +66,66 @@ export function NearbyRequestDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/40" onClick={onCancel} />
-      <div className="relative bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-1">Request Nearby Report</h3>
-        <p className="text-sm text-gray-500 mb-4">
-          Request a report for a property near this listing area.
-        </p>
+    <Dialog open onOpenChange={(open) => { if (!open) onCancel(); }}>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Request Nearby Report</DialogTitle>
+          <DialogDescription>
+            Request a report for a property near this listing area.
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="space-y-3 mb-4">
+        <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Property Address *
-            </label>
-            <input
+            <Label htmlFor="nearby-address" className="mb-1">Property Address *</Label>
+            <Input
+              id="nearby-address"
               type="text"
               value={propertyAddress}
               onChange={(e) => setPropertyAddress(e.target.value)}
               placeholder="Full property address"
-              className="w-full border rounded px-3 py-2 text-sm"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-              <input
+              <Label htmlFor="nearby-city" className="mb-1">City</Label>
+              <Input
+                id="nearby-city"
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="w-full border rounded px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pin Code</label>
-              <input
+              <Label htmlFor="nearby-pin" className="mb-1">Pin Code</Label>
+              <Input
+                id="nearby-pin"
                 type="text"
                 value={pinCode}
                 onChange={(e) => setPinCode(e.target.value)}
-                className="w-full border rounded px-3 py-2 text-sm"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Area (optional)</label>
-            <input
+            <Label htmlFor="nearby-area" className="mb-1">Area (optional)</Label>
+            <Input
+              id="nearby-area"
               type="text"
               value={area}
               onChange={(e) => setArea(e.target.value)}
               placeholder="e.g., Koramangala"
-              className="w-full border rounded px-3 py-2 text-sm"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
+            <Label htmlFor="nearby-type" className="mb-1">Report Type</Label>
             <select
+              id="nearby-type"
               value={reportCategory}
               onChange={(e) => setReportCategory(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="VALUATION">Valuation</option>
               <option value="LEGAL">Legal</option>
@@ -121,40 +133,39 @@ export function NearbyRequestDialog({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Comments (optional)</label>
-            <textarea
+            <Label htmlFor="nearby-comments" className="mb-1">Comments (optional)</Label>
+            <Textarea
+              id="nearby-comments"
               value={comments}
               onChange={(e) => setComments(e.target.value)}
               rows={2}
               placeholder="Any additional details for the vendor..."
-              className="w-full border rounded px-3 py-2 text-sm"
             />
           </div>
         </div>
 
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-muted-foreground">
           Price per your lender pricing agreement.
         </p>
 
-        {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+        {error && <p className="text-destructive text-sm">{error}</p>}
 
-        <div className="flex gap-3 justify-end">
-          <button
+        <DialogFooter>
+          <Button
             onClick={onCancel}
             disabled={loading}
-            className="px-4 py-2 border rounded text-sm hover:bg-gray-50"
+            variant="outline"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? "Submitting..." : "Submit Nearby Request"}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -9,6 +9,11 @@ import { ReportPreviewCard } from "./_components/report-preview-card";
 import { PurchaseDialog } from "./_components/purchase-dialog";
 import { UpdateRequestDialog } from "./_components/update-request-dialog";
 import { NearbyRequestDialog } from "./_components/nearby-request-dialog";
+import { PageHeader } from "@/components/page-header";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LenderListingDetailPage() {
   const params = useParams<{ id: string }>();
@@ -64,40 +69,54 @@ export default function LenderListingDetailPage() {
     window.location.href = "/lender/listings/purchases";
   };
 
-  if (loading) return <p className="text-gray-500">Loading...</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (!data) return <p className="text-gray-500">Listing not found</p>;
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+      </div>
+    );
+  }
+  if (error) return <p className="text-destructive">{error}</p>;
+  if (!data) return <p className="text-muted-foreground">Listing not found</p>;
 
   const { listing, reports } = data;
 
   return (
     <div>
-      <a href="/lender/listings" className="text-sm text-blue-600 hover:underline mb-4 inline-block">
+      <a href="/lender/listings" className="text-sm text-primary hover:underline mb-4 inline-block">
         ← Back to Listings
       </a>
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">{listing.macro_location}</h1>
-        <p className="text-gray-500">
-          {listing.city} · {listing.pin_code} · {listing.property_type}
-        </p>
-        <p className="text-sm text-gray-400 mt-1">
-          {listing.report_count} report{listing.report_count !== 1 ? "s" : ""} ·{" "}
-          {listing.vendor_count} vendor{listing.vendor_count !== 1 ? "s" : ""}
-        </p>
-        <button
-          onClick={() => {
-            const firstReport = reports.length > 0 ? reports[0] : null;
-            if (firstReport) {
-              setNearbyRefReportId(firstReport.id);
-              setShowNearbyDialog(true);
-            }
-          }}
-          className="mt-3 px-4 py-2 text-sm border border-blue-300 text-blue-600 rounded hover:bg-blue-50"
-        >
-          Request Nearby Report
-        </button>
-      </div>
+      <Card className="mb-6">
+        <CardContent>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">{listing.macro_location}</h1>
+              <p className="text-muted-foreground mt-1">
+                {listing.city} · {listing.pin_code} · <Badge variant="secondary">{listing.property_type}</Badge>
+              </p>
+              <p className="text-sm text-muted-foreground/60 mt-1">
+                {listing.report_count} report{listing.report_count !== 1 ? "s" : ""} ·{" "}
+                {listing.vendor_count} vendor{listing.vendor_count !== 1 ? "s" : ""}
+              </p>
+            </div>
+            <Button
+              onClick={() => {
+                const firstReport = reports.length > 0 ? reports[0] : null;
+                if (firstReport) {
+                  setNearbyRefReportId(firstReport.id);
+                  setShowNearbyDialog(true);
+                }
+              }}
+              variant="outline"
+            >
+              Request Nearby Report
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="space-y-4">
         {reports.map((r) => (
@@ -115,7 +134,7 @@ export default function LenderListingDetailPage() {
       </div>
 
       {reports.length === 0 && (
-        <p className="text-gray-500">No reports available in this listing.</p>
+        <p className="text-muted-foreground">No reports available in this listing.</p>
       )}
 
       {purchasingReport && (
