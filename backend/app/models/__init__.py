@@ -16,6 +16,7 @@ from app.models.enums import (
     PayableType,
     PaymentStatus,
     PropertyType,
+    QualityReviewStatus,
     RejectionReason,
     ReportCategory,
     ReportStatus,
@@ -24,6 +25,7 @@ from app.models.enums import (
     UserType,
     VendorRequestStatus,
     VendorRole,
+    VendorTier,
 )
 from app.models.user import Organization, Role, User, UserRole
 from app.models.lender import Lender, LenderBranch, LenderUser
@@ -42,6 +44,7 @@ from app.models.push_subscription import PushSubscription
 from app.models.system_config import SystemConfig
 from app.models.vendor_config import VendorConfig, VendorLenderExclusion
 from app.models.lender_config import LenderConfig, LenderVendorPreference
+from app.models.vendor_profile import VendorProfile, VendorRating
 
 __all__ = [
     "Base",
@@ -116,4 +119,9 @@ __all__ = [
     "VendorLenderExclusion",
     "LenderConfig",
     "LenderVendorPreference",
+    # Phase 13 — Vendor Profiles & Trust
+    "VendorTier",
+    "QualityReviewStatus",
+    "VendorProfile",
+    "VendorRating",
 ]

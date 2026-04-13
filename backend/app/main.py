@@ -32,6 +32,9 @@ from app.api.lender.billing import router as lender_billing_router
 from app.api.admin.system_config import router as admin_system_config_router
 from app.api.vendor.config import router as vendor_config_router
 from app.api.lender.config import router as lender_config_router
+from app.api.vendor.profile import router as vendor_profile_router
+from app.api.lender.vendors import router as lender_vendors_router
+from app.api.admin.vendor_tiers import router as admin_vendor_tiers_router
 from app.core.ws_manager import ws_manager
 
 app = FastAPI(
@@ -95,3 +98,7 @@ app.include_router(lender_billing_router)
 app.include_router(admin_system_config_router)
 app.include_router(vendor_config_router)
 app.include_router(lender_config_router)
+# Phase 13 — Vendor Profiles & Trust
+app.include_router(vendor_profile_router)
+app.include_router(lender_vendors_router)
+app.include_router(admin_vendor_tiers_router)

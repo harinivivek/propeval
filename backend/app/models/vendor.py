@@ -15,6 +15,7 @@ class Vendor(BaseModel):
     services: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
     users: Mapped[list["VendorUser"]] = relationship(back_populates="vendor")
     service_areas: Mapped[list["ServiceArea"]] = relationship(back_populates="vendor")
+    profile: Mapped["VendorProfile | None"] = relationship(back_populates="vendor", uselist=False)
 
 
 class VendorUser(BaseModel):

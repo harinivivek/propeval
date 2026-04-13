@@ -11,6 +11,8 @@ import { PendingRequestsTable } from "./_components/pending-requests-table";
 import { ReportsTable } from "./_components/reports-table";
 import { InstallBanner } from "./_components/install-banner";
 import { NotificationBanner } from "./_components/notification-banner";
+import { TierCard } from "./_components/tier-card";
+import { QualityScoreCard } from "./_components/quality-score-card";
 
 function getCurrentFY(): number {
   const now = new Date();
@@ -36,6 +38,11 @@ export default function VendorDashboardPage() {
             Upload Reports
           </Link>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <TierCard />
+        <QualityScoreCard />
       </div>
 
       <VendorStats />
