@@ -15,7 +15,7 @@ class VendorProfileUpdate(BaseModel):
 
 
 class VendorProfileResponse(BaseModel):
-    model_config = {"from_attributes": True}
+    model_config = {"from_attributes": True, "coerce_numbers_to_str": True}
     id: UUID
     vendor_id: UUID
     display_photo: str | None = None
@@ -32,7 +32,7 @@ class VendorProfileResponse(BaseModel):
 
 
 class VendorPublicProfileResponse(BaseModel):
-    model_config = {"from_attributes": True}
+    model_config = {"from_attributes": True, "coerce_numbers_to_str": True}
     vendor_id: UUID
     vendor_name: str
     display_photo: str | None = None
