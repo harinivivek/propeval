@@ -1,7 +1,10 @@
 "use client";
 
+import { Store } from "lucide-react";
 import { VendorListingReportItem } from "@/types/listing";
 import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Props {
   reports: VendorListingReportItem[];
@@ -22,34 +25,38 @@ export function ListableReports({ reports, onListed }: Props) {
   if (reports.length === 0) return null;
 
   return (
-    <div className="mb-8 rounded-lg border border-blue-200 bg-blue-50 p-4">
-      <h3 className="text-sm font-semibold text-blue-800 mb-3">
-        {reports.length} unlisted published report{reports.length !== 1 ? "s" : ""} available
-      </h3>
-      <div className="space-y-2">
+    <Card className="mb-8 border-primary/20 bg-primary/5">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-semibold text-primary">
+          {reports.length} unlisted published report{reports.length !== 1 ? "s" : ""} available
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
         {reports.map((r) => (
           <div
             key={r.id}
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded bg-white p-3 border"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-md bg-background p-3 border border-border"
           >
             <div className="text-sm">
-              <span className="font-medium">{r.property_address || "No address"}</span>
-              <span className="text-gray-500 ml-2">
+              <span className="font-medium text-foreground">{r.property_address || "No address"}</span>
+              <span className="text-muted-foreground ml-2">
                 {r.city} · {r.pin_code} · {r.report_category} · {r.property_type}
               </span>
               {r.report_date && (
-                <span className="text-gray-400 ml-2">{r.report_date}</span>
+                <span className="text-muted-foreground/60 ml-2">{r.report_date}</span>
               )}
             </div>
-            <button
+            <Button
+              size="sm"
               onClick={() => handleList(r.id)}
-              className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 shrink-0"
+              className="shrink-0"
             >
+              <Store className="h-4 w-4 mr-1" />
               List on Marketplace
-            </button>
+            </Button>
           </div>
         ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
