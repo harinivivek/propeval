@@ -34,6 +34,9 @@ class Listing(BaseModel):
     latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
     longitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    locality_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("localities.id"), nullable=True, index=True
+    )
 
     listing_reports: Mapped[list["ListingReport"]] = relationship(
         back_populates="listing"

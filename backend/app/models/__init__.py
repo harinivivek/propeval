@@ -45,6 +45,7 @@ from app.models.system_config import SystemConfig
 from app.models.vendor_config import VendorConfig, VendorLenderExclusion
 from app.models.lender_config import LenderConfig, LenderVendorPreference
 from app.models.vendor_profile import VendorProfile, VendorRating
+from app.models.locality import Locality
 
 __all__ = [
     "Base",
@@ -124,4 +125,6 @@ __all__ = [
     "QualityReviewStatus",
     "VendorProfile",
     "VendorRating",
+    # Phase 14 — Marketplace & Discovery
+    "Locality",
 ]

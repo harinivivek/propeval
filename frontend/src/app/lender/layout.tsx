@@ -19,6 +19,7 @@ export default function LenderLayout({
         <nav className="space-y-1 text-sm">
           <a href="/lender/dashboard" className="block px-2 py-3 rounded hover:bg-gray-100">Dashboard</a>
           <a href="/lender/requests" className="block px-2 py-3 rounded hover:bg-gray-100">Requests</a>
+          <a href="/lender/marketplace" className="block px-2 py-3 rounded hover:bg-gray-100">Marketplace</a>
           <a href="/lender/listings" className="block px-2 py-3 rounded hover:bg-gray-100">Listings</a>
           <a href="/lender/listings/purchases" className="block px-2 py-3 rounded hover:bg-gray-100">Purchased Reports</a>
           <a href="/lender/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
@@ -48,6 +49,7 @@ export default function LenderLayout({
             <nav className="space-y-1 text-sm">
               <a href="/lender/dashboard" className="block px-2 py-3 rounded hover:bg-gray-100">Dashboard</a>
               <a href="/lender/requests" className="block px-2 py-3 rounded hover:bg-gray-100">Requests</a>
+              <a href="/lender/marketplace" className="block px-2 py-3 rounded hover:bg-gray-100">Marketplace</a>
               <a href="/lender/listings" className="block px-2 py-3 rounded hover:bg-gray-100">Listings</a>
               <a href="/lender/listings/purchases" className="block px-2 py-3 rounded hover:bg-gray-100">Purchased Reports</a>
               <a href="/lender/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>

@@ -35,6 +35,7 @@ from app.api.lender.config import router as lender_config_router
 from app.api.vendor.profile import router as vendor_profile_router
 from app.api.lender.vendors import router as lender_vendors_router
 from app.api.admin.vendor_tiers import router as admin_vendor_tiers_router
+from app.api.marketplace.search import router as marketplace_router
 from app.core.ws_manager import ws_manager
 
 app = FastAPI(
@@ -102,3 +103,5 @@ app.include_router(lender_config_router)
 app.include_router(vendor_profile_router)
 app.include_router(lender_vendors_router)
 app.include_router(admin_vendor_tiers_router)
+# Phase 14 — Unified Marketplace
+app.include_router(marketplace_router)
