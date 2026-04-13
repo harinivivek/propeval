@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { NotificationBell } from "@/components/notification-bell";
 import { WebSocketProvider } from "@/contexts/websocket-provider";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function LenderLayout({
   children,
@@ -9,6 +10,7 @@ export default function LenderLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { logout } = useAuth();
 
   return (
     <WebSocketProvider>
@@ -16,7 +18,7 @@ export default function LenderLayout({
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:w-64 border-r bg-gray-50 p-4 flex-col">
         <h2 className="text-lg font-semibold mb-4">Lender Portal</h2>
-        <nav className="space-y-1 text-sm">
+        <nav className="space-y-1 text-sm flex-1">
           <a href="/lender/dashboard" className="block px-2 py-3 rounded hover:bg-gray-100">Dashboard</a>
           <a href="/lender/requests" className="block px-2 py-3 rounded hover:bg-gray-100">Requests</a>
           <a href="/lender/marketplace" className="block px-2 py-3 rounded hover:bg-gray-100">Marketplace</a>
@@ -24,6 +26,7 @@ export default function LenderLayout({
           <a href="/lender/listings/purchases" className="block px-2 py-3 rounded hover:bg-gray-100">Purchased Reports</a>
           <a href="/lender/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
         </nav>
+        <button onClick={logout} className="mt-auto w-full text-left px-2 py-3 text-sm text-red-600 rounded hover:bg-red-50">Logout</button>
       </aside>
 
       {/* Mobile/tablet overlay sidebar */}
@@ -46,7 +49,7 @@ export default function LenderLayout({
                 ✕
               </button>
             </div>
-            <nav className="space-y-1 text-sm">
+            <nav className="space-y-1 text-sm flex-1">
               <a href="/lender/dashboard" className="block px-2 py-3 rounded hover:bg-gray-100">Dashboard</a>
               <a href="/lender/requests" className="block px-2 py-3 rounded hover:bg-gray-100">Requests</a>
               <a href="/lender/marketplace" className="block px-2 py-3 rounded hover:bg-gray-100">Marketplace</a>
@@ -54,6 +57,7 @@ export default function LenderLayout({
               <a href="/lender/listings/purchases" className="block px-2 py-3 rounded hover:bg-gray-100">Purchased Reports</a>
               <a href="/lender/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
             </nav>
+            <button onClick={logout} className="mt-auto w-full text-left px-2 py-3 text-sm text-red-600 rounded hover:bg-red-50">Logout</button>
           </aside>
         </div>
       )}

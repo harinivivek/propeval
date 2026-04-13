@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { NotificationBell } from "@/components/notification-bell";
 import { WebSocketProvider } from "@/contexts/websocket-provider";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function AdminLayout({
   children,
@@ -9,6 +10,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { logout } = useAuth();
 
   return (
     <WebSocketProvider>
@@ -16,7 +18,7 @@ export default function AdminLayout({
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:w-64 border-r bg-gray-50 p-4 flex-col">
         <h2 className="text-lg font-semibold mb-4">GTR Admin</h2>
-        <nav className="space-y-1 text-sm">
+        <nav className="space-y-1 text-sm flex-1">
           <a href="/admin/dashboard" className="block px-2 py-3 rounded hover:bg-gray-100">Dashboard</a>
           <a href="/admin/accounts/lenders" className="block px-2 py-3 rounded hover:bg-gray-100">Lenders</a>
           <a href="/admin/accounts/vendors" className="block px-2 py-3 rounded hover:bg-gray-100">Vendors</a>
@@ -26,6 +28,7 @@ export default function AdminLayout({
           <a href="/admin/quality-reviews" className="block px-2 py-3 rounded hover:bg-gray-100">Quality Reviews</a>
           <a href="/admin/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
         </nav>
+        <button onClick={logout} className="mt-auto w-full text-left px-2 py-3 text-sm text-red-600 rounded hover:bg-red-50">Logout</button>
       </aside>
 
       {/* Mobile/tablet overlay sidebar */}
@@ -48,7 +51,7 @@ export default function AdminLayout({
                 ✕
               </button>
             </div>
-            <nav className="space-y-1 text-sm">
+            <nav className="space-y-1 text-sm flex-1">
               <a href="/admin/dashboard" className="block px-2 py-3 rounded hover:bg-gray-100">Dashboard</a>
               <a href="/admin/accounts/lenders" className="block px-2 py-3 rounded hover:bg-gray-100">Lenders</a>
               <a href="/admin/accounts/vendors" className="block px-2 py-3 rounded hover:bg-gray-100">Vendors</a>
@@ -58,6 +61,7 @@ export default function AdminLayout({
               <a href="/admin/quality-reviews" className="block px-2 py-3 rounded hover:bg-gray-100">Quality Reviews</a>
               <a href="/admin/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
             </nav>
+            <button onClick={logout} className="mt-auto w-full text-left px-2 py-3 text-sm text-red-600 rounded hover:bg-red-50">Logout</button>
           </aside>
         </div>
       )}
