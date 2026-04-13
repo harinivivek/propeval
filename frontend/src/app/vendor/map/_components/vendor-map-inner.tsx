@@ -5,6 +5,8 @@ import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMap } from "react-leaflet";
 import { useEffect } from "react";
 import type { VendorOwnReport, CompetitorArea } from "@/types/map";
+import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/status-badge";
 
 const greenIcon = new L.Icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
@@ -59,25 +61,27 @@ export default function VendorMapInner({
         >
           <Popup>
             <div className="text-sm space-y-1 min-w-[180px]">
-              <div className="font-semibold">{report.property_address}</div>
-              <div className="text-gray-500">{report.city}</div>
+              <div className="font-semibold text-foreground">{report.property_address}</div>
+              <div className="text-muted-foreground">{report.city}</div>
               <div className="flex gap-1">
                 {report.property_type && (
-                  <span className="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
                     {report.property_type}
-                  </span>
+                  </Badge>
                 )}
                 {report.report_category && (
-                  <span className="inline-block px-1.5 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">
+                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-xs">
                     {report.report_category}
-                  </span>
+                  </Badge>
                 )}
               </div>
               {report.status && (
-                <div className="text-xs text-gray-600">Status: {report.status}</div>
+                <div className="mt-1">
+                  <StatusBadge status={report.status} />
+                </div>
               )}
               {report.report_date && (
-                <div className="text-xs text-gray-400">{report.report_date}</div>
+                <div className="text-xs text-muted-foreground">{report.report_date}</div>
               )}
             </div>
           </Popup>
@@ -94,8 +98,8 @@ export default function VendorMapInner({
         >
           <Popup>
             <div className="text-sm">
-              <div className="font-semibold">{area.report_count} reports by other vendors</div>
-              <div className="text-gray-500">{area.pin_code}, {area.city}</div>
+              <div className="font-semibold text-foreground">{area.report_count} reports by other vendors</div>
+              <div className="text-muted-foreground">{area.pin_code}, {area.city}</div>
             </div>
           </Popup>
         </CircleMarker>

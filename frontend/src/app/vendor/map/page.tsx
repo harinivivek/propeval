@@ -4,12 +4,17 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { api } from "@/lib/api";
 import type { VendorMapResponse } from "@/types/map";
+import { PageHeader } from "@/components/page-header";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 const VendorMapInner = dynamic(() => import("./_components/vendor-map-inner"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center bg-gray-100 rounded-lg" style={{ height: "calc(100vh - 220px)" }}>
-      <p className="text-gray-400 text-sm">Loading map…</p>
+    <div className="flex items-center justify-center bg-muted rounded-lg" style={{ height: "calc(100vh - 220px)" }}>
+      <Skeleton className="h-6 w-32" />
     </div>
   ),
 });
@@ -38,41 +43,47 @@ export default function VendorMapPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Coverage Map</h1>
+      <PageHeader title="Coverage Map" description="View your reports and competitor density" />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <input
+        <Input
           type="text"
           placeholder="Filter by city"
           value={cityFilter}
           onChange={(e) => setCityFilter(e.target.value)}
-          className="border rounded px-3 py-2 text-sm w-full sm:w-48"
+          className="w-full sm:w-48"
         />
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center bg-gray-100 rounded-lg" style={{ height: "calc(100vh - 220px)" }}>
-          <p className="text-gray-400 text-sm">Loading map data…</p>
+        <div className="flex items-center justify-center bg-muted rounded-lg" style={{ height: "calc(100vh - 220px)" }}>
+          <p className="text-muted-foreground text-sm">Loading map data...</p>
         </div>
       ) : data ? (
         <div className="relative" style={{ height: "calc(100vh - 220px)" }}>
-          <div className="rounded-lg overflow-hidden border border-gray-200 h-full">
+          <Card className="overflow-hidden h-full">
             <VendorMapInner ownReports={data.own_reports} competitorAreas={data.competitor_areas} />
-          </div>
+          </Card>
           {/* Legend */}
-          <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-md px-3 py-2 z-[1000] text-xs space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-green-500 inline-block" />
-              Your Reports
+          <Card className="absolute bottom-4 left-4 z-[1000] px-3 py-2 shadow-md">
+            <div className="text-xs space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px] px-1.5 py-0">
+                  You
+                </Badge>
+                <span className="text-foreground">Your Reports</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200 text-[10px] px-1.5 py-0">
+                  Others
+                </Badge>
+                <span className="text-foreground">Other Vendors</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
-              Other Vendors
-            </div>
-          </div>
+          </Card>
         </div>
       ) : (
-        <p className="text-gray-500">Failed to load map data.</p>
+        <p className="text-muted-foreground">Failed to load map data.</p>
       )}
     </div>
   );
