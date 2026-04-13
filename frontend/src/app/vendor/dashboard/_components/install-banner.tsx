@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -58,29 +59,30 @@ export function InstallBanner() {
   if (!show) return null;
 
   return (
-    <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between gap-3">
+    <div className="mb-4 bg-primary/5 border border-primary/20 rounded-lg p-4 flex items-center justify-between gap-3">
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+        <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
           +
         </div>
         <div>
-          <p className="text-sm font-semibold text-blue-900">Install PropEval</p>
-          <p className="text-xs text-blue-600">Add to your home screen for quick access</p>
+          <p className="text-sm font-semibold text-foreground">Install PropEval</p>
+          <p className="text-xs text-primary">Add to your home screen for quick access</p>
         </div>
       </div>
       <div className="flex gap-2 flex-shrink-0">
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleDismiss}
-          className="text-sm text-gray-500 px-2 py-1"
         >
           Later
-        </button>
-        <button
+        </Button>
+        <Button
+          size="sm"
           onClick={handleInstall}
-          className="text-sm bg-blue-600 text-white rounded-md px-4 py-1.5 font-medium hover:bg-blue-700"
         >
           Install
-        </button>
+        </Button>
       </div>
     </div>
   );

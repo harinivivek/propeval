@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PendingRequestItem } from "@/types/dashboard";
 
 function timeRemaining(deadline: string | null): string {
@@ -29,63 +32,66 @@ export function PendingRequestsTable() {
   }, []);
 
   if (loading) {
-    return <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-6 h-32 animate-pulse" />;
+    return <Skeleton className="h-32 rounded-lg" />;
   }
 
   if (requests.length === 0) return null;
 
   return (
-    <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-6">
-      <h3 className="font-semibold text-lg mb-4 text-yellow-800">Pending Requests</h3>
+    <Card className="border-amber-200 bg-amber-50/50">
+      <CardHeader>
+        <CardTitle className="text-amber-800">Pending Requests</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {/* Desktop table */}
+        <div className="hidden md:block overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-amber-200">
+                <TableHead>Lender</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead className="text-right">ETA</TableHead>
+                <TableHead className="text-right">Price</TableHead>
+                <TableHead className="text-right">Time Left</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {requests.map((r) => (
+                <TableRow key={r.id} className="border-amber-100 hover:bg-amber-100/50">
+                  <TableCell>
+                    <Link href={`/vendor/requests/${r.id}`} className="text-primary hover:underline">
+                      {r.lender_name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{r.property_address || "—"}</TableCell>
+                  <TableCell>{r.report_category}</TableCell>
+                  <TableCell className="text-right">{r.eta_days ? `${r.eta_days}d` : "—"}</TableCell>
+                  <TableCell className="text-right">{r.price ? `₹${parseFloat(r.price).toLocaleString()}` : "—"}</TableCell>
+                  <TableCell className="text-right font-medium">{timeRemaining(r.accept_deadline)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
-      {/* Desktop table */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-yellow-200">
-              <th className="text-left py-2">Lender</th>
-              <th className="text-left py-2">Address</th>
-              <th className="text-left py-2">Category</th>
-              <th className="text-right py-2">ETA</th>
-              <th className="text-right py-2">Price</th>
-              <th className="text-right py-2">Time Left</th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((r) => (
-              <tr key={r.id} className="border-b border-yellow-100 hover:bg-yellow-100">
-                <td className="py-2">
-                  <Link href={`/vendor/requests/${r.id}`} className="text-blue-600 hover:underline">
-                    {r.lender_name}
-                  </Link>
-                </td>
-                <td className="py-2">{r.property_address || "—"}</td>
-                <td className="py-2">{r.report_category}</td>
-                <td className="text-right py-2">{r.eta_days ? `${r.eta_days}d` : "—"}</td>
-                <td className="text-right py-2">{r.price ? `₹${parseFloat(r.price).toLocaleString()}` : "—"}</td>
-                <td className="text-right py-2 font-medium">{timeRemaining(r.accept_deadline)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile cards */}
-      <div className="md:hidden space-y-3">
-        {requests.map((r) => (
-          <Link key={r.id} href={`/vendor/requests/${r.id}`} className="block bg-white rounded-lg p-4 border border-yellow-200">
-            <div className="flex justify-between items-start mb-2">
-              <span className="font-medium">{r.lender_name}</span>
-              <span className="text-sm font-medium text-yellow-700">{timeRemaining(r.accept_deadline)}</span>
-            </div>
-            <p className="text-sm text-gray-600">{r.property_address || "—"}</p>
-            <div className="flex gap-4 mt-2 text-sm text-gray-500">
-              <span>{r.report_category}</span>
-              {r.price && <span>₹{parseFloat(r.price).toLocaleString()}</span>}
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
+        {/* Mobile cards */}
+        <div className="md:hidden space-y-3">
+          {requests.map((r) => (
+            <Link key={r.id} href={`/vendor/requests/${r.id}`} className="block bg-background rounded-lg p-4 border border-amber-200">
+              <div className="flex justify-between items-start mb-2">
+                <span className="font-medium">{r.lender_name}</span>
+                <span className="text-sm font-medium text-amber-700">{timeRemaining(r.accept_deadline)}</span>
+              </div>
+              <p className="text-sm text-muted-foreground">{r.property_address || "—"}</p>
+              <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+                <span>{r.report_category}</span>
+                {r.price && <span>₹{parseFloat(r.price).toLocaleString()}</span>}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

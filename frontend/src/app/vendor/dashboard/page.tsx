@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Upload } from "lucide-react";
 import Link from "next/link";
 import { DateRangeFilter } from "@/components/date-range-filter";
+import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 import { VendorStats } from "./_components/vendor-stats";
 import { ReceivablesSection } from "./_components/receivables-section";
 import { EarningsCharts } from "./_components/earnings-charts";
@@ -26,19 +28,15 @@ export default function VendorDashboardPage() {
     <div className="space-y-6">
       <InstallBanner />
       <NotificationBanner />
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <div className="flex items-center gap-3">
-          <DateRangeFilter selectedYear={fyYear} onChange={setFyYear} />
-          <Link
-            href="/vendor/reports/bulk-upload"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
-          >
-            <Upload className="h-4 w-4" />
+      <PageHeader title="Dashboard">
+        <DateRangeFilter selectedYear={fyYear} onChange={setFyYear} />
+        <Button asChild>
+          <Link href="/vendor/reports/bulk-upload">
+            <Upload className="h-4 w-4 mr-2" />
             Upload Reports
           </Link>
-        </div>
-      </div>
+        </Button>
+      </PageHeader>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TierCard />

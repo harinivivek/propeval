@@ -2,18 +2,17 @@
 
 import { Fragment, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/status-badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { VendorReceivablesResponse } from "@/types/dashboard";
 import { BillingEntry } from "@/types/billing";
 
 interface Props {
   fyYear: number;
 }
-
-const STATUS_BADGE: Record<string, string> = {
-  PENDING: "bg-amber-100 text-amber-800",
-  BILLED: "bg-blue-100 text-blue-800",
-  PAID: "bg-green-100 text-green-800",
-};
 
 export function ReceivablesSection({ fyYear }: Props) {
   const [data, setData] = useState<VendorReceivablesResponse | null>(null);
@@ -63,130 +62,132 @@ export function ReceivablesSection({ fyYear }: Props) {
   };
 
   if (!data) {
-    return <div className="bg-white rounded-lg border p-6 h-48 animate-pulse" />;
+    return <Skeleton className="h-48 rounded-lg" />;
   }
 
   return (
-    <div className="bg-white rounded-lg border p-6">
-      <h3 className="font-semibold text-lg mb-4">Receivables</h3>
+    <Card>
+      <CardHeader>
+        <CardTitle>Receivables</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div>
+          <h4 className="text-sm font-medium text-muted-foreground mb-2">By Lender</h4>
+          {data.lender_wise.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No data</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Lender</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.lender_wise.map((row) => (
+                    <TableRow key={row.lender_id}>
+                      <TableCell>{row.lender_name}</TableCell>
+                      <TableCell className="text-right font-medium">₹{parseFloat(row.total_amount).toLocaleString()}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
 
-      <div className="mb-6">
-        <h4 className="text-sm font-medium text-gray-500 mb-2">By Lender</h4>
-        {data.lender_wise.length === 0 ? (
-          <p className="text-sm text-gray-400">No data</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2">Lender</th>
-                  <th className="text-right py-2">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.lender_wise.map((row) => (
-                  <tr key={row.lender_id} className="border-b">
-                    <td className="py-2">{row.lender_name}</td>
-                    <td className="text-right py-2 font-medium">₹{parseFloat(row.total_amount).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+        <div>
+          <h4 className="text-sm font-medium text-muted-foreground mb-2">Month-wise</h4>
+          {data.month_wise.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No data</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Month</TableHead>
+                    <TableHead>Invoice #</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="text-right">Export</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.month_wise.map((row) => {
+                    const status = row.invoice_status || "PENDING";
+                    const isExpanded = expandedMonth === row.month;
 
-      <div>
-        <h4 className="text-sm font-medium text-gray-500 mb-2">Month-wise</h4>
-        {data.month_wise.length === 0 ? (
-          <p className="text-sm text-gray-400">No data</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2">Month</th>
-                  <th className="text-left py-2">Invoice #</th>
-                  <th className="text-left py-2">Status</th>
-                  <th className="text-right py-2">Amount</th>
-                  <th className="text-right py-2">Export</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.month_wise.map((row) => {
-                  const status = row.invoice_status || "Not Generated";
-                  const badgeClass = STATUS_BADGE[status] || "bg-gray-100 text-gray-600";
-                  const isExpanded = expandedMonth === row.month;
-
-                  return (
-                    <Fragment key={row.month}>
-                      <tr
-                        className="border-b cursor-pointer hover:bg-gray-50"
-                        onClick={() => toggleMonth(row.month)}
-                      >
-                        <td className="py-2">
-                          <span className="mr-1 text-xs text-gray-400">{isExpanded ? "▼" : "▶"}</span>
-                          {row.month}
-                        </td>
-                        <td className="py-2 font-mono text-xs">{row.invoice_number || "—"}</td>
-                        <td className="py-2">
-                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${badgeClass}`}>
-                            {status}
-                          </span>
-                        </td>
-                        <td className="text-right py-2 font-medium">₹{parseFloat(row.total_amount).toLocaleString()}</td>
-                        <td className="text-right py-2">
-                          <button
-                            className="text-indigo-600 hover:text-indigo-800 text-xs font-medium"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              downloadCsv(row.month);
-                            }}
-                          >
-                            CSV
-                          </button>
-                        </td>
-                      </tr>
-                      {isExpanded && (
-                        <tr>
-                          <td colSpan={5} className="bg-gray-50 px-4 py-3">
-                            {loadingEntries ? (
-                              <p className="text-xs text-gray-400">Loading...</p>
-                            ) : entries.length === 0 ? (
-                              <p className="text-xs text-gray-400">No entries</p>
-                            ) : (
-                              <table className="w-full text-xs">
-                                <thead>
-                                  <tr className="border-b">
-                                    <th className="text-left py-1">Entry Type</th>
-                                    <th className="text-left py-1">Report ID</th>
-                                    <th className="text-right py-1">Amount</th>
-                                    <th className="text-right py-1">Date</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {entries.map((entry) => (
-                                    <tr key={entry.id} className="border-b border-gray-200">
-                                      <td className="py-1">{entry.entry_type.replace(/_/g, " ")}</td>
-                                      <td className="py-1 font-mono">{entry.report_id.slice(0, 8)}...</td>
-                                      <td className="text-right py-1">₹{parseFloat(entry.amount).toLocaleString()}</td>
-                                      <td className="text-right py-1">{new Date(entry.created_at).toLocaleDateString()}</td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            )}
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
+                    return (
+                      <Fragment key={row.month}>
+                        <TableRow
+                          className="cursor-pointer hover:bg-muted"
+                          onClick={() => toggleMonth(row.month)}
+                        >
+                          <TableCell>
+                            <span className="mr-1 text-xs text-muted-foreground">{isExpanded ? "▼" : "▶"}</span>
+                            {row.month}
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">{row.invoice_number || "—"}</TableCell>
+                          <TableCell>
+                            <StatusBadge status={status} />
+                          </TableCell>
+                          <TableCell className="text-right font-medium">₹{parseFloat(row.total_amount).toLocaleString()}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="text-xs h-auto p-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                downloadCsv(row.month);
+                              }}
+                            >
+                              CSV
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                        {isExpanded && (
+                          <TableRow>
+                            <TableCell colSpan={5} className="bg-muted px-4 py-3">
+                              {loadingEntries ? (
+                                <p className="text-xs text-muted-foreground">Loading...</p>
+                              ) : entries.length === 0 ? (
+                                <p className="text-xs text-muted-foreground">No entries</p>
+                              ) : (
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="text-xs">Entry Type</TableHead>
+                                      <TableHead className="text-xs">Report ID</TableHead>
+                                      <TableHead className="text-xs text-right">Amount</TableHead>
+                                      <TableHead className="text-xs text-right">Date</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {entries.map((entry) => (
+                                      <TableRow key={entry.id}>
+                                        <TableCell className="text-xs">{entry.entry_type.replace(/_/g, " ")}</TableCell>
+                                        <TableCell className="text-xs font-mono">{entry.report_id.slice(0, 8)}...</TableCell>
+                                        <TableCell className="text-xs text-right">₹{parseFloat(entry.amount).toLocaleString()}</TableCell>
+                                        <TableCell className="text-xs text-right">{new Date(entry.created_at).toLocaleDateString()}</TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
