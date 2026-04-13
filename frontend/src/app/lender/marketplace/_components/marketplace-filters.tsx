@@ -1,5 +1,9 @@
 "use client";
 
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
 interface MarketplaceFiltersProps {
   city: string;
   setCity: (v: string) => void;
@@ -41,101 +45,99 @@ export function MarketplaceFilters({
   };
 
   return (
-    <div className="bg-white border rounded-lg p-4">
-      {/* Result type toggle */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        <span className="text-sm font-medium mr-1">Show:</span>
-        {[
-          { value: "", label: "All" },
-          { value: "reports", label: "Reports Only" },
-          { value: "vendors", label: "Vendors Only" },
-        ].map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => { setResultType(opt.value); onSearch(); }}
-            className={`px-3 py-1 text-sm rounded-full border ${
-              resultType === opt.value
-                ? "bg-blue-600 text-white border-blue-600"
-                : "hover:bg-gray-50"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+    <Card className="shadow-sm mb-6">
+      <CardContent className="p-4">
+        {/* Result type toggle */}
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <span className="text-sm font-medium text-foreground mr-1">Show:</span>
+          {[
+            { value: "", label: "All" },
+            { value: "reports", label: "Reports Only" },
+            { value: "vendors", label: "Vendors Only" },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => { setResultType(opt.value); onSearch(); }}
+              className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                resultType === opt.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <input
-          placeholder="City"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          className="border rounded-md p-2 text-sm"
-        />
-        <input
-          placeholder="Pin Code"
-          value={pinCode}
-          onChange={(e) => setPinCode(e.target.value)}
-          className="border rounded-md p-2 text-sm"
-        />
-        <select
-          value={propertyType}
-          onChange={(e) => setPropertyType(e.target.value)}
-          className="border rounded-md p-2 text-sm"
-        >
-          <option value="">All Types</option>
-          <option value="RESIDENTIAL">Residential</option>
-          <option value="COMMERCIAL">Commercial</option>
-          <option value="INDUSTRIAL">Industrial</option>
-          <option value="AGRICULTURAL">Agricultural</option>
-        </select>
-        <select
-          value={minRating}
-          onChange={(e) => setMinRating(e.target.value)}
-          className="border rounded-md p-2 text-sm"
-        >
-          <option value="">Any Rating</option>
-          <option value="3">3+ Stars</option>
-          <option value="3.5">3.5+ Stars</option>
-          <option value="4">4+ Stars</option>
-          <option value="4.5">4.5+ Stars</option>
-        </select>
-        <select
-          value={vendorTier}
-          onChange={(e) => setVendorTier(e.target.value)}
-          className="border rounded-md p-2 text-sm"
-        >
-          <option value="">Any Tier</option>
-          <option value="NEW">New</option>
-          <option value="VERIFIED">Verified</option>
-          <option value="TOP_VALUER">Top Valuer</option>
-        </select>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="border rounded-md p-2 text-sm"
-        >
-          <option value="relevance">Relevance</option>
-          <option value="rating">Rating</option>
-          <option value="recency">Newest</option>
-        </select>
-      </div>
-
-      <div className="flex items-center gap-3 mt-3">
-        <button
-          onClick={onSearch}
-          className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700"
-        >
-          Search
-        </button>
-        {hasFilters && (
-          <button
-            onClick={() => { clearAll(); onSearch(); }}
-            className="text-sm text-blue-600 hover:underline"
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <Input
+            placeholder="City"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
+          <Input
+            placeholder="Pin Code"
+            value={pinCode}
+            onChange={(e) => setPinCode(e.target.value)}
+          />
+          <select
+            value={propertyType}
+            onChange={(e) => setPropertyType(e.target.value)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
-            Clear all filters
-          </button>
-        )}
-      </div>
-    </div>
+            <option value="">All Types</option>
+            <option value="RESIDENTIAL">Residential</option>
+            <option value="COMMERCIAL">Commercial</option>
+            <option value="INDUSTRIAL">Industrial</option>
+            <option value="AGRICULTURAL">Agricultural</option>
+          </select>
+          <select
+            value={minRating}
+            onChange={(e) => setMinRating(e.target.value)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="">Any Rating</option>
+            <option value="3">3+ Stars</option>
+            <option value="3.5">3.5+ Stars</option>
+            <option value="4">4+ Stars</option>
+            <option value="4.5">4.5+ Stars</option>
+          </select>
+          <select
+            value={vendorTier}
+            onChange={(e) => setVendorTier(e.target.value)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="">Any Tier</option>
+            <option value="NEW">New</option>
+            <option value="VERIFIED">Verified</option>
+            <option value="TOP_VALUER">Top Valuer</option>
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="relevance">Relevance</option>
+            <option value="rating">Rating</option>
+            <option value="recency">Newest</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-3 mt-3">
+          <Button onClick={onSearch} size="sm">
+            Search
+          </Button>
+          {hasFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { clearAll(); onSearch(); }}
+            >
+              Clear all filters
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

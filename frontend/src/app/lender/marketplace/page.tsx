@@ -6,6 +6,9 @@ import type { MarketplaceSearchResponse, MarketplaceResult } from "@/types/marke
 import { MarketplaceFilters } from "./_components/marketplace-filters";
 import { MarketplaceMap } from "./_components/marketplace-map";
 import { ResultCard } from "./_components/result-card";
+import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MarketplacePage() {
   const [results, setResults] = useState<MarketplaceResult[]>([]);
@@ -57,46 +60,53 @@ export default function MarketplacePage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <h1 className="text-2xl font-bold">Marketplace</h1>
-        <div className="flex items-center gap-2">
-          {/* View toggle - desktop: split, mobile: list/map toggle */}
-          <div className="hidden lg:flex border rounded-md overflow-hidden text-sm">
-            <button
-              onClick={() => setViewMode("split")}
-              className={`px-3 py-1.5 ${viewMode === "split" ? "bg-blue-600 text-white" : "hover:bg-gray-50"}`}
-            >
-              Split
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`px-3 py-1.5 border-l ${viewMode === "list" ? "bg-blue-600 text-white" : "hover:bg-gray-50"}`}
-            >
-              List
-            </button>
-            <button
-              onClick={() => setViewMode("map")}
-              className={`px-3 py-1.5 border-l ${viewMode === "map" ? "bg-blue-600 text-white" : "hover:bg-gray-50"}`}
-            >
-              Map
-            </button>
-          </div>
-          <div className="lg:hidden flex border rounded-md overflow-hidden text-sm">
-            <button
-              onClick={() => setViewMode("list")}
-              className={`px-3 py-1.5 ${viewMode !== "map" ? "bg-blue-600 text-white" : "hover:bg-gray-50"}`}
-            >
-              List
-            </button>
-            <button
-              onClick={() => setViewMode("map")}
-              className={`px-3 py-1.5 border-l ${viewMode === "map" ? "bg-blue-600 text-white" : "hover:bg-gray-50"}`}
-            >
-              Map
-            </button>
-          </div>
+      <PageHeader title="Marketplace" description="Browse reports and vendors">
+        {/* View toggle - desktop: split/list/map, mobile: list/map toggle */}
+        <div className="hidden lg:flex rounded-md overflow-hidden">
+          <Button
+            variant={viewMode === "split" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("split")}
+            className="rounded-r-none"
+          >
+            Split
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+            className="rounded-none border-x-0"
+          >
+            List
+          </Button>
+          <Button
+            variant={viewMode === "map" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("map")}
+            className="rounded-l-none"
+          >
+            Map
+          </Button>
         </div>
-      </div>
+        <div className="lg:hidden flex rounded-md overflow-hidden">
+          <Button
+            variant={viewMode !== "map" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+            className="rounded-r-none"
+          >
+            List
+          </Button>
+          <Button
+            variant={viewMode === "map" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("map")}
+            className="rounded-l-none"
+          >
+            Map
+          </Button>
+        </div>
+      </PageHeader>
 
       <MarketplaceFilters
         city={city}
@@ -119,17 +129,23 @@ export default function MarketplacePage() {
       {/* Split view (desktop) */}
       {viewMode === "split" && (
         <div className="hidden lg:grid lg:grid-cols-2 gap-4" style={{ height: "calc(100vh - 280px)" }}>
-          <div className="rounded-lg overflow-hidden border">
+          <div className="rounded-lg overflow-hidden border border-border">
             <MarketplaceMap results={results} />
           </div>
           <div className="overflow-y-auto space-y-3 pr-2">
-            {loading && <div className="text-center py-8 text-muted-foreground">Searching...</div>}
+            {loading && (
+              <div className="space-y-3">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-24 w-full rounded-lg" />
+                ))}
+              </div>
+            )}
             {!loading && results.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 No results found. Try adjusting your filters.
               </div>
             )}
-            {results.map((r, i) => (
+            {!loading && results.map((r, i) => (
               <ResultCard key={i} result={r} />
             ))}
           </div>
@@ -140,13 +156,19 @@ export default function MarketplacePage() {
       {(viewMode === "list" || (viewMode === "split" && true)) && (
         <div className={viewMode === "split" ? "lg:hidden" : ""}>
           <div className="space-y-3">
-            {loading && <div className="text-center py-8 text-muted-foreground">Searching...</div>}
+            {loading && (
+              <div className="space-y-3">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-24 w-full rounded-lg" />
+                ))}
+              </div>
+            )}
             {!loading && results.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 No results found. Try adjusting your filters.
               </div>
             )}
-            {results.map((r, i) => (
+            {!loading && results.map((r, i) => (
               <ResultCard key={i} result={r} />
             ))}
           </div>
@@ -155,7 +177,7 @@ export default function MarketplacePage() {
 
       {/* Map-only view */}
       {viewMode === "map" && (
-        <div className="rounded-lg overflow-hidden border" style={{ height: "calc(100vh - 280px)" }}>
+        <div className="rounded-lg overflow-hidden border border-border" style={{ height: "calc(100vh - 280px)" }}>
           <MarketplaceMap results={results} />
         </div>
       )}
@@ -163,23 +185,25 @@ export default function MarketplacePage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 pt-4">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page <= 1}
-            className="px-3 py-1.5 text-sm border rounded disabled:opacity-50 hover:bg-gray-50"
           >
             Previous
-          </button>
+          </Button>
           <span className="text-sm text-muted-foreground">
             Page {page} of {totalPages} ({total} results)
           </span>
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setPage(Math.min(totalPages, page + 1))}
             disabled={page >= totalPages}
-            className="px-3 py-1.5 text-sm border rounded disabled:opacity-50 hover:bg-gray-50"
           >
             Next
-          </button>
+          </Button>
         </div>
       )}
     </div>
