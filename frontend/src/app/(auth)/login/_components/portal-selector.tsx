@@ -1,5 +1,7 @@
 "use client";
 import type { LoginResponse } from "@/types/auth";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface PortalSelectorProps {
   loginResponse: LoginResponse;
@@ -17,10 +19,10 @@ export function PortalSelector({ loginResponse }: PortalSelectorProps) {
   return (
     <div className="w-full max-w-md space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-foreground">
           Welcome, {user.full_name}
         </h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           You have access to multiple portals. Choose one to continue.
         </p>
       </div>
@@ -29,12 +31,13 @@ export function PortalSelector({ loginResponse }: PortalSelectorProps) {
           <a
             key={href}
             href={href}
-            className="flex items-center justify-between w-full px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors group"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "w-full justify-between py-6 text-base hover:border-primary hover:bg-primary/5 hover:text-primary"
+            )}
           >
-            <span className="font-medium text-gray-800 group-hover:text-blue-700">
-              {label}
-            </span>
-            <span className="text-gray-400 group-hover:text-blue-500">→</span>
+            <span className="font-medium">{label}</span>
+            <span>&rarr;</span>
           </a>
         ))}
       </div>

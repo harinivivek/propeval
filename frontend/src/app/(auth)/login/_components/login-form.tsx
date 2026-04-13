@@ -5,6 +5,9 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import type { LoginResponse } from "@/types/auth";
 import { PortalSelector } from "./portal-selector";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 type Tab = "email" | "mobile";
 type OtpStep = "request" | "verify";
@@ -93,14 +96,14 @@ export function LoginForm() {
     <div className="w-full max-w-sm space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Sign in</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-2xl font-bold text-foreground">Sign in</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Access your PropEval portal
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-border">
         {(["email", "mobile"] as Tab[]).map((t) => (
           <button
             key={t}
@@ -108,8 +111,8 @@ export function LoginForm() {
             onClick={() => { setTab(t); setError(null); setOtpStep("request"); }}
             className={`flex-1 py-2 text-sm font-medium transition-colors ${
               tab === t
-                ? "border-b-2 border-blue-600 text-blue-600"
-                : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2 border-primary text-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {t === "email" ? "Email" : "Mobile"}
@@ -119,7 +122,7 @@ export function LoginForm() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -127,106 +130,87 @@ export function LoginForm() {
       {/* Email Tab */}
       {tab === "email" && (
         <form onSubmit={handleEmailLogin} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email address
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="email">Email address</Label>
+            <Input
+              id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="you@example.com"
             />
           </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <a href="#" className="text-xs text-blue-600 hover:underline">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <a href="#" className="text-xs text-primary hover:underline">
                 Forgot password?
               </a>
             </div>
-            <input
+            <Input
+              id="password"
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="••••••••"
             />
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors"
-          >
-            {loading ? "Signing in…" : "Sign in"}
-          </button>
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? "Signing in\u2026" : "Sign in"}
+          </Button>
         </form>
       )}
 
       {/* Mobile Tab */}
       {tab === "mobile" && otpStep === "request" && (
         <form onSubmit={handleRequestOtp} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mobile number
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="mobile">Mobile number</Label>
+            <Input
+              id="mobile"
               type="tel"
               required
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="+91 98765 43210"
             />
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors"
-          >
-            {loading ? "Sending OTP…" : "Send OTP"}
-          </button>
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? "Sending OTP\u2026" : "Send OTP"}
+          </Button>
         </form>
       )}
 
       {tab === "mobile" && otpStep === "verify" && (
         <form onSubmit={handleVerifyOtp} className="space-y-4">
-          <p className="text-sm text-gray-600">
-            OTP sent to <span className="font-medium">{mobile}</span>.{" "}
+          <p className="text-sm text-muted-foreground">
+            OTP sent to <span className="font-medium text-foreground">{mobile}</span>.{" "}
             <button
               type="button"
               onClick={() => { setOtpStep("request"); setOtp(""); setError(null); }}
-              className="text-blue-600 hover:underline"
+              className="text-primary hover:underline"
             >
               Change
             </button>
           </p>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Enter OTP
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="otp">Enter OTP</Label>
+            <Input
+              id="otp"
               type="text"
               required
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               maxLength={6}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent tracking-widest text-center text-lg"
+              className="tracking-widest text-center text-lg"
               placeholder="• • • • • •"
             />
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors"
-          >
-            {loading ? "Verifying…" : "Verify & Sign in"}
-          </button>
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? "Verifying\u2026" : "Verify & Sign in"}
+          </Button>
         </form>
       )}
     </div>
