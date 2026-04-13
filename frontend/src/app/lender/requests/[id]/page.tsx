@@ -6,6 +6,12 @@ import { api } from "@/lib/api";
 import type { ReportRequest } from "@/types/request";
 import { StatusTimeline } from "./_components/status-timeline";
 import DownloadButton from "@/components/download-button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/status-badge";
+import { Separator } from "@/components/ui/separator";
+import { PageHeader } from "@/components/page-header";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function LenderRequestDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -54,125 +60,139 @@ export default function LenderRequestDetailPage() {
     }
   };
 
-  if (loading) return <p className="text-gray-500 py-8">Loading...</p>;
-  if (!request) return <p className="text-red-500 py-8">{error || "Request not found"}</p>;
+  if (loading) return <p className="text-muted-foreground py-8">Loading...</p>;
+  if (!request) return <p className="text-destructive py-8">{error || "Request not found"}</p>;
 
   const canAcceptReject = request.lender_status === "RECEIVED";
 
   return (
     <div className="max-w-3xl mx-auto">
       <button onClick={() => router.push("/lender/requests")}
-        className="text-sm text-blue-600 hover:underline mb-4 block">&larr; Back to Requests</button>
+        className="text-sm text-primary hover:underline mb-4 block">&larr; Back to Requests</button>
 
-      <h1 className="text-2xl font-bold mb-4">Request Detail</h1>
+      <PageHeader title="Request Detail" />
 
         {request.request_type !== "NEW" && (
-          <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-2 ${
-            request.request_type === "UPDATE"
-              ? "bg-orange-100 text-orange-800"
-              : "bg-blue-100 text-blue-800"
-          }`}>
-            {request.request_type === "UPDATE" ? "Update Request" : "Nearby Request"}
-          </span>
+          <StatusBadge
+            status={request.request_type}
+            className="mb-2"
+          />
         )}
 
         {request.parent_report_id && (
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 mb-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-1">Related Report</h3>
-            <p className="text-sm text-gray-600">
-              Report ID: {request.parent_report_id}
-            </p>
-            {request.request_type === "UPDATE" && request.comments && (() => {
-              try {
-                const parsed = JSON.parse(request.comments);
-                if (parsed.checklist) {
-                  return (
-                    <div className="mt-2">
-                      <p className="text-xs font-medium text-gray-500 mb-1">Update items:</p>
-                      <ul className="text-sm text-gray-600 list-disc list-inside">
-                        {parsed.checklist.map((item: string) => (
-                          <li key={item}>{item.replace(/_/g, " ").toLowerCase()}</li>
-                        ))}
-                      </ul>
-                      {parsed.text && <p className="text-sm text-gray-600 mt-1">{parsed.text}</p>}
-                    </div>
-                  );
-                }
-              } catch { /* plain text comments */ }
-              return null;
-            })()}
-          </div>
+          <Card className="mb-4">
+            <CardContent>
+              <h3 className="text-sm font-medium text-foreground mb-1">Related Report</h3>
+              <p className="text-sm text-muted-foreground">
+                Report ID: {request.parent_report_id}
+              </p>
+              {request.request_type === "UPDATE" && request.comments && (() => {
+                try {
+                  const parsed = JSON.parse(request.comments);
+                  if (parsed.checklist) {
+                    return (
+                      <div className="mt-2">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Update items:</p>
+                        <ul className="text-sm text-muted-foreground list-disc list-inside">
+                          {parsed.checklist.map((item: string) => (
+                            <li key={item}>{item.replace(/_/g, " ").toLowerCase()}</li>
+                          ))}
+                        </ul>
+                        {parsed.text && <p className="text-sm text-muted-foreground mt-1">{parsed.text}</p>}
+                      </div>
+                    );
+                  }
+                } catch { /* plain text comments */ }
+                return null;
+              })()}
+            </CardContent>
+          </Card>
         )}
 
       <StatusTimeline status={request.lender_status} />
 
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded mb-4 text-sm">{error}</div>
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-lg mb-4 text-sm">{error}</div>
       )}
 
       {/* Property Details */}
-      <div className="border rounded-lg p-4 mb-4">
-        <h2 className="font-semibold mb-3">Property Details</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-          <div><span className="text-gray-500">Address:</span> {request.property_address || "\u2014"}</div>
-          <div><span className="text-gray-500">City:</span> {request.city}{request.area ? `, ${request.area}` : ""}</div>
-          <div><span className="text-gray-500">Type:</span> {request.property_type}</div>
-          <div><span className="text-gray-500">Category:</span> {request.report_category}</div>
-          <div><span className="text-gray-500">Applicant:</span> {request.loan_applicant_name || "\u2014"}</div>
-          <div><span className="text-gray-500">Price:</span> {request.price ? `\u20B9${request.price}` : "\u2014"}</div>
-        </div>
-      </div>
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Property Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+            <div><span className="text-muted-foreground">Address:</span> <span className="text-foreground">{request.property_address || "\u2014"}</span></div>
+            <div><span className="text-muted-foreground">City:</span> <span className="text-foreground">{request.city}{request.area ? `, ${request.area}` : ""}</span></div>
+            <div><span className="text-muted-foreground">Type:</span> <span className="text-foreground">{request.property_type}</span></div>
+            <div><span className="text-muted-foreground">Category:</span> <span className="text-foreground">{request.report_category}</span></div>
+            <div><span className="text-muted-foreground">Applicant:</span> <span className="text-foreground">{request.loan_applicant_name || "\u2014"}</span></div>
+            <div><span className="text-muted-foreground">Price:</span> <span className="text-foreground">{request.price ? `\u20B9${request.price}` : "\u2014"}</span></div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Report Actions */}
       {canAcceptReject && (
-        <div className="border rounded-lg p-4 mb-4 bg-green-50">
-          <h2 className="font-semibold mb-3">Report Uploaded</h2>
-          <p className="text-sm text-gray-700 mb-4">The vendor has uploaded a report. You can accept or send it back for revision.</p>
-          <div className="flex gap-3">
-            <button onClick={handleAccept} disabled={actionLoading}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 disabled:opacity-50">
-              {actionLoading ? "Processing..." : "Accept Report"}
-            </button>
-            <button onClick={() => setShowRejectDialog(true)} disabled={actionLoading}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-600 disabled:opacity-50">
-              Send Back for Revision
-            </button>
-            <DownloadButton
-              downloadUrl={`/api/reports/${id}/download`}
-              filename={`report-${id}.pdf`}
-              className="border px-4 py-2 rounded-lg text-sm hover:bg-gray-50"
-            />
-          </div>
-        </div>
+        <Card className="mb-4 bg-emerald-50/50">
+          <CardHeader>
+            <CardTitle>Report Uploaded</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">The vendor has uploaded a report. You can accept or send it back for revision.</p>
+            <Separator className="mb-4" />
+            <div className="flex gap-3 flex-wrap">
+              <Button onClick={handleAccept} disabled={actionLoading}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                {actionLoading ? "Processing..." : "Accept Report"}
+              </Button>
+              <Button variant="outline" onClick={() => setShowRejectDialog(true)} disabled={actionLoading}
+                className="border-orange-300 text-orange-700 hover:bg-orange-50">
+                Send Back for Revision
+              </Button>
+              <DownloadButton
+                downloadUrl={`/api/reports/${id}/download`}
+                filename={`report-${id}.pdf`}
+                className="border border-border px-4 py-2 rounded-lg text-sm hover:bg-muted"
+              />
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {request.lender_status === "ACCEPTED" && (
-        <div className="border rounded-lg p-4 mb-4 bg-emerald-50">
-          <p className="text-emerald-800 font-medium">Report accepted. Billing entries created.</p>
-        </div>
+        <Card className="mb-4 bg-emerald-50/50">
+          <CardContent>
+            <p className="text-emerald-800 font-medium">Report accepted. Billing entries created.</p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Reject Dialog */}
       {showRejectDialog && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="font-semibold mb-3">Send Back for Revision</h3>
-            <textarea
-              className="w-full border rounded-lg px-3 py-2 text-sm mb-4"
-              rows={4}
-              placeholder="Describe what needs to be revised..."
-              value={rejectComments}
-              onChange={(e) => setRejectComments(e.target.value)}
-            />
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setShowRejectDialog(false)}
-                className="border px-4 py-2 rounded-lg text-sm">Cancel</button>
-              <button onClick={handleReject} disabled={actionLoading || !rejectComments.trim()}
-                className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50">
-                {actionLoading ? "Sending..." : "Send Back"}
-              </button>
-            </div>
-          </div>
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle>Send Back for Revision</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea
+                rows={4}
+                placeholder="Describe what needs to be revised..."
+                value={rejectComments}
+                onChange={(e) => setRejectComments(e.target.value)}
+              />
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleReject} disabled={actionLoading || !rejectComments.trim()}
+                  className="bg-orange-500 hover:bg-orange-600 text-white">
+                  {actionLoading ? "Sending..." : "Send Back"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

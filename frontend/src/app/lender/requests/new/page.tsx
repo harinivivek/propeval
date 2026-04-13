@@ -7,6 +7,8 @@ import type { ReportRequestCreate, ReportRequest } from "@/types/request";
 import { PropertyForm } from "./_components/property-form";
 import { ReportConfigForm } from "./_components/report-config-form";
 import { PriceConfirmation } from "./_components/price-confirmation";
+import { PageHeader } from "@/components/page-header";
+import { Card, CardContent } from "@/components/ui/card";
 
 type FormData = Partial<ReportRequestCreate>;
 
@@ -58,7 +60,7 @@ export default function NewRequestPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Raise New Request</h1>
+      <PageHeader title="Raise New Request" />
 
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-8">
@@ -67,52 +69,56 @@ export default function NewRequestPage() {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 step >= s
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-500"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
               }`}
             >
               {s}
             </div>
             {s < 3 && (
-              <div className={`w-12 h-0.5 ${step > s ? "bg-blue-600" : "bg-gray-200"}`} />
+              <div className={`w-12 h-0.5 ${step > s ? "bg-primary" : "bg-muted"}`} />
             )}
           </div>
         ))}
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-lg mb-4 text-sm">
           {error}
         </div>
       )}
 
-      {step === 1 && (
-        <PropertyForm
-          data={formData}
-          onNext={(data) => {
-            updateForm(data);
-            setStep(2);
-          }}
-        />
-      )}
+      <Card>
+        <CardContent>
+          {step === 1 && (
+            <PropertyForm
+              data={formData}
+              onNext={(data) => {
+                updateForm(data);
+                setStep(2);
+              }}
+            />
+          )}
 
-      {step === 2 && (
-        <ReportConfigForm
-          data={formData}
-          onBack={() => setStep(1)}
-          onNext={handleStep2Complete}
-        />
-      )}
+          {step === 2 && (
+            <ReportConfigForm
+              data={formData}
+              onBack={() => setStep(1)}
+              onNext={handleStep2Complete}
+            />
+          )}
 
-      {step === 3 && (
-        <PriceConfirmation
-          data={formData as ReportRequestCreate}
-          price={price}
-          submitting={submitting}
-          onBack={() => setStep(2)}
-          onConfirm={handleSubmit}
-        />
-      )}
+          {step === 3 && (
+            <PriceConfirmation
+              data={formData as ReportRequestCreate}
+              price={price}
+              submitting={submitting}
+              onBack={() => setStep(2)}
+              onConfirm={handleSubmit}
+            />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

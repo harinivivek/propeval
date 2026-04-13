@@ -27,16 +27,16 @@ export function StatusTimeline({ status }: { status: LenderRequestStatus }) {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
                   i <= currentIndex
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-200 text-gray-500"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {i <= currentIndex ? "\u2713" : i + 1}
               </div>
-              <span className="text-xs mt-1 text-gray-600">{step.label}</span>
+              <span className="text-xs mt-1 text-muted-foreground">{step.label}</span>
             </div>
             {i < STEPS.length - 1 && (
-              <div className={`w-16 h-0.5 mb-5 ${i < currentIndex ? "bg-green-600" : "bg-gray-200"}`} />
+              <div className={`w-16 h-0.5 mb-5 ${i < currentIndex ? "bg-primary" : "bg-muted"}`} />
             )}
           </div>
         ))}
@@ -48,12 +48,12 @@ export function StatusTimeline({ status }: { status: LenderRequestStatus }) {
           <div key={step.status} className="flex items-center gap-3">
             <div
               className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                i <= currentIndex ? "bg-green-600 text-white" : "bg-gray-200 text-gray-500"
+                i <= currentIndex ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
               }`}
             >
               {i <= currentIndex ? "\u2713" : i + 1}
             </div>
-            <span className={`text-sm ${i <= currentIndex ? "font-medium" : "text-gray-500"}`}>
+            <span className={`text-sm ${i <= currentIndex ? "font-medium text-foreground" : "text-muted-foreground"}`}>
               {step.label}
             </span>
           </div>
@@ -61,7 +61,7 @@ export function StatusTimeline({ status }: { status: LenderRequestStatus }) {
       </div>
 
       {status === "SENT_FOR_REVIEW" && (
-        <div className="bg-orange-50 text-orange-800 text-sm px-4 py-2 rounded mb-4">
+        <div className="bg-orange-50 text-orange-800 text-sm px-4 py-2 rounded-lg mb-4">
           Report sent back for revision — awaiting vendor resubmission
         </div>
       )}

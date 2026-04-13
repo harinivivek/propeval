@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { EligibleVendor, ReportRequestCreate } from "@/types/request";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   data: Partial<ReportRequestCreate>;
@@ -44,28 +47,27 @@ export function ReportConfigForm({ data, onBack, onNext }: Props) {
     });
   };
 
-  const inputClass = "w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
+  const selectClass = "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-lg font-semibold">Report Configuration</h2>
+      <h2 className="text-lg font-semibold text-foreground">Report Configuration</h2>
 
-      <div>
-        <label className={labelClass}>Report Category *</label>
-        <select className={inputClass} required value={reportCategory}
+      <div className="space-y-1.5">
+        <Label>Report Category *</Label>
+        <select className={selectClass} required value={reportCategory}
           onChange={(e) => setReportCategory(e.target.value as "VALUATION" | "LEGAL")}>
           <option value="VALUATION">Valuation</option>
           <option value="LEGAL">Legal</option>
         </select>
       </div>
 
-      <div>
-        <label className={labelClass}>Preferred Vendor (optional)</label>
+      <div className="space-y-1.5">
+        <Label>Preferred Vendor (optional)</Label>
         {loadingVendors ? (
-          <p className="text-sm text-gray-500">Loading vendors...</p>
+          <p className="text-sm text-muted-foreground">Loading vendors...</p>
         ) : (
-          <select className={inputClass} value={vendorId}
+          <select className={selectClass} value={vendorId}
             onChange={(e) => setVendorId(e.target.value)}>
             <option value="">Auto-assign (broadcast to area vendors)</option>
             {vendors.map((v) => (
@@ -79,29 +81,27 @@ export function ReportConfigForm({ data, onBack, onNext }: Props) {
         <div className="flex items-center gap-2">
           <input type="checkbox" id="allowBroadcast" checked={allowBroadcast}
             onChange={(e) => setAllowBroadcast(e.target.checked)}
-            className="rounded border-gray-300" />
-          <label htmlFor="allowBroadcast" className="text-sm text-gray-700">
+            className="rounded border-input accent-primary" />
+          <label htmlFor="allowBroadcast" className="text-sm text-muted-foreground">
             Broadcast to other vendors if preferred vendor rejects
           </label>
         </div>
       )}
 
-      <div>
-        <label className={labelClass}>Comments</label>
-        <textarea className={inputClass} rows={3} value={comments}
+      <div className="space-y-1.5">
+        <Label>Comments</Label>
+        <Textarea rows={3} value={comments}
           onChange={(e) => setComments(e.target.value)}
           placeholder="Any additional notes for the vendor..." />
       </div>
 
       <div className="flex justify-between pt-4">
-        <button type="button" onClick={onBack}
-          className="border px-6 py-2 rounded-lg text-sm hover:bg-gray-50">
+        <Button type="button" variant="outline" onClick={onBack}>
           Back
-        </button>
-        <button type="submit"
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-700">
+        </Button>
+        <Button type="submit">
           Next
-        </button>
+        </Button>
       </div>
     </form>
   );
