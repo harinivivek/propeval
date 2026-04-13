@@ -42,6 +42,10 @@ Three core workflows: New request, Listing purchase, Update/Nearby requests.
 **Phase 12A (Billing & Invoicing):** Complete — Monthly invoice generation Celery job (1st of month), structured invoice numbering (GTR-PAY/RCV-YYYY-MM-NNNN), invoice lifecycle management (PENDING → BILLED → PAID), dedicated admin billing page with bulk status updates and CSV export, enhanced vendor receivables with invoice status drill-down and CSV, enhanced lender payables with invoice status drill-down and CSV, notifications on invoice generation and payment confirmation, activity logging for billing events
 **Phase 12B (System & Entity Config):** Complete — SystemConfig model with Redis cache (60s TTL) for broadcast/acceptance/upload params, VendorConfig model with auto-listing toggle and price threshold, LenderConfig with per-vendor auto-approve preferences, VendorLenderExclusion for listings visibility filtering, admin system config page (/admin/settings), vendor/lender configuration tabs in settings, workflow wiring (auto-approve in request service, auto-listing on acceptance, price threshold in broadcast, exclusion filter in listings browse, upload size from config)
 **Phase 12C (Polish & Hardening):** Complete — Pagination on 12 list endpoints, rate limiting on 5 auth endpoints (slowapi + Redis), N+1 query fix in broadcast service (batch VendorConfig + VendorUser), 8 missing FK indexes added, weekly orphaned file cleanup Celery job, error handling polish (specific exception types in push/activity/OCR services)
+**Phase 13 (Vendor Profiles & Trust):** Complete — VendorProfile model (bio, certifications, specialization tags, quality score 0-100, vendor tier), VendorRating model (1-5 stars per request), VendorTier enum (NEW/VERIFIED/TOP_VALUER), quality score composite calculation (rating 30%, acceptance 25%, delivery 20%, revision 15%, OCR 10%), automated tier promotion checks, 8 new API endpoints (vendor profile CRUD + photo + tier, lender vendor view/portfolio/rate, admin tier override), vendor profile editor page with completeness meter, lender public vendor profile page with portfolio/stats, TierBadge + RatingStars + RatingModal shared components, tier card + quality score card on vendor dashboard
+**Phase 14 (Unified Marketplace & Discovery):** Complete — Locality model (30 seeded localities across 4 metro cities), Listing extended with locality_id FK, marketplace search service (unified reports + vendors query, geo-bounds, multi-filter), 3 new API endpoints (marketplace/search, marketplace/map-bounds, localities/autocomplete), split-view marketplace page (Leaflet map + card grid on desktop, toggle on mobile), MarketplaceFilters with result type/property/rating/tier filters, ResultCard component (blue document for reports, green person for vendors)
+**Phase 15 (Marketplace Pricing):** Complete — PriceBand model (city × property_type × report_category floor/ceiling), VendorPricing model (vendor self-set prices validated against bands), PLATFORM_FEE PayableType for lender-side fees, price band service with CRUD + vendor pricing upsert with band validation, tier restriction (NEW vendors cannot self-price), 5 new API endpoints (admin price band CRUD, vendor pricing get/put), admin price bands management page, vendor pricing page with band indicators
+**Phase 16 (Graduated Trust Engine):** Complete — QualityReview model (report gate for New-tier vendors), GTR_REVIEW report status, quality review service (create/queue/detail/approve/return/flag with report status updates), tier demotion Celery tasks (daily 30-day check + day-15 warnings), 3 admin API endpoints (review queue/detail/decision), admin quality review queue page with inline actions
 
 ## Seed Data (local)
 
@@ -154,7 +158,7 @@ make lint            # Lint backend + frontend
 - `backend/app/core/database.py` — Async engine + session factories
 - `backend/app/core/deps.py` — FastAPI dependencies (auth, db, require_role)
 - `backend/app/core/security.py` — JWT + bcrypt
-- `backend/app/main.py` — App init + router registration (~56 endpoints)
+- `backend/app/main.py` — App init + router registration (~76 endpoints)
 - `backend/app/jobs/celery_app.py` — Celery config + beat schedule
 - `backend/app/services/otp_service.py` — Mock OTP with Redis store
 - `backend/app/services/pricing_service.py` — Pricing CRUD + price calculation with area fallback
@@ -222,6 +226,28 @@ make lint            # Lint backend + frontend
 - `backend/app/services/lender_config_service.py` — Lender config + vendor preferences
 - `backend/app/api/admin/system_config.py` — Admin system config endpoints
 - `frontend/src/app/admin/settings/page.tsx` — Admin system config page
+- `backend/app/models/vendor_profile.py` — VendorProfile (quality score, tier) + VendorRating models
+- `backend/app/services/vendor_profile_service.py` — Profile CRUD, quality score calculation, tier promotion
+- `backend/app/services/vendor_rating_service.py` — Rating CRUD + aggregation
+- `backend/app/api/vendor/profile.py` — Vendor profile endpoints (4: view/edit/photo/tier)
+- `backend/app/api/lender/vendors.py` — Lender vendor endpoints (4: profile/portfolio/rate/ratings)
+- `backend/app/api/admin/vendor_tiers.py` — Admin tier override endpoint
+- `frontend/src/components/tier-badge.tsx` — Reusable tier badge (NEW/VERIFIED/TOP_VALUER)
+- `frontend/src/components/rating-stars.tsx` — Star rating display + interactive input
+- `frontend/src/components/rating-modal.tsx` — Post-acceptance rating dialog
+- `backend/app/models/locality.py` — Locality model (name, pin_code, city, lat/lng)
+- `backend/app/services/marketplace_service.py` — Unified search (reports + vendors), geo-bounds, autocomplete
+- `backend/app/api/marketplace/search.py` — Marketplace endpoints (search, map-bounds, autocomplete)
+- `frontend/src/app/lender/marketplace/page.tsx` — Split-view marketplace page
+- `backend/app/models/price_band.py` — PriceBand + VendorPricing models
+- `backend/app/services/price_band_service.py` — Price band CRUD + vendor pricing with band validation
+- `backend/app/api/admin/price_bands.py` — Admin price band endpoints (3)
+- `backend/app/api/vendor/pricing.py` — Vendor self-pricing endpoints (2)
+- `backend/app/models/quality_review.py` — QualityReview model (GTR quality gate)
+- `backend/app/services/quality_review_service.py` — Review queue, decisions, report status updates
+- `backend/app/api/admin/quality_reviews.py` — Admin quality review endpoints (3)
+- `backend/app/jobs/tier_tasks.py` — Celery tasks for tier demotion + warnings
+- `backend/scripts/seed_localities.py` — Seed 30 localities across 4 metros
 - `docker-compose.local.yml` — Local dev environment
 - `.env.local` — Environment variables (ports, secrets, config)
 - `ARCHITECTURE.md` — Full architecture design
