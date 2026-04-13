@@ -2,16 +2,14 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import func, select, case
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.enums import (
-    LenderRequestStatus,
     ReportStatus,
     VendorTier,
 )
 from app.models.report import Report, ReportRevision
-from app.models.request import ReportRequest, RequestAcceptance
 from app.models.vendor import Vendor, ServiceArea
 from app.models.vendor_profile import VendorProfile, VendorRating
 
@@ -87,10 +85,8 @@ async def get_vendor_portfolio(
 ) -> dict:
     base_query = (
         select(Report)
-        .join(ReportRequest, ReportRequest.id == Report.request_id)
-        .join(RequestAcceptance, RequestAcceptance.request_id == ReportRequest.id)
         .where(
-            RequestAcceptance.vendor_id == vendor_id,
+            Report.vendor_id == vendor_id,
             Report.status == ReportStatus.PUBLISHED,
         )
     )
@@ -271,14 +267,13 @@ def _calculate_completeness(profile: VendorProfile) -> int:
 
 
 async def _get_vendor_stats(db: AsyncSession, vendor_id: UUID) -> dict:
-    # Total completed jobs
+    # Total completed jobs (published reports by this vendor)
     completed_q = await db.execute(
         select(func.count())
-        .select_from(RequestAcceptance)
-        .join(ReportRequest, ReportRequest.id == RequestAcceptance.request_id)
+        .select_from(Report)
         .where(
-            RequestAcceptance.vendor_id == vendor_id,
-            ReportRequest.lender_status == LenderRequestStatus.ACCEPTED,
+            Report.vendor_id == vendor_id,
+            Report.status == ReportStatus.PUBLISHED,
         )
     )
     total_completed = completed_q.scalar() or 0
@@ -294,27 +289,15 @@ async def _get_vendor_stats(db: AsyncSession, vendor_id: UUID) -> dict:
     avg_rating = round(float(rating_row[0]), 2) if rating_row and rating_row[0] else None
     total_ratings = rating_row[1] if rating_row else 0
 
-    # First-time acceptance rate (accepted without revision)
+    # First-time acceptance rate (reports without revisions)
     if total_completed > 0:
-        # Count accepted requests that had at least one report revision
-        revised_subq = (
-            select(Report.request_id)
-            .join(ReportRevision, ReportRevision.report_id == Report.id)
-            .where(Report.request_id.isnot(None))
-            .distinct()
-            .subquery()
+        revised_count_q = await db.execute(
+            select(func.count(func.distinct(ReportRevision.report_id)))
+            .select_from(ReportRevision)
+            .join(Report, Report.id == ReportRevision.report_id)
+            .where(Report.vendor_id == vendor_id)
         )
-        revision_count_q = await db.execute(
-            select(func.count())
-            .select_from(RequestAcceptance)
-            .join(ReportRequest, ReportRequest.id == RequestAcceptance.request_id)
-            .where(
-                RequestAcceptance.vendor_id == vendor_id,
-                ReportRequest.lender_status == LenderRequestStatus.ACCEPTED,
-                ReportRequest.id.in_(select(revised_subq.c.request_id)),
-            )
-        )
-        revised_count = revision_count_q.scalar() or 0
+        revised_count = revised_count_q.scalar() or 0
         ftar = round((total_completed - revised_count) / total_completed * 100, 1)
         revision_rate = round(revised_count / total_completed * 100, 1)
     else:
