@@ -3,6 +3,12 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import type { VendorConfigWithExclusions } from "@/types/config";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 interface LenderOption {
   id: string;
@@ -88,7 +94,18 @@ export function VendorConfigTab() {
   }
 
   if (loading) {
-    return <p className="text-sm text-gray-400 py-8 text-center">Loading…</p>;
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-10 w-48" />
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const excludedIds = new Set(data?.exclusions.map((e) => e.lender_id) ?? []);
@@ -97,124 +114,138 @@ export function VendorConfigTab() {
   return (
     <div className="space-y-6">
       {/* Listing Preferences */}
-      <div className="bg-white border border-gray-200 rounded-lg p-5">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">Listing Preferences</h2>
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={autoListing}
-            onChange={(e) => setAutoListing(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-700">
-            Automatically list accepted reports on the marketplace
-          </span>
-        </label>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Listing Preferences</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={autoListing}
+              onChange={(e) => setAutoListing(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-ring"
+            />
+            <span className="text-sm text-muted-foreground">
+              Automatically list accepted reports on the marketplace
+            </span>
+          </label>
+        </CardContent>
+      </Card>
 
       {/* Pricing */}
-      <div className="bg-white border border-gray-200 rounded-lg p-5">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">Pricing</h2>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Minimum price threshold (₹)
-          </label>
-          <input
-            type="number"
-            min="0"
-            value={priceThreshold}
-            onChange={(e) => setPriceThreshold(e.target.value)}
-            placeholder="e.g. 500"
-            className="w-full sm:w-48 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <p className="text-xs text-gray-400 mt-1">Leave blank to accept all prices</p>
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Pricing</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="price-threshold">
+              Minimum price threshold (&#8377;)
+            </Label>
+            <Input
+              id="price-threshold"
+              type="number"
+              min="0"
+              value={priceThreshold}
+              onChange={(e) => setPriceThreshold(e.target.value)}
+              placeholder="e.g. 500"
+              className="w-full sm:w-48"
+            />
+            <p className="text-xs text-muted-foreground">Leave blank to accept all prices</p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Report Types */}
-      <div className="bg-white border border-gray-200 rounded-lg p-5">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">Report Types</h2>
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={separateValLegal}
-            onChange={(e) => setSeparateValLegal(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <div>
-            <span className="text-sm text-gray-700 font-medium">
-              Separate valuation &amp; legal settings
-            </span>
-            <p className="text-xs text-gray-400 mt-0.5">
-              Apply different pricing thresholds and listing preferences for valuation and legal reports
-            </p>
-          </div>
-        </label>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Report Types</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={separateValLegal}
+              onChange={(e) => setSeparateValLegal(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-ring"
+            />
+            <div>
+              <span className="text-sm text-foreground font-medium">
+                Separate valuation &amp; legal settings
+              </span>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Apply different pricing thresholds and listing preferences for valuation and legal reports
+              </p>
+            </div>
+          </label>
+        </CardContent>
+      </Card>
 
       {/* Save button */}
       <div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {saving ? "Saving…" : "Save Configuration"}
-        </button>
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? "Saving..." : "Save Configuration"}
+        </Button>
       </div>
 
       {/* Lender Exclusions */}
-      <div className="bg-white border border-gray-200 rounded-lg p-5">
-        <h2 className="text-base font-semibold text-gray-900 mb-1">Lender Exclusions</h2>
-        <p className="text-sm text-gray-500 mb-4">
-          Excluded lenders will not receive your broadcast requests.
-        </p>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Lender Exclusions</CardTitle>
+          <CardDescription>
+            Excluded lenders will not receive your broadcast requests.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Add exclusion */}
+          <div className="flex gap-2">
+            <select
+              value={selectedLenderId}
+              onChange={(e) => setSelectedLenderId(e.target.value)}
+              className="flex-1 sm:flex-none sm:w-64 h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              <option value="">Select a lender to exclude...</option>
+              {availableLenders.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+            <Button
+              variant="secondary"
+              onClick={handleAddExclusion}
+              disabled={!selectedLenderId}
+            >
+              Add
+            </Button>
+          </div>
 
-        {/* Add exclusion */}
-        <div className="flex gap-2 mb-4">
-          <select
-            value={selectedLenderId}
-            onChange={(e) => setSelectedLenderId(e.target.value)}
-            className="flex-1 sm:flex-none sm:w-64 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select a lender to exclude…</option>
-            {availableLenders.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={handleAddExclusion}
-            disabled={!selectedLenderId}
-            className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Add
-          </button>
-        </div>
-
-        {/* Exclusion list */}
-        {data?.exclusions.length === 0 ? (
-          <p className="text-sm text-gray-400">No lenders excluded.</p>
-        ) : (
-          <ul className="space-y-2">
-            {data?.exclusions.map((ex) => (
-              <li
-                key={ex.lender_id}
-                className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-md"
-              >
-                <span className="text-sm text-gray-700">{ex.lender_name}</span>
-                <button
-                  onClick={() => handleRemoveExclusion(ex.lender_id)}
-                  className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+          {/* Exclusion list */}
+          {data?.exclusions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No lenders excluded.</p>
+          ) : (
+            <ul className="space-y-2">
+              {data?.exclusions.map((ex) => (
+                <li
+                  key={ex.lender_id}
+                  className="flex items-center justify-between py-2 px-3 bg-muted rounded-md"
                 >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+                  <span className="text-sm text-foreground">{ex.lender_name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveExclusion(ex.lender_id)}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-auto py-1 px-2 text-xs"
+                  >
+                    Remove
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

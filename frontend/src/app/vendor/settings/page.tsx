@@ -4,20 +4,25 @@ import { api } from "@/lib/api";
 import type { UserResponse } from "@/types/auth";
 import { NotificationPrefs } from "./_components/notification-prefs";
 import { VendorConfigTab } from "./_components/vendor-config-tab";
-
-const TABS = [
-  { key: "general", label: "General" },
-  { key: "notifications", label: "Notifications" },
-  { key: "configuration", label: "Configuration" },
-] as const;
-
-type TabKey = (typeof TABS)[number]["key"];
+import { PageHeader } from "@/components/page-header";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function VendorSettingsPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>("general");
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("general");
 
   useEffect(() => {
     if (activeTab !== "general") return;
@@ -30,128 +35,122 @@ export default function VendorSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-gray-900">Settings</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Manage your organisation settings</p>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Manage your organisation settings"
+      />
 
-      {/* Tab navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="flex gap-6">
-          {TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.key
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="configuration">Configuration</TabsTrigger>
+        </TabsList>
 
-      {/* Tab content */}
-      {activeTab === "general" && (
-        <>
-          <div>
-            <h2 className="text-base font-semibold text-gray-900 mb-4">Team Members</h2>
-
-            {error && (
-              <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-4">
-                {error}
-              </div>
-            )}
-
-            {/* Desktop/Tablet: Table */}
-            <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Mobile</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading && (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
-                        Loading…
-                      </td>
-                    </tr>
-                  )}
-                  {!loading && users.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-8 text-center text-gray-400">
-                        No users found.
-                      </td>
-                    </tr>
-                  )}
-                  {users.map((u) => (
-                    <tr key={u.id} className="border-t border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-gray-900">{u.full_name}</td>
-                      <td className="px-4 py-3 text-gray-600">{u.email}</td>
-                      <td className="px-4 py-3 text-gray-600 hidden lg:table-cell">{u.mobile}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            u.is_active
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-500"
-                          }`}
-                        >
-                          {u.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile: Card list */}
-            <div className="md:hidden space-y-3">
-              {loading && (
-                <p className="text-center text-gray-400 py-8">Loading…</p>
-              )}
-              {!loading && users.length === 0 && (
-                <p className="text-center text-gray-400 py-8">No users found.</p>
-              )}
-              {users.map((u) => (
-                <div key={u.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="font-medium text-gray-900">{u.full_name}</div>
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        u.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {u.is_active ? "Active" : "Inactive"}
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-500">{u.email}</div>
-                  <div className="text-sm text-gray-500">{u.mobile}</div>
+        <TabsContent value="general" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Team Members</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {error && (
+                <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive mb-4">
+                  {error}
                 </div>
-              ))}
-            </div>
-          </div>
+              )}
+
+              {/* Desktop/Tablet: Table */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead className="hidden lg:table-cell">Mobile</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loading && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-8">
+                          <div className="flex flex-col items-center gap-2">
+                            <Skeleton className="h-4 w-48" />
+                            <Skeleton className="h-4 w-32" />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {!loading && users.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                          No users found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {users.map((u) => (
+                      <TableRow key={u.id}>
+                        <TableCell className="font-medium">{u.full_name}</TableCell>
+                        <TableCell className="text-muted-foreground">{u.email}</TableCell>
+                        <TableCell className="text-muted-foreground hidden lg:table-cell">{u.mobile}</TableCell>
+                        <TableCell>
+                          <Badge variant={u.is_active ? "default" : "secondary"}>
+                            {u.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile: Card list */}
+              <div className="md:hidden space-y-3">
+                {loading && (
+                  <div className="flex flex-col items-center gap-2 py-8">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                )}
+                {!loading && users.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">No users found.</p>
+                )}
+                {users.map((u) => (
+                  <Card key={u.id}>
+                    <CardContent className="p-4 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <div className="font-medium text-foreground">{u.full_name}</div>
+                        <Badge variant={u.is_active ? "default" : "secondary"}>
+                          {u.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground">{u.email}</div>
+                      <div className="text-sm text-muted-foreground">{u.mobile}</div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Template info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
-            <p className="text-sm text-blue-700">
-              Reports you upload are stored in their original PDF format. Lenders with custom templates will see a formatted version when they download.
-            </p>
-          </div>
-        </>
-      )}
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="p-4">
+              <p className="text-sm text-primary">
+                Reports you upload are stored in their original PDF format. Lenders with custom templates will see a formatted version when they download.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {activeTab === "notifications" && <NotificationPrefs />}
-      {activeTab === "configuration" && <VendorConfigTab />}
+        <TabsContent value="notifications" className="mt-6">
+          <NotificationPrefs />
+        </TabsContent>
+
+        <TabsContent value="configuration" className="mt-6">
+          <VendorConfigTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

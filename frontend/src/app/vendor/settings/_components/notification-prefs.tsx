@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { NotificationPreferenceItem, NotificationPreferencesResponse } from "@/types/notification-preference";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   NEW_BROADCAST: "New broadcast requests",
@@ -51,38 +54,50 @@ export function NotificationPrefs() {
   };
 
   if (loading) {
-    return <p className="text-gray-500 text-sm">Loading preferences...</p>;
+    return (
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-600">
-        Choose which notifications you receive. Disabled notifications will not appear in your notification bell.
-      </p>
-      <div className="divide-y border rounded-lg">
-        {prefs.map((pref) => (
-          <div
-            key={pref.event_type}
-            className="flex items-center justify-between px-4 py-3"
-          >
-            <span className="text-sm font-medium text-gray-800">
-              {EVENT_TYPE_LABELS[pref.event_type] || pref.event_type}
-            </span>
-            <button
-              onClick={() => togglePref(pref.event_type, pref.enabled)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                pref.enabled ? "bg-blue-600" : "bg-gray-300"
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  pref.enabled ? "translate-x-6" : "translate-x-1"
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Notification Preferences</CardTitle>
+        <CardDescription>
+          Choose which notifications you receive. Disabled notifications will not appear in your notification bell.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-0">
+        {prefs.map((pref, index) => (
+          <div key={pref.event_type}>
+            <div className="flex items-center justify-between px-6 py-4">
+              <span className="text-sm font-medium text-foreground">
+                {EVENT_TYPE_LABELS[pref.event_type] || pref.event_type}
+              </span>
+              <button
+                onClick={() => togglePref(pref.event_type, pref.enabled)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  pref.enabled ? "bg-primary" : "bg-muted"
                 }`}
-              />
-            </button>
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    pref.enabled ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+            {index < prefs.length - 1 && <Separator />}
           </div>
         ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
