@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { Camera, User } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ProfilePhotoUploadProps {
   currentPhoto: string | null;
@@ -46,33 +49,39 @@ export function ProfilePhotoUpload({ currentPhoto, onUploaded }: ProfilePhotoUpl
     : null;
 
   return (
-    <div className="bg-white border rounded-lg p-6">
-      <h2 className="text-lg font-semibold mb-4">Profile Photo</h2>
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden border-2 border-gray-300">
-          {photoUrl ? (
-            <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
-              ?
-            </div>
-          )}
+    <Card>
+      <CardHeader>
+        <CardTitle>Profile Photo</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-32 h-32 rounded-full bg-muted overflow-hidden border-2 border-border">
+            {photoUrl ? (
+              <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                <User className="h-12 w-12" />
+              </div>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleUpload}
+            className="hidden"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            <Camera className="h-4 w-4 mr-1" />
+            {uploading ? "Uploading..." : "Change Photo"}
+          </Button>
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={handleUpload}
-          className="hidden"
-        />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
-        >
-          {uploading ? "Uploading..." : "Change Photo"}
-        </button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

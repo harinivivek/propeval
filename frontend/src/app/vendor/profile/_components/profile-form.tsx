@@ -1,9 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { Save } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import type { VendorProfile } from "@/types/vendor-profile";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ProfileFormProps {
   profile: VendorProfile;
@@ -44,79 +50,76 @@ export function ProfileForm({ profile, onSaved }: ProfileFormProps) {
   };
 
   return (
-    <div className="bg-white border rounded-lg p-6">
-      <h2 className="text-lg font-semibold mb-4">Profile Details</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Bio / About</label>
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            className="w-full border rounded-md p-2 text-sm min-h-[100px]"
-            placeholder="Tell lenders about your practice, expertise, and experience..."
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <Card>
+      <CardHeader>
+        <CardTitle>Profile Details</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Founding Year</label>
-            <input
-              type="number"
-              value={foundingYear}
-              onChange={(e) => setFoundingYear(e.target.value)}
-              className="w-full border rounded-md p-2 text-sm"
-              placeholder="e.g., 2015"
-              min="1900"
-              max={new Date().getFullYear()}
+            <Label className="mb-1">Bio / About</Label>
+            <Textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              className="min-h-[100px]"
+              placeholder="Tell lenders about your practice, expertise, and experience..."
             />
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label className="mb-1">Founding Year</Label>
+              <Input
+                type="number"
+                value={foundingYear}
+                onChange={(e) => setFoundingYear(e.target.value)}
+                placeholder="e.g., 2015"
+                min="1900"
+                max={new Date().getFullYear()}
+              />
+            </div>
+            <div>
+              <Label className="mb-1">IBBI Registration No.</Label>
+              <Input
+                type="text"
+                value={ibbiNumber}
+                onChange={(e) => setIbbiNumber(e.target.value)}
+                placeholder="IBBI/RV/..."
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">IBBI Registration No.</label>
-            <input
+            <Label className="mb-1">Other Certifications</Label>
+            <Input
               type="text"
-              value={ibbiNumber}
-              onChange={(e) => setIbbiNumber(e.target.value)}
-              className="w-full border rounded-md p-2 text-sm"
-              placeholder="IBBI/RV/..."
+              value={otherCerts}
+              onChange={(e) => setOtherCerts(e.target.value)}
+              placeholder="e.g., RICS, ISA, other qualifications"
             />
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Other Certifications</label>
-          <input
-            type="text"
-            value={otherCerts}
-            onChange={(e) => setOtherCerts(e.target.value)}
-            className="w-full border rounded-md p-2 text-sm"
-            placeholder="e.g., RICS, ISA, other qualifications"
-          />
-        </div>
+          <div>
+            <Label className="mb-1">Specialization Tags</Label>
+            <Input
+              type="text"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="Comma-separated: Residential, Commercial, Heritage Properties"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Separate tags with commas. These appear on your public profile.
+            </p>
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Specialization Tags</label>
-          <input
-            type="text"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            className="w-full border rounded-md p-2 text-sm"
-            placeholder="Comma-separated: Residential, Commercial, Heritage Properties"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Separate tags with commas. These appear on your public profile.
-          </p>
-        </div>
-
-        <div className="pt-2">
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-          >
-            {saving ? "Saving..." : "Save Profile"}
-          </button>
-        </div>
-      </form>
-    </div>
+          <div className="pt-2">
+            <Button type="submit" disabled={saving}>
+              <Save className="h-4 w-4 mr-2" />
+              {saving ? "Saving..." : "Save Profile"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
