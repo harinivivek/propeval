@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 function timeAgo(dateStr: string): string {
   const now = new Date();
@@ -54,9 +57,11 @@ export function NotificationBell() {
 
   return (
     <div ref={ref} className="relative">
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => setOpen(!open)}
-        className="relative p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
+        className="relative"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
@@ -64,78 +69,83 @@ export function NotificationBell() {
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-      </button>
+      </Button>
 
       {open && (
         <>
           {/* Mobile: full-screen overlay */}
-          <div className="md:hidden fixed inset-0 z-50 bg-white flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b">
+          <div className="md:hidden fixed inset-0 z-50 bg-background flex flex-col">
+            <div className="flex items-center justify-between p-4">
               <h2 className="text-lg font-semibold">Notifications</h2>
-              <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-700 text-2xl">
+              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground text-2xl">
                 &times;
               </button>
             </div>
+            <Separator />
             <div className="flex-1 overflow-y-auto">
               {loading ? (
-                <p className="p-4 text-center text-gray-500">Loading...</p>
+                <p className="p-4 text-center text-muted-foreground">Loading...</p>
               ) : notifications.length === 0 ? (
-                <p className="p-4 text-center text-gray-500">No notifications</p>
+                <p className="p-4 text-center text-muted-foreground">No notifications</p>
               ) : (
                 notifications.map((n) => (
                   <a
                     key={n.id}
                     href={getNotificationLink(n.reference_type, n.reference_id, user.user_type)}
                     onClick={() => { if (!n.is_read) markAsRead(n.id); setOpen(false); }}
-                    className={`block p-4 border-b hover:bg-gray-50 ${!n.is_read ? "bg-blue-50" : ""}`}
+                    className={`block p-4 border-b hover:bg-muted ${!n.is_read ? "bg-secondary" : ""}`}
                   >
                     <p className="font-medium text-sm">{n.title}</p>
-                    <p className="text-sm text-gray-600 mt-1">{n.message}</p>
-                    <p className="text-xs text-gray-400 mt-1">{timeAgo(n.created_at)}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{n.message}</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">{timeAgo(n.created_at)}</p>
                   </a>
                 ))
               )}
             </div>
             {notifications.length > 0 && unreadCount > 0 && (
-              <div className="p-3 border-t">
-                <button onClick={markAllAsRead} className="text-sm text-blue-600 hover:text-blue-800 w-full text-center">
-                  Mark all as read
-                </button>
-              </div>
+              <>
+                <Separator />
+                <div className="p-3">
+                  <button onClick={markAllAsRead} className="text-sm text-primary hover:text-primary/80 w-full text-center">
+                    Mark all as read
+                  </button>
+                </div>
+              </>
             )}
           </div>
 
           {/* Desktop: dropdown */}
-          <div className="hidden md:flex md:flex-col absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-lg border z-50 max-h-[480px]">
-            <div className="flex items-center justify-between p-3 border-b">
+          <Card className="hidden md:flex md:flex-col absolute right-0 top-full mt-2 w-96 shadow-lg z-50 max-h-[480px]">
+            <div className="flex items-center justify-between p-3">
               <h3 className="font-semibold text-sm">Notifications</h3>
               {unreadCount > 0 && (
-                <button onClick={markAllAsRead} className="text-xs text-blue-600 hover:text-blue-800">
+                <button onClick={markAllAsRead} className="text-xs text-primary hover:text-primary/80">
                   Mark all as read
                 </button>
               )}
             </div>
+            <Separator />
             <div className="overflow-y-auto max-h-[400px]">
               {loading ? (
-                <p className="p-4 text-center text-gray-500 text-sm">Loading...</p>
+                <p className="p-4 text-center text-muted-foreground text-sm">Loading...</p>
               ) : notifications.length === 0 ? (
-                <p className="p-4 text-center text-gray-500 text-sm">No notifications</p>
+                <p className="p-4 text-center text-muted-foreground text-sm">No notifications</p>
               ) : (
                 notifications.map((n) => (
                   <a
                     key={n.id}
                     href={getNotificationLink(n.reference_type, n.reference_id, user.user_type)}
                     onClick={() => { if (!n.is_read) markAsRead(n.id); setOpen(false); }}
-                    className={`block px-4 py-3 border-b hover:bg-gray-50 ${!n.is_read ? "bg-blue-50" : ""}`}
+                    className={`block px-4 py-3 border-b hover:bg-muted ${!n.is_read ? "bg-secondary" : ""}`}
                   >
                     <p className="font-medium text-sm">{n.title}</p>
-                    <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{n.message}</p>
-                    <p className="text-xs text-gray-400 mt-1">{timeAgo(n.created_at)}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">{timeAgo(n.created_at)}</p>
                   </a>
                 ))
               )}
             </div>
-          </div>
+          </Card>
         </>
       )}
     </div>

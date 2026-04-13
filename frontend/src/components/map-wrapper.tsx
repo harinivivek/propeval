@@ -11,8 +11,8 @@ export default function MapWrapper({ children }: { children: React.ReactNode }) 
 
   if (!mounted) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100 rounded-lg">
-        <p className="text-gray-400 text-sm">Loading map…</p>
+      <div className="flex items-center justify-center h-full bg-muted rounded-lg">
+        <p className="text-muted-foreground text-sm">Loading map…</p>
       </div>
     );
   }

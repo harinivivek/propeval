@@ -1,13 +1,15 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { api } from "@/lib/api";
 import type { ReportTemplate } from "@/types/template";
-
-interface DownloadButtonProps {
-  downloadUrl: string;
-  filename?: string;
-  className?: string;
-}
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function getApiBase() {
   if (typeof window === "undefined") return "http://localhost:8020";
@@ -18,11 +20,15 @@ function getApiBase() {
   return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8020";
 }
 
+interface DownloadButtonProps {
+  downloadUrl: string;
+  filename?: string;
+  className?: string;
+}
+
 export default function DownloadButton({ downloadUrl, filename, className }: DownloadButtonProps) {
   const [hasTemplate, setHasTemplate] = useState(false);
-  const [open, setOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.get<ReportTemplate>("/api/lender/templates/active")
@@ -30,19 +36,8 @@ export default function DownloadButton({ downloadUrl, filename, className }: Dow
       .catch(() => setHasTemplate(false));
   }, []);
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const handleDownload = useCallback(async (format: "original" | "template") => {
     setDownloading(true);
-    setOpen(false);
     try {
       const separator = downloadUrl.includes("?") ? "&" : "?";
       const url = `${getApiBase()}${downloadUrl}${separator}format=${format}`;
@@ -67,53 +62,39 @@ export default function DownloadButton({ downloadUrl, filename, className }: Dow
     }
   }, [downloadUrl, filename]);
 
-  const baseClass = className || "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50";
-
   if (!hasTemplate) {
     return (
-      <button onClick={() => handleDownload("original")} disabled={downloading} className={baseClass}>
-        {downloading ? "Downloading…" : "Download PDF"}
-      </button>
+      <Button onClick={() => handleDownload("original")} disabled={downloading} className={className}>
+        {downloading ? "Downloading\u2026" : "Download PDF"}
+      </Button>
     );
   }
 
   return (
-    <div className="relative inline-block" ref={dropdownRef}>
-      <div className="flex">
-        <button
-          onClick={() => handleDownload("template")}
+    <div className="inline-flex rounded-md">
+      <Button
+        onClick={() => handleDownload("template")}
+        disabled={downloading}
+        className={`rounded-r-none ${className || ""}`}
+      >
+        {downloading ? "Downloading\u2026" : "Download (My Template)"}
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger
           disabled={downloading}
-          className={`${baseClass} rounded-r-none`}
+          className="inline-flex items-center justify-center rounded-r-md rounded-l-none border-l border-primary-foreground/20 bg-primary px-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-50 h-9"
         >
-          {downloading ? "Downloading…" : "Download (My Template)"}
-        </button>
-        <button
-          onClick={() => setOpen(!open)}
-          disabled={downloading}
-          className={`${baseClass} rounded-l-none border-l border-blue-500 px-2`}
-        >
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-            <path d="M3 5l3 3 3-3" />
-          </svg>
-        </button>
-      </div>
-
-      {open && (
-        <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-          <button
-            onClick={() => handleDownload("template")}
-            className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg"
-          >
+          <ChevronDown className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => handleDownload("template")}>
             Download (My Template)
-          </button>
-          <button
-            onClick={() => handleDownload("original")}
-            className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-b-lg border-t border-gray-100"
-          >
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleDownload("original")}>
             Download (Original)
-          </button>
-        </div>
-      )}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

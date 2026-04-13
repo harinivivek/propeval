@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 const tierConfig = {
   NEW: { label: "New", color: "bg-gray-100 text-gray-700 border-gray-300", icon: "+" },
@@ -24,9 +25,10 @@ export function TierBadge({ tier, size = "md", className }: TierBadgeProps) {
   };
 
   return (
-    <span
+    <Badge
+      variant="outline"
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border font-medium",
+        "inline-flex items-center gap-1 rounded-full font-medium",
         config.color,
         sizeClasses[size],
         className
@@ -34,6 +36,6 @@ export function TierBadge({ tier, size = "md", className }: TierBadgeProps) {
     >
       <span>{config.icon}</span>
       <span>{config.label}</span>
-    </span>
+    </Badge>
   );
 }

@@ -47,7 +47,7 @@ export function RatingStars({
               className={cn(
                 sizeClasses[size],
                 interactive ? "cursor-pointer hover:scale-110 transition-transform" : "cursor-default",
-                filled ? "text-amber-400" : "text-gray-300"
+                filled ? "text-amber-400" : "text-muted-foreground/30"
               )}
             >
               {"\u2605"}
