@@ -38,6 +38,14 @@ celery_app.conf.beat_schedule = {
         "task": "app.jobs.cleanup_tasks.cleanup_orphaned_files",
         "schedule": crontab(day_of_week=0, hour=3, minute=0),
     },
+    "check-tier-demotions": {
+        "task": "check_tier_demotions",
+        "schedule": crontab(hour=0, minute=30),  # Daily at 00:30 IST
+    },
+    "send-demotion-warnings": {
+        "task": "send_demotion_warnings",
+        "schedule": crontab(hour=0, minute=15),  # Daily at 00:15 IST
+    },
 }
 
 # Auto-discover tasks in app.jobs package

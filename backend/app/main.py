@@ -38,6 +38,7 @@ from app.api.admin.vendor_tiers import router as admin_vendor_tiers_router
 from app.api.marketplace.search import router as marketplace_router
 from app.api.admin.price_bands import router as admin_price_bands_router
 from app.api.vendor.pricing import router as vendor_pricing_router
+from app.api.admin.quality_reviews import router as admin_quality_reviews_router
 from app.core.ws_manager import ws_manager
 
 app = FastAPI(
@@ -110,3 +111,5 @@ app.include_router(marketplace_router)
 # Phase 15 — Marketplace Pricing
 app.include_router(admin_price_bands_router)
 app.include_router(vendor_pricing_router)
+# Phase 16 — Graduated Trust Engine
+app.include_router(admin_quality_reviews_router)

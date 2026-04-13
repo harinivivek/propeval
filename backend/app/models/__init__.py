@@ -47,6 +47,7 @@ from app.models.lender_config import LenderConfig, LenderVendorPreference
 from app.models.vendor_profile import VendorProfile, VendorRating
 from app.models.locality import Locality
 from app.models.price_band import PriceBand, VendorPricing
+from app.models.quality_review import QualityReview
 
 __all__ = [
     "Base",
@@ -131,4 +132,6 @@ __all__ = [
     # Phase 15 — Marketplace Pricing
     "PriceBand",
     "VendorPricing",
+    # Phase 16 — Graduated Trust Engine
+    "QualityReview",
 ]
