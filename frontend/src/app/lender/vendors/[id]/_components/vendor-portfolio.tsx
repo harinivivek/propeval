@@ -30,7 +30,7 @@ export function VendorPortfolio({ portfolio: initial, vendorId }: VendorPortfoli
   const totalPages = Math.ceil(data.total / data.page_size);
 
   return (
-    <div className="bg-white border rounded-lg p-6">
+    <div className="bg-card border rounded-lg p-6">
       <h2 className="text-lg font-semibold mb-3">
         Portfolio <span className="text-sm text-muted-foreground font-normal">({data.total} reports)</span>
       </h2>
@@ -71,7 +71,7 @@ export function VendorPortfolio({ portfolio: initial, vendorId }: VendorPortfoli
               <button
                 onClick={() => loadPage(data.page - 1)}
                 disabled={data.page <= 1 || loading}
-                className="px-3 py-1 text-sm border rounded disabled:opacity-50 hover:bg-gray-50"
+                className="px-3 py-1 text-sm border rounded disabled:opacity-50 hover:bg-muted"
               >
                 Previous
               </button>
@@ -81,7 +81,7 @@ export function VendorPortfolio({ portfolio: initial, vendorId }: VendorPortfoli
               <button
                 onClick={() => loadPage(data.page + 1)}
                 disabled={data.page >= totalPages || loading}
-                className="px-3 py-1 text-sm border rounded disabled:opacity-50 hover:bg-gray-50"
+                className="px-3 py-1 text-sm border rounded disabled:opacity-50 hover:bg-muted"
               >
                 Next
               </button>

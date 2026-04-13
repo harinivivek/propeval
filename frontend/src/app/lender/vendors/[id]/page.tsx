@@ -47,13 +47,13 @@ export default function VendorPublicProfilePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white border rounded-lg p-6">
+      <div className="bg-card border rounded-lg p-6">
         <div className="flex flex-col sm:flex-row gap-6">
-          <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-2 border-gray-300 flex-shrink-0">
+          <div className="w-24 h-24 rounded-full bg-muted overflow-hidden border-2 border-border flex-shrink-0">
             {photoUrl ? (
               <img src={photoUrl} alt={profile.vendor_name} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400 text-3xl">
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-3xl">
                 {profile.vendor_name.charAt(0)}
               </div>
             )}
@@ -76,7 +76,7 @@ export default function VendorPublicProfilePage() {
                 {profile.specialization_tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full"
+                    className="inline-block bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded-full"
                   >
                     {tag}
                   </span>
@@ -84,7 +84,7 @@ export default function VendorPublicProfilePage() {
               </div>
             )}
 
-            {profile.bio && <p className="text-sm text-gray-600">{profile.bio}</p>}
+            {profile.bio && <p className="text-sm text-muted-foreground">{profile.bio}</p>}
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@ export default function VendorPublicProfilePage() {
 
       {/* Service Areas */}
       {profile.service_areas.length > 0 && (
-        <div className="bg-white border rounded-lg p-6">
+        <div className="bg-card border rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-3">Service Areas</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {profile.service_areas.map((area, i) => (
@@ -111,7 +111,7 @@ export default function VendorPublicProfilePage() {
 
       {/* Certifications */}
       {profile.certifications && Object.keys(profile.certifications).length > 0 && (
-        <div className="bg-white border rounded-lg p-6">
+        <div className="bg-card border rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-3">Certifications</h2>
           <div className="space-y-2">
             {Object.entries(profile.certifications).map(([key, value]) => (

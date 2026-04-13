@@ -18,7 +18,7 @@ export function VendorStatsBar({ profile }: VendorStatsBarProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
       {stats.map((s) => (
-        <div key={s.label} className="bg-white border rounded-lg p-3 text-center">
+        <div key={s.label} className="bg-card border rounded-lg p-3 text-center">
           <div className="text-lg font-bold">{s.value}</div>
           <div className="text-xs text-muted-foreground">{s.label}</div>
         </div>
