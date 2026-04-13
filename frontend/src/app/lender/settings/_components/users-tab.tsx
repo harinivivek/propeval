@@ -2,6 +2,16 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { UserResponse } from "@/types/auth";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 export default function UsersTab() {
   const [users, setUsers] = useState<UserResponse[]>([]);
@@ -18,64 +28,68 @@ export default function UsersTab() {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       {/* Desktop/Tablet: Table */}
-      <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Mobile</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading && (
-              <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-400">Loading…</td>
-              </tr>
-            )}
-            {!loading && users.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-400">No users found.</td>
-              </tr>
-            )}
-            {users.map((u) => (
-              <tr key={u.id} className="border-t border-gray-100 hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium text-gray-900">{u.full_name}</td>
-                <td className="px-4 py-3 text-gray-600">{u.email}</td>
-                <td className="px-4 py-3 text-gray-600 hidden lg:table-cell">{u.mobile}</td>
-                <td className="px-4 py-3">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${u.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                    {u.is_active ? "Active" : "Inactive"}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Card className="hidden md:block">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-4">Name</TableHead>
+                <TableHead className="px-4">Email</TableHead>
+                <TableHead className="px-4 hidden lg:table-cell">Mobile</TableHead>
+                <TableHead className="px-4">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading && (
+                <TableRow>
+                  <TableCell colSpan={4} className="px-4 py-8 text-center text-muted-foreground">Loading...</TableCell>
+                </TableRow>
+              )}
+              {!loading && users.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="px-4 py-8 text-center text-muted-foreground">No users found.</TableCell>
+                </TableRow>
+              )}
+              {users.map((u) => (
+                <TableRow key={u.id}>
+                  <TableCell className="px-4 py-3 font-medium">{u.full_name}</TableCell>
+                  <TableCell className="px-4 py-3 text-muted-foreground">{u.email}</TableCell>
+                  <TableCell className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{u.mobile}</TableCell>
+                  <TableCell className="px-4 py-3">
+                    <Badge variant={u.is_active ? "outline" : "secondary"} className={u.is_active ? "border-green-300 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400 dark:border-green-800" : ""}>
+                      {u.is_active ? "Active" : "Inactive"}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       {/* Mobile: Card list */}
       <div className="md:hidden space-y-3">
-        {loading && <p className="text-center text-gray-400 py-8">Loading…</p>}
-        {!loading && users.length === 0 && <p className="text-center text-gray-400 py-8">No users found.</p>}
+        {loading && <p className="text-center text-muted-foreground py-8">Loading...</p>}
+        {!loading && users.length === 0 && <p className="text-center text-muted-foreground py-8">No users found.</p>}
         {users.map((u) => (
-          <div key={u.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-1">
-            <div className="flex items-center justify-between">
-              <div className="font-medium text-gray-900">{u.full_name}</div>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${u.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                {u.is_active ? "Active" : "Inactive"}
-              </span>
-            </div>
-            <div className="text-sm text-gray-500">{u.email}</div>
-            <div className="text-sm text-gray-500">{u.mobile}</div>
-          </div>
+          <Card key={u.id}>
+            <CardContent className="p-4 space-y-1">
+              <div className="flex items-center justify-between">
+                <div className="font-medium">{u.full_name}</div>
+                <Badge variant={u.is_active ? "outline" : "secondary"} className={u.is_active ? "border-green-300 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400 dark:border-green-800" : ""}>
+                  {u.is_active ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+              <div className="text-sm text-muted-foreground">{u.email}</div>
+              <div className="text-sm text-muted-foreground">{u.mobile}</div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>

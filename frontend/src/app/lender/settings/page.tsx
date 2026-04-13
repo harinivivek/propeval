@@ -1,53 +1,28 @@
 "use client";
-import { useState } from "react";
 import UsersTab from "./_components/users-tab";
 import TemplateBuilder from "./_components/template-builder";
 import { NotificationPrefs } from "./_components/notification-prefs";
 import { LenderConfigTab } from "./_components/lender-config-tab";
-
-const TABS = [
-  { key: "users", label: "Users" },
-  { key: "template", label: "Report Template" },
-  { key: "notifications", label: "Notifications" },
-  { key: "configuration", label: "Configuration" },
-] as const;
-
-type TabKey = (typeof TABS)[number]["key"];
+import { PageHeader } from "@/components/page-header";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function LenderSettingsPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>("users");
-
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-gray-900">Settings</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Manage your organisation settings</p>
-      </div>
+      <PageHeader title="Settings" description="Manage your organisation settings" />
 
-      {/* Tab navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="flex gap-6">
-          {TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.key
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Tab content */}
-      {activeTab === "users" && <UsersTab />}
-      {activeTab === "template" && <TemplateBuilder />}
-      {activeTab === "notifications" && <NotificationPrefs />}
-      {activeTab === "configuration" && <LenderConfigTab />}
+      <Tabs defaultValue="users">
+        <TabsList variant="line">
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="template">Report Template</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="config">Configuration</TabsTrigger>
+        </TabsList>
+        <TabsContent value="users"><UsersTab /></TabsContent>
+        <TabsContent value="template"><TemplateBuilder /></TabsContent>
+        <TabsContent value="notifications"><NotificationPrefs /></TabsContent>
+        <TabsContent value="config"><LenderConfigTab /></TabsContent>
+      </Tabs>
     </div>
   );
 }

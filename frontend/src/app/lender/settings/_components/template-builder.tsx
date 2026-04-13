@@ -9,6 +9,11 @@ import type {
   TemplateFieldOption,
   TemplateSectionField,
 } from "@/types/template";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const DEFAULT_CONFIG: TemplateConfig = {
   header: {
@@ -139,197 +144,208 @@ export default function TemplateBuilder() {
   }
 
   if (loading) {
-    return <p className="text-center text-gray-400 py-8">Loading…</p>;
+    return <p className="text-center text-muted-foreground py-8">Loading...</p>;
   }
 
   return (
     <div className="space-y-6 max-w-2xl">
       {/* Template name */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Template Name</label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="template-name">Template Name</Label>
+        <Input
+          id="template-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
       {/* Header Config */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-        <h3 className="font-medium text-gray-900">Header</h3>
-
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Logo</label>
-          <div className="flex items-center gap-4">
-            {(logoPreview || template?.logo_path) && (
-              <img
-                src={logoPreview || `/api/media/${template?.logo_path}`}
-                alt="Logo preview"
-                className="h-10 object-contain border border-gray-200 rounded px-2 py-1"
-              />
-            )}
-            <input
-              type="file"
-              accept="image/png,image/jpeg"
-              onChange={handleLogoChange}
-              className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Bank Name</label>
-            <input
-              type="text"
-              value={config.header.bank_name}
-              onChange={(e) =>
-                setConfig((c) => ({ ...c, header: { ...c.header, bank_name: e.target.value } }))
-              }
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Subtitle</label>
-            <input
-              type="text"
-              value={config.header.subtitle}
-              onChange={(e) =>
-                setConfig((c) => ({ ...c, header: { ...c.header, subtitle: e.target.value } }))
-              }
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Primary Color</label>
-            <div className="flex items-center gap-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>Header</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Logo</Label>
+            <div className="flex items-center gap-4">
+              {(logoPreview || template?.logo_path) && (
+                <img
+                  src={logoPreview || `/api/media/${template?.logo_path}`}
+                  alt="Logo preview"
+                  className="h-10 object-contain border border-border rounded px-2 py-1"
+                />
+              )}
               <input
-                type="color"
-                value={config.header.primary_color}
-                onChange={(e) =>
-                  setConfig((c) => ({ ...c, header: { ...c.header, primary_color: e.target.value } }))
-                }
-                className="h-9 w-9 rounded border border-gray-300 cursor-pointer"
-              />
-              <input
-                type="text"
-                value={config.header.primary_color}
-                onChange={(e) =>
-                  setConfig((c) => ({ ...c, header: { ...c.header, primary_color: e.target.value } }))
-                }
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                type="file"
+                accept="image/png,image/jpeg"
+                onChange={handleLogoChange}
+                className="text-sm text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
               />
             </div>
           </div>
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Secondary Color</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={config.header.secondary_color}
-                onChange={(e) =>
-                  setConfig((c) => ({ ...c, header: { ...c.header, secondary_color: e.target.value } }))
-                }
-                className="h-9 w-9 rounded border border-gray-300 cursor-pointer"
-              />
-              <input
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="bank-name">Bank Name</Label>
+              <Input
+                id="bank-name"
                 type="text"
-                value={config.header.secondary_color}
+                value={config.header.bank_name}
                 onChange={(e) =>
-                  setConfig((c) => ({ ...c, header: { ...c.header, secondary_color: e.target.value } }))
+                  setConfig((c) => ({ ...c, header: { ...c.header, bank_name: e.target.value } }))
                 }
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="subtitle">Subtitle</Label>
+              <Input
+                id="subtitle"
+                type="text"
+                value={config.header.subtitle}
+                onChange={(e) =>
+                  setConfig((c) => ({ ...c, header: { ...c.header, subtitle: e.target.value } }))
+                }
               />
             </div>
           </div>
-        </div>
-      </div>
+
+          <Separator />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Primary Color</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={config.header.primary_color}
+                  onChange={(e) =>
+                    setConfig((c) => ({ ...c, header: { ...c.header, primary_color: e.target.value } }))
+                  }
+                  className="h-9 w-9 rounded border border-border cursor-pointer"
+                />
+                <Input
+                  type="text"
+                  value={config.header.primary_color}
+                  onChange={(e) =>
+                    setConfig((c) => ({ ...c, header: { ...c.header, primary_color: e.target.value } }))
+                  }
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Secondary Color</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={config.header.secondary_color}
+                  onChange={(e) =>
+                    setConfig((c) => ({ ...c, header: { ...c.header, secondary_color: e.target.value } }))
+                  }
+                  className="h-9 w-9 rounded border border-border cursor-pointer"
+                />
+                <Input
+                  type="text"
+                  value={config.header.secondary_color}
+                  onChange={(e) =>
+                    setConfig((c) => ({ ...c, header: { ...c.header, secondary_color: e.target.value } }))
+                  }
+                  className="flex-1"
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Field Selection & Ordering */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <h3 className="font-medium text-gray-900">Fields</h3>
-        <p className="text-xs text-gray-500">Drag to reorder. Check to include in the template.</p>
-        <FieldList
-          fields={config.sections}
-          onChange={(sections) => setConfig((c) => ({ ...c, sections }))}
-        />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Fields</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">Drag to reorder. Check to include in the template.</p>
+          <FieldList
+            fields={config.sections}
+            onChange={(sections) => setConfig((c) => ({ ...c, sections }))}
+          />
+        </CardContent>
+      </Card>
 
       {/* Footer Config */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-        <h3 className="font-medium text-gray-900">Footer</h3>
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Footer Text</label>
-          <input
-            type="text"
-            value={config.footer.text}
-            onChange={(e) =>
-              setConfig((c) => ({ ...c, footer: { ...c.footer, text: e.target.value } }))
-            }
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        <label className="flex items-center gap-2 text-sm text-gray-700">
-          <input
-            type="checkbox"
-            checked={config.footer.show_page_numbers}
-            onChange={(e) =>
-              setConfig((c) => ({
-                ...c,
-                footer: { ...c.footer, show_page_numbers: e.target.checked },
-              }))
-            }
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          Show page numbers
-        </label>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Footer</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="footer-text">Footer Text</Label>
+            <Input
+              id="footer-text"
+              type="text"
+              value={config.footer.text}
+              onChange={(e) =>
+                setConfig((c) => ({ ...c, footer: { ...c.footer, text: e.target.value } }))
+              }
+            />
+          </div>
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={config.footer.show_page_numbers}
+              onChange={(e) =>
+                setConfig((c) => ({
+                  ...c,
+                  footer: { ...c.footer, show_page_numbers: e.target.checked },
+                }))
+              }
+              className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
+            />
+            Show page numbers
+          </label>
+        </CardContent>
+      </Card>
 
       {/* Actions */}
       <div className="flex items-center gap-4">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
-        >
-          {saving ? "Saving…" : "Save Template"}
-        </button>
-        <button
-          onClick={loadHistory}
-          className="text-sm text-blue-600 hover:text-blue-800"
-        >
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? "Saving..." : "Save Template"}
+        </Button>
+        <Button variant="link" onClick={loadHistory} className="text-primary">
           Template History
-        </button>
+        </Button>
       </div>
 
       {/* Template History */}
       {showHistory && (
-        <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-          <h3 className="font-medium text-gray-900">Archived Templates</h3>
-          {archivedTemplates.length === 0 && (
-            <p className="text-sm text-gray-400">No archived templates.</p>
-          )}
-          {archivedTemplates.map((t) => (
-            <div key={t.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-              <div>
-                <div className="text-sm font-medium text-gray-900">{t.name}</div>
-                <div className="text-xs text-gray-400">
-                  {new Date(t.created_at).toLocaleDateString()}
+        <Card>
+          <CardHeader>
+            <CardTitle>Archived Templates</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            {archivedTemplates.length === 0 && (
+              <p className="text-sm text-muted-foreground">No archived templates.</p>
+            )}
+            {archivedTemplates.map((t) => (
+              <div key={t.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                <div>
+                  <div className="text-sm font-medium">{t.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(t.created_at).toLocaleDateString()}
+                  </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleActivate(t.id)}
+                >
+                  Activate
+                </Button>
               </div>
-              <button
-                onClick={() => handleActivate(t.id)}
-                className="text-xs px-3 py-1 border border-blue-200 text-blue-600 rounded-md hover:bg-blue-50"
-              >
-                Activate
-              </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </CardContent>
+        </Card>
       )}
     </div>
   );

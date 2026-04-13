@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { NotificationPreferenceItem, NotificationPreferencesResponse } from "@/types/notification-preference";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   NEW_BROADCAST: "New broadcast requests",
@@ -51,38 +52,45 @@ export function NotificationPrefs() {
   };
 
   if (loading) {
-    return <p className="text-gray-500 text-sm">Loading preferences...</p>;
+    return <p className="text-muted-foreground text-sm">Loading preferences...</p>;
   }
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-muted-foreground">
         Choose which notifications you receive. Disabled notifications will not appear in your notification bell.
       </p>
-      <div className="divide-y border rounded-lg">
-        {prefs.map((pref) => (
-          <div
-            key={pref.event_type}
-            className="flex items-center justify-between px-4 py-3"
-          >
-            <span className="text-sm font-medium text-gray-800">
-              {EVENT_TYPE_LABELS[pref.event_type] || pref.event_type}
-            </span>
-            <button
-              onClick={() => togglePref(pref.event_type, pref.enabled)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                pref.enabled ? "bg-blue-600" : "bg-gray-300"
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  pref.enabled ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
+      <Card>
+        <CardHeader>
+          <CardTitle>Notification Preferences</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="divide-y divide-border">
+            {prefs.map((pref) => (
+              <div
+                key={pref.event_type}
+                className="flex items-center justify-between px-6 py-3"
+              >
+                <span className="text-sm font-medium text-foreground">
+                  {EVENT_TYPE_LABELS[pref.event_type] || pref.event_type}
+                </span>
+                <button
+                  onClick={() => togglePref(pref.event_type, pref.enabled)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    pref.enabled ? "bg-primary" : "bg-muted-foreground/30"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      pref.enabled ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

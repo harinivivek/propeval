@@ -52,13 +52,13 @@ function SortableField({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3 px-3 py-2.5 bg-white border border-gray-200 rounded-lg ${
+      className={`flex items-center gap-3 px-3 py-2.5 bg-card border border-border rounded-lg ${
         !field.enabled ? "opacity-60" : ""
       }`}
     >
       <button
         type="button"
-        className="cursor-grab text-gray-400 hover:text-gray-600 touch-none"
+        className="cursor-grab text-muted-foreground hover:text-foreground touch-none"
         {...attributes}
         {...listeners}
       >
@@ -76,17 +76,17 @@ function SortableField({
         type="checkbox"
         checked={field.enabled}
         onChange={onToggle}
-        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
       />
 
       <input
         type="text"
         value={field.label}
         onChange={(e) => onLabelChange(e.target.value)}
-        className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0 text-gray-900"
+        className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0 text-foreground"
       />
 
-      <span className="text-xs text-gray-400 hidden sm:inline">{field.key}</span>
+      <span className="text-xs text-muted-foreground hidden sm:inline">{field.key}</span>
     </div>
   );
 }
