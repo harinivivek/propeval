@@ -103,6 +103,7 @@ class PayableType(str, Enum):
     LISTING_DOWNLOAD = "LISTING_DOWNLOAD"
     UPDATE = "UPDATE"
     NEARBY = "NEARBY"
+    PLATFORM_FEE = "PLATFORM_FEE"
 
 
 class InvoiceType(str, Enum):

@@ -22,6 +22,7 @@ export default function VendorLayout({
           <a href="/vendor/reports/bulk-upload" className="block px-2 py-3 rounded hover:bg-gray-100">Reports</a>
           <a href="/vendor/listings" className="block px-2 py-3 rounded hover:bg-gray-100">My Listings</a>
           <a href="/vendor/map" className="block px-2 py-3 rounded hover:bg-gray-100">Coverage Map</a>
+          <a href="/vendor/pricing" className="block px-2 py-3 rounded hover:bg-gray-100">Pricing</a>
           <a href="/vendor/profile" className="block px-2 py-3 rounded hover:bg-gray-100">Profile</a>
           <a href="/vendor/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
         </nav>
@@ -53,6 +54,7 @@ export default function VendorLayout({
               <a href="/vendor/reports/bulk-upload" className="block px-2 py-3 rounded hover:bg-gray-100">Reports</a>
               <a href="/vendor/listings" className="block px-2 py-3 rounded hover:bg-gray-100">My Listings</a>
               <a href="/vendor/map" className="block px-2 py-3 rounded hover:bg-gray-100">Coverage Map</a>
+              <a href="/vendor/pricing" className="block px-2 py-3 rounded hover:bg-gray-100">Pricing</a>
               <a href="/vendor/profile" className="block px-2 py-3 rounded hover:bg-gray-100">Profile</a>
               <a href="/vendor/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
             </nav>

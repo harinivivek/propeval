@@ -46,6 +46,7 @@ from app.models.vendor_config import VendorConfig, VendorLenderExclusion
 from app.models.lender_config import LenderConfig, LenderVendorPreference
 from app.models.vendor_profile import VendorProfile, VendorRating
 from app.models.locality import Locality
+from app.models.price_band import PriceBand, VendorPricing
 
 __all__ = [
     "Base",
@@ -127,4 +128,7 @@ __all__ = [
     "VendorRating",
     # Phase 14 — Marketplace & Discovery
     "Locality",
+    # Phase 15 — Marketplace Pricing
+    "PriceBand",
+    "VendorPricing",
 ]

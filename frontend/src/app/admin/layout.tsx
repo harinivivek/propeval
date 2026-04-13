@@ -22,6 +22,7 @@ export default function AdminLayout({
           <a href="/admin/accounts/vendors" className="block px-2 py-3 rounded hover:bg-gray-100">Vendors</a>
           <a href="/admin/pricing" className="block px-2 py-3 rounded hover:bg-gray-100">Pricing</a>
           <a href="/admin/billing" className="block px-2 py-3 rounded hover:bg-gray-100">Billing</a>
+          <a href="/admin/price-bands" className="block px-2 py-3 rounded hover:bg-gray-100">Price Bands</a>
           <a href="/admin/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
         </nav>
       </aside>
@@ -52,6 +53,7 @@ export default function AdminLayout({
               <a href="/admin/accounts/vendors" className="block px-2 py-3 rounded hover:bg-gray-100">Vendors</a>
               <a href="/admin/pricing" className="block px-2 py-3 rounded hover:bg-gray-100">Pricing</a>
               <a href="/admin/billing" className="block px-2 py-3 rounded hover:bg-gray-100">Billing</a>
+              <a href="/admin/price-bands" className="block px-2 py-3 rounded hover:bg-gray-100">Price Bands</a>
               <a href="/admin/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
             </nav>
           </aside>
