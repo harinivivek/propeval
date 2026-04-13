@@ -1,9 +1,9 @@
-# PropEval Product Specification
+# Get It Right Product Specification
 ## Functional & User Experience Document
 
 **Document Version:** 1.0
 **Date:** April 13, 2026
-**Prepared by:** Get-It-Right (GTR) Product Team
+**Prepared by:** Get It Right (GTR) Product Team
 **Classification:** Internal / Stakeholder Review
 **Status:** Living Document
 
@@ -27,23 +27,22 @@
 14. [Configuration & Platform Controls](#14-configuration--platform-controls)
 15. [Analytics & Reporting](#15-analytics--reporting)
 16. [Mobile & Field Experience](#16-mobile--field-experience)
-17. [Future Roadmap (Phases 13-16)](#17-future-roadmap-phases-13-16)
-18. [Glossary of Terms](#18-glossary-of-terms)
-19. [Appendices](#19-appendices)
+17. [Glossary of Terms](#17-glossary-of-terms)
+18. [Appendices](#18-appendices)
 
 ---
 
 # 1. Executive Summary
 
-PropEval is a **B2B digital marketplace** that connects lending institutions (banks and NBFCs) with property valuation professionals (valuers and lawyers) through a managed platform operated by **Get-It-Right (GTR)**. The platform digitizes the entire lifecycle of property report procurement — from request creation and vendor matching, through report submission and quality review, to billing reconciliation and secondary marketplace trading of completed reports.
+Get It Right is a **B2B digital marketplace** that connects lending institutions (banks and NBFCs) with property valuation professionals (valuers and lawyers) through a managed platform operated by **Get It Right (GTR)**. The platform digitizes the entire lifecycle of property report procurement — from request creation and vendor matching, through report submission and quality review, to billing reconciliation and secondary marketplace trading of completed reports.
 
-**In a single sentence:** PropEval makes it as easy for a bank to get a property valuation report as it is to order a ride on a cab aggregator — transparent pricing, automatic vendor matching, real-time tracking, and quality assurance built in.
+**In a single sentence:** Get It Right makes it as easy for a bank to get a property valuation report as it is to order a ride on a cab aggregator — transparent pricing, automatic vendor matching, real-time tracking, and quality assurance built in.
 
 ### Why This Product Matters
 
-Every property loan in India requires at least one independent valuation report. The Reserve Bank of India mandates it. Yet the process of getting that report is stuck in the 1990s — phone calls to empaneled valuers, email follow-ups, PDF reports arriving in inconsistent formats, manual billing reconciliation, and no visibility into turnaround time or quality. PropEval replaces this with a digital-first workflow that benefits all three participants:
+Every property loan in India requires at least one independent valuation report. The Reserve Bank of India mandates it. Yet the process of getting that report is stuck in the 1990s — phone calls to empaneled valuers, email follow-ups, PDF reports arriving in inconsistent formats, manual billing reconciliation, and no visibility into turnaround time or quality. Get It Right replaces this with a digital-first workflow that benefits all three participants:
 
-| Participant | Current Reality | With PropEval |
+| Participant | Current Reality | With Get It Right |
 |---|---|---|
 | **Lender (Bank/NBFC)** | Calls 3-5 valuers, waits 3-10 days, gets inconsistent PDFs, reconciles bills manually | Creates a request in 2 minutes, gets matched vendor automatically, tracks status in real-time, downloads branded reports, auto-reconciled billing |
 | **Vendor (Valuer/Lawyer)** | Depends on personal relationships for work, no digital presence, fills paper forms, chases payments | Receives broadcast notifications on mobile, accepts work instantly, uploads reports with AI-assisted data extraction, tracks earnings transparently |
@@ -66,7 +65,7 @@ Every property loan in India requires at least one independent valuation report.
 
 > **To become India's definitive infrastructure for property intelligence — the platform where every property loan report in the country is requested, delivered, and trusted.**
 
-PropEval envisions a future where:
+Get It Right envisions a future where:
 - No bank employee ever needs to make a phone call to find a valuer
 - No qualified valuer lacks access to work because they don't have the right personal connections
 - No property report sits unused in a filing cabinet when another lender needs the same information
@@ -75,7 +74,7 @@ PropEval envisions a future where:
 
 ## Mission Statement
 
-> **Get-It-Right (GTR) operates PropEval to bring transparency, speed, and trust to India's property valuation and legal due diligence ecosystem — connecting lending institutions with qualified professionals through fair pricing, intelligent matching, and platform-assured quality.**
+> **Get It Right (GTR) brings transparency, speed, and trust to India's property valuation and legal due diligence ecosystem — connecting lending institutions with qualified professionals through fair pricing, intelligent matching, and platform-assured quality.**
 
 ## Product Principles
 
@@ -143,15 +142,15 @@ Legal practitioners (advocates specializing in property title search and due dil
 | **NoBroker Legal** | Consumer-facing legal services for property title verification | Consumer-facing; not structured for B2B bank-vendor workflows |
 | **PropEquity** | Property data and analytics for developers/investors | Not a valuation-for-lending marketplace |
 
-**PropEval's Unique Position:** No existing platform in India combines: request dispatch + vendor broadcast matching + valuation AND legal report workflows + OCR data extraction + secondary marketplace + billing/invoicing + vendor trust scoring — all within a GTR-operated neutral marketplace. This is the gap PropEval fills.
+**Get It Right's Unique Position:** No existing platform in India combines: request dispatch + vendor broadcast matching + valuation AND legal report workflows + OCR data extraction + secondary marketplace + billing/invoicing + vendor trust scoring — all within a GTR-operated neutral marketplace. This is the gap Get It Right fills.
 
 ## Regulatory Tailwinds
 
-Several regulatory developments actively support PropEval's timing:
+Several regulatory developments actively support Get It Right's timing:
 
-1. **IBBI Registered Valuers Framework** — Creates a standardized credential that PropEval can verify and display
-2. **RBI Early Warning System mandate (2024)** — Forces NBFCs to have structured collateral monitoring, which PropEval's data layer enables
-3. **CERSAI (Central Registry)** — Enables double-mortgage detection; PropEval can integrate this check
+1. **IBBI Registered Valuers Framework** — Creates a standardized credential that Get It Right can verify and display
+2. **RBI Early Warning System mandate (2024)** — Forces NBFCs to have structured collateral monitoring, which Get It Right's data layer enables
+3. **CERSAI (Central Registry)** — Enables double-mortgage detection; Get It Right can integrate this check
 4. **Account Aggregator Framework** — Moves lending toward digital-first data exchange; property reports are the next frontier
 5. **DigiLocker** — KYC documents already digital; property documents moving in the same direction
 
@@ -165,31 +164,31 @@ Several regulatory developments actively support PropEval's timing:
 
 A bank branch manager in Tier-2 city Hubli needs a property valuation for a home loan application. Their empanelment list has 12 valuers. Three are inactive. Two don't cover the specific locality. The branch manager makes phone calls, sends WhatsApp messages, and waits for responses. If no one is available, they escalate to the regional office. This takes 1-3 days before work even begins.
 
-**PropEval Solution:** The lender creates a request in 2 minutes. The platform's broadcast system automatically identifies eligible vendors based on service area, availability, pricing threshold, and trust tier — and sends the request to matched vendors simultaneously. First vendor to accept gets the assignment. If all decline, the system automatically broadcasts to the next set. Zero phone calls required.
+**Get It Right Solution:** The lender creates a request in 2 minutes. The platform's broadcast system automatically identifies eligible vendors based on service area, availability, pricing threshold, and trust tier — and sends the request to matched vendors simultaneously. First vendor to accept gets the assignment. If all decline, the system automatically broadcasts to the next set. Zero phone calls required.
 
 ### Problem 2: No Visibility into Report Progress
 
 After assigning a valuation, the bank has no way to track progress. Did the valuer visit the site? When will the report arrive? Is it stuck somewhere? The only option is to call the valuer and ask. For a bank processing hundreds of loans monthly, this creates an enormous coordination overhead.
 
-**PropEval Solution:** Every request has a real-time status timeline visible to the lender: Sent → Accepted → Site Visit Scheduled → Report Uploaded → Under Review → Accepted. WebSocket-driven notifications alert the lender the moment a status changes. Auto-accept rules ensure reports don't sit unreviewed indefinitely.
+**Get It Right Solution:** Every request has a real-time status timeline visible to the lender: Sent → Accepted → Site Visit Scheduled → Report Uploaded → Under Review → Accepted. WebSocket-driven notifications alert the lender the moment a status changes. Auto-accept rules ensure reports don't sit unreviewed indefinitely.
 
 ### Problem 3: Inconsistent Report Quality and Format
 
 Different valuers submit reports in wildly different formats. Some use Word documents, some submit scanned handwritten forms, some use their own PDF templates. The data points captured vary. There's no structured data — just unstructured documents that a credit analyst must manually read and interpret.
 
-**PropEval Solution:** Every uploaded PDF goes through AI-powered OCR extraction (Claude Vision) that converts it into structured, validated data. Vendors review and confirm extracted fields before publishing. Lenders can download reports in their own branded template format with standardized field ordering. The platform trades in structured data, not just files.
+**Get It Right Solution:** Every uploaded PDF goes through AI-powered OCR extraction (Claude Vision) that converts it into structured, validated data. Vendors review and confirm extracted fields before publishing. Lenders can download reports in their own branded template format with standardized field ordering. The platform trades in structured data, not just files.
 
 ### Problem 4: Duplicate Valuation Spend
 
 Three different banks each commission a fresh valuation for the same property within 6 months because they don't know a recent report already exists. The industry collectively wastes millions on redundant work.
 
-**PropEval Solution:** The Listings Marketplace makes published reports discoverable (with PII redacted). A lender can search by pin code, property type, and locality to find existing reports and purchase them at a fraction of the new-request price — instant access, no waiting.
+**Get It Right Solution:** The Listings Marketplace makes published reports discoverable (with PII redacted). A lender can search by pin code, property type, and locality to find existing reports and purchase them at a fraction of the new-request price — instant access, no waiting.
 
 ### Problem 5: Billing is a Monthly Nightmare
 
 Banks receive invoices from dozens of valuers, each in different formats, with different payment terms. Reconciling valuation fees against loan files is a manual, error-prone process.
 
-**PropEval Solution:** Every transaction creates automatic billing entries. Monthly invoices are generated by the platform with structured numbering (GTR-PAY-YYYY-MM-NNNN). Lenders see a single dashboard of all payables with drill-down to individual transactions. CSV exports for ERP integration.
+**Get It Right Solution:** Every transaction creates automatic billing entries. Monthly invoices are generated by the platform with structured numbering (GTR-PAY-YYYY-MM-NNNN). Lenders see a single dashboard of all payables with drill-down to individual transactions. CSV exports for ERP integration.
 
 ## For Vendors (Valuers & Lawyers)
 
@@ -197,19 +196,19 @@ Banks receive invoices from dozens of valuers, each in different formats, with d
 
 A freshly qualified IBBI-registered valuer has the skills but not the relationships. Banks empanel valuers through lengthy processes that favor established firms. There's no marketplace where new talent can demonstrate capability and earn work on merit.
 
-**PropEval Solution:** Progressive trust tiers (New → Verified → Top Valuer) give new vendors a starter path. They begin with simpler assignments, build a track record on the platform, earn ratings from lenders, and gradually unlock access to higher-value work and marketplace features.
+**Get It Right Solution:** Progressive trust tiers (New → Verified → Top Valuer) give new vendors a starter path. They begin with simpler assignments, build a track record on the platform, earn ratings from lenders, and gradually unlock access to higher-value work and marketplace features.
 
 ### Problem 7: Chasing Payments
 
 Valuers complete reports and then wait 30-60 days for payment. There's no transparency into when or how much they'll be paid. Disputed amounts require phone calls and emails.
 
-**PropEval Solution:** Every completed report immediately generates a VendorEarning record with the exact amount. Monthly invoices are generated automatically. Vendors see their receivables dashboard with month-wise breakdown, invoice status (Pending → Billed → Paid), and CSV export for their own accounting.
+**Get It Right Solution:** Every completed report immediately generates a VendorEarning record with the exact amount. Monthly invoices are generated automatically. Vendors see their receivables dashboard with month-wise breakdown, invoice status (Pending → Billed → Paid), and CSV export for their own accounting.
 
 ### Problem 8: Wasted Reports
 
 A valuer completes a detailed report for Bank A. Six months later, Bank B needs the same property valued. The valuer can't easily monetize their existing work because there's no marketplace for it.
 
-**PropEval Solution:** Vendors can list published reports on the marketplace with a single toggle. Every purchase generates passive income. The platform handles PII redaction, pricing, payment, and delivery automatically.
+**Get It Right Solution:** Vendors can list published reports on the marketplace with a single toggle. Every purchase generates passive income. The platform handles PII redaction, pricing, payment, and delivery automatically.
 
 ## For the Industry
 
@@ -217,7 +216,7 @@ A valuer completes a detailed report for Bank A. Six months later, Bank B needs 
 
 Borrowers collude with valuers to inflate property values, enabling loans larger than the property can support. When defaults happen, the bank discovers the collateral is worth a fraction of what was reported. RBI reported INR 139 billion in bank fraud in FY2024, with overvalued collateral being a primary mechanism.
 
-**PropEval Solution:** Platform-level quality scoring, lender ratings, mandatory structured data extraction, trend analysis across multiple reports for the same area, and audit trails create structural accountability. Vendor trust tiers incentivize honest reporting because a vendor's livelihood depends on their platform reputation, not a single relationship.
+**Get It Right Solution:** Platform-level quality scoring, lender ratings, mandatory structured data extraction, trend analysis across multiple reports for the same area, and audit trails create structural accountability. Vendor trust tiers incentivize honest reporting because a vendor's livelihood depends on their platform reputation, not a single relationship.
 
 ---
 
@@ -240,7 +239,7 @@ Borrowers collude with valuers to inflate property values, enabling loans larger
 - Has had two cases in the past year where the auditor questioned valuation quality
 - Year-end billing reconciliation with 8 different valuers takes his team a full week
 
-**How PropEval Helps:**
+**How Get It Right Helps:**
 - Creates requests in minutes, tracks them on a real-time dashboard
 - Downloads reports in his bank's branded template with standardized fields
 - Rates vendors after each engagement, building a reliable quality signal
@@ -270,7 +269,7 @@ Borrowers collude with valuers to inflate property values, enabling loans larger
 - Cannot monetize the hundreds of reports she's completed over the years
 - Has qualifications (IBBI-registered, MRICS) but no digital presence to showcase them
 
-**How PropEval Helps:**
+**How Get It Right Helps:**
 - Receives broadcast notifications on her phone the moment a matching request comes in
 - Accepts work with one tap while on-site at another property
 - Uploads report PDFs; AI extracts the data automatically — she just reviews and confirms
@@ -302,7 +301,7 @@ Borrowers collude with valuers to inflate property values, enabling loans larger
 - Her firm has no visibility to banks outside their personal network
 - Duplicate effort: same property's title searched multiple times by different banks
 
-**How PropEval Helps:**
+**How Get It Right Helps:**
 - Receives legal report requests through the same platform as valuation requests
 - Can list completed legal opinions for other lenders to purchase
 - Builds a public profile with specializations, rating, and completed job count
@@ -312,7 +311,7 @@ Borrowers collude with valuers to inflate property values, enabling loans larger
 
 ## Persona 4: Amit — GTR Operations Manager (Admin)
 
-**Role:** Platform Operations Lead at Get-It-Right
+**Role:** Platform Operations Lead at Get It Right
 **Age:** 35 | **Experience:** 8 years in fintech operations
 **Device:** Desktop (multiple monitors)
 
@@ -322,10 +321,10 @@ Borrowers collude with valuers to inflate property values, enabling loans larger
 - Manage billing cycles accurately and on time
 - Onboard new lenders and vendors efficiently
 
-**Pain Points (before PropEval):**
-- N/A — GTR is created specifically to operate PropEval
+**Pain Points (before Get It Right):**
+- N/A — GTR is created specifically to operate the platform
 
-**How PropEval Helps:**
+**How Get It Right Helps:**
 - Admin dashboard shows platform-wide metrics: open requests, vendor performance, billing status
 - Can configure system parameters (broadcast size, acceptance windows, auto-accept thresholds) without code changes
 - Onboards lenders and vendors through admin UI — creates accounts, sets up pricing, defines service areas
@@ -351,7 +350,7 @@ Borrowers collude with valuers to inflate property values, enabling loans larger
 - Ensure report data is complete and consistent before forwarding for approval
 - Request updates or nearby reports when property conditions warrant
 
-**How PropEval Helps:**
+**How Get It Right Helps:**
 - Receives notifications when reports arrive; opens structured data view alongside original PDF
 - Uses the branded template download for standardized presentation to approving authority
 - Requests updates on previously valued properties when borrowers report construction changes
@@ -363,7 +362,7 @@ Borrowers collude with valuers to inflate property values, enabling loans larger
 
 ## Platform Structure
 
-PropEval is a **three-portal marketplace** with distinct experiences for each participant type:
+Get It Right is a **three-portal marketplace** with distinct experiences for each participant type:
 
 ```
                     +-------------------+
@@ -388,7 +387,7 @@ PropEval is a **three-portal marketplace** with distinct experiences for each pa
 
 ## Access Model
 
-PropEval is an **invite-only B2B platform**. There is no self-registration.
+Get It Right is an **invite-only B2B platform**. There is no self-registration.
 
 - GTR Admin creates all Lender and Vendor organization accounts
 - Within their organization, Lenders and Vendors can manage their own internal users
@@ -431,7 +430,7 @@ PropEval is an **invite-only B2B platform**. There is no self-registration.
 
 ## Workflow 1: New Report Request (The Primary Revenue Flow)
 
-This is the central workflow of PropEval — a lender needs a property report, and the platform orchestrates getting it done.
+This is the central workflow of Get It Right — a lender needs a property report, and the platform orchestrates getting it done.
 
 ### Step-by-Step Flow
 
@@ -533,7 +532,7 @@ LENDER                          PLATFORM                         VENDOR
 
 ## Workflow 2: Listings Marketplace (The Secondary Market)
 
-The listings marketplace is PropEval's "Airbnb for property reports" — vendors list completed reports, and other lenders can discover and purchase them.
+The listings marketplace is Get It Right's "Airbnb for property reports" — vendors list completed reports, and other lenders can discover and purchase them.
 
 ### How Listings Work
 
@@ -797,6 +796,19 @@ A "listing" is a group of reports sharing the same **pin code + property type**.
 - Marker clustering for dense areas (nearby listings group into numbered circles)
 - Click marker → popup with listing summary + "View Details" link
 - Same filters apply in both map and list view
+
+### Unified Marketplace Discovery
+
+The listings page provides an "Airbnb-style" discovery experience combining reports and vendor availability:
+
+- **Split-view layout:** map (45%) + card grid (55%) on desktop
+- **Two result types in one unified feed:**
+  - **Report Listing Cards** — Existing reports available for purchase
+  - **Available Vendor Cards** — Vendors accepting new requests in that area
+- **Rich filtering:** location (city/pin code/radius), property type, vendor quality (min rating, tier), report age
+- **Sort options:** Relevance, Price, Rating, Recency, Turnaround
+- **Locality autocomplete** search with typeahead
+- **Map drag/zoom** updates results in real-time
 
 ---
 
@@ -1126,7 +1138,7 @@ Login → Billing page → Month selector (shows "April 2026")
 
 ## What a Property Valuation Report Contains
 
-Based on analysis of actual Indian property valuation reports used by major lending institutions, PropEval's data extraction captures the following standardized structure:
+Based on analysis of actual Indian property valuation reports used by major lending institutions, Get It Right's data extraction captures the following standardized structure:
 
 ### Section 1: Report Header
 - Commissioning bank/NBFC name and branch
@@ -1253,12 +1265,26 @@ Pricing supports two levels of specificity:
 
 When calculating a price, the system first looks for an area-specific match. If none exists, it falls back to the city-level rule. This allows premium pricing for high-value localities without creating rules for every area.
 
+### Price Bands & Vendor Self-Pricing
+
+GTR Admin sets minimum and maximum price per city + property type + report category. Within these bands:
+
+- **New-tier vendors:** Platform assigns the price (within the band)
+- **Verified and Top Valuer vendors:** Set their own prices within the admin-defined band
+- **Vendor Pricing UI:** Visual indicator showing where their price sits within the band (e.g., slider or gauge)
+
+### Platform Fee
+
+A transparent platform fee is added on top of the report price, shown separately at checkout:
+- Example: "Report: INR 4,500 + Platform Fee: INR 300 = Total: INR 4,800"
+- Fee is visible to both lenders (at purchase) and vendors (in earnings breakdown)
+
 ### Price Visibility
 
 - **Lenders** see the calculated price at Step 3 of request creation (before submitting)
 - **Vendors** see the offered price in the broadcast notification and request detail
 - **Listings** show the per-report purchase price on each report card
-- No hidden fees (platform fee to be introduced in Phase 15)
+- All fees (report price + platform fee) are transparent — no hidden charges
 
 ## Billing Model
 
@@ -1322,7 +1348,7 @@ PENDING → BILLED → PAID
 
 # 12. Trust, Quality & Governance
 
-## Vendor Trust Framework (Current + Planned)
+## Vendor Trust Framework
 
 ### Vendor Quality Score (0-100)
 
@@ -1357,13 +1383,14 @@ A composite metric calculated from platform performance:
 - No text reviews in the current version — purely numeric rating
 - 30-day window after acceptance to submit a rating
 
-### Vendor Public Profile (Planned)
+### Vendor Public Profile
 - Display photo, bio, founding year
 - Certifications (IBBI registration number, RICS, etc.)
 - Specialization tags (e.g., "Industrial", "Residential", "Legal Title Search")
-- Profile completeness percentage (incentivizes filling out all fields)
+- Profile completeness score to incentivize filling out all fields
 - Portfolio: auto-generated from completed reports (PII-redacted)
-- Performance metrics: rating, first-time acceptance rate, average turnaround, total completed jobs
+- Performance metrics: quality score, star rating, first-time acceptance rate, average turnaround, total completed jobs
+- Vendor tier badge (Grey/Blue/Gold) displayed on profile and all marketplace cards
 
 ## Quality Assurance Mechanisms
 
@@ -1375,13 +1402,37 @@ A composite metric calculated from platform performance:
 6. **Activity Logging:** 18 action types logged with actor, timestamp, and target — full audit trail for compliance and dispute resolution
 7. **GTR Quality Gate (New-Tier Vendors):** Reports from new/unproven vendors are reviewed by GTR operations before forwarding to the lender — protecting lenders from poor quality while giving new vendors a supervised on-ramp
 
+## Graduated Trust Engine
+
+A structured on-ramp for new vendors that protects lender confidence while giving new talent a fair path to full marketplace access:
+
+### Starter Pool
+- New-tier vendors only receive eligible requests: residential properties, below a value threshold, non-urgent
+- This limits exposure while the vendor builds their track record
+
+### GTR Quality Review Queue
+- Reports from new-tier vendors go through GTR review before reaching the lender
+- Admin page for GTR operations to review, approve, or return reports with feedback
+- Creates a supervised quality checkpoint during the vendor's early tenure
+
+### Automated Tier Progression
+- Tier eligibility is recalculated on every report completion and rating event
+- **Vendor Progress Dashboard:** Visual progress bars showing distance to next tier with estimated timeline
+- Transparent criteria — vendors always know exactly what they need to achieve
+
+### Demotion Safeguards
+- 30-day grace period before demotion takes effect
+- Warning notification sent at day 15
+- Minimum sample size of 20 rated jobs required before demotion can trigger — prevents small-sample penalization
+- GTR Admin can manually freeze demotion for any vendor during special circumstances
+
 ---
 
 # 13. Notifications & Communication
 
 ## Notification Architecture
 
-PropEval uses a layered notification system designed to reach users through the most appropriate channel based on urgency and context:
+Get It Right uses a layered notification system designed to reach users through the most appropriate channel based on urgency and context:
 
 ### Layer 1: In-App Notifications (All Users)
 - Delivered via WebSocket for instant display
@@ -1560,7 +1611,7 @@ Vendors are field professionals who spend most of their day at property sites. T
 
 **Install Banner (Smart Prompt):**
 - Appears on the vendor dashboard after first login
-- "Install PropEval for instant notifications and quick access"
+- "Install Get It Right for instant notifications and quick access"
 - "Install" button + dismiss (X) that snoozes for 7 days
 - Only shows on mobile browsers that support PWA
 - Not shown if the app is already installed
@@ -1586,59 +1637,7 @@ Vendors are field professionals who spend most of their day at property sites. T
 
 ---
 
-# 17. Future Roadmap (Phases 13-16)
-
-The following capabilities are planned for future development, building on the current foundation:
-
-## Phase 13: Vendor Profiles & Trust Foundation
-
-**Goal:** Make vendor quality visible and give lenders confidence to work with unfamiliar vendors.
-
-- Public vendor profile pages with bio, certifications, specialization tags
-- Profile completeness score to incentivize full profiles
-- Quality score (0-100 composite) visible to lenders
-- Three trust tiers: New → Verified → Top Valuer
-- Automated tier promotion/demotion based on performance
-- 1-5 star lender rating system for vendors
-- Vendor tier badges displayed on all marketplace cards
-
-## Phase 14: Unified Marketplace & Discovery
-
-**Goal:** Transform the listings page from a simple browse into an "Airbnb-style" discovery experience.
-
-- Split-view layout: map (45%) + card grid (55%) on desktop
-- Two result types in one unified feed:
-  - **Report Listing Cards** — Existing reports available for purchase
-  - **Available Vendor Cards** — Vendors accepting new requests in that area
-- Rich filtering: location (city/pin/radius), property type, vendor quality (min rating, tier), report age
-- Sort options: Relevance, Price, Rating, Recency, Turnaround
-- Locality autocomplete search with typeahead
-- Map drag/zoom updates results in real-time
-
-## Phase 15: Marketplace Pricing
-
-**Goal:** Enable fair, transparent, market-driven pricing.
-
-- **Price Bands:** GTR Admin sets min/max price per city + property type + category
-- **Vendor Self-Pricing:** Verified and Top Valuer vendors set their own prices within the band
-- **Platform Fee:** Transparent fee added on top of report price, shown at checkout
-  - Example: "Report: INR 4,500 + Platform Fee: INR 300 = Total: INR 4,800"
-- **Vendor Pricing UI:** Visual indicator showing where their price sits within the band
-
-## Phase 16: Graduated Trust Engine
-
-**Goal:** Create a structured on-ramp for new vendors while protecting lender confidence.
-
-- **Starter Pool:** New-tier vendors only receive eligible requests (residential, below value threshold, non-urgent)
-- **GTR Quality Gate:** Reports from new vendors go through GTR review before reaching the lender
-- **Quality Review Queue:** Admin page for GTR to review, approve, or return reports
-- **Automated Tier Progression:** Checked on every report completion and rating
-- **Vendor Progress Dashboard:** Visual progress bars toward next tier with estimated timeline
-- **Demotion Safeguards:** 30-day grace period, warning at day 15, minimum sample size required
-
----
-
-# 18. Glossary of Terms
+# 17. Glossary of Terms
 
 | Term | Definition |
 |---|---|
@@ -1658,11 +1657,11 @@ The following capabilities are planned for future development, building on the c
 | **Forced Sale Value (FSV)** | The estimated price a property would fetch in a distress/quick sale — typically 70-80% of Fair Market Value; used by banks as the lending limit |
 | **FSI (Floor Space Index)** | The ratio of total permitted built-up area to plot area — a key construction compliance metric |
 | **FMV (Fair Market Value)** | The estimated price a property would fetch in a willing-buyer-willing-seller transaction |
-| **GTR (Get-It-Right)** | The company that operates the PropEval marketplace platform |
+| **GTR (Get It Right)** | The company that builds and operates the Get It Right marketplace platform |
 | **HFC (Housing Finance Company)** | Non-bank entities specifically licensed to provide housing loans (e.g., LIC Housing, PNB Housing) |
 | **IBBI** | Insolvency and Bankruptcy Board of India — regulatory authority for Registered Valuers |
 | **LAP (Loan Against Property)** | A loan where existing property is pledged as collateral (as opposed to a home loan for purchasing) |
-| **Lender** | A bank, NBFC, or HFC that uses PropEval to commission property reports |
+| **Lender** | A bank, NBFC, or HFC that uses Get It Right to commission property reports |
 | **Listing** | A group of marketplace reports sharing the same pin code and property type |
 | **Macro-Location** | Neighborhood/locality-level address used for listing grouping (as opposed to exact street address) |
 | **NBFC (Non-Banking Financial Company)** | Financial institutions that provide loans but don't hold a banking license (e.g., Bajaj Finance, Aditya Birla Finance) |
@@ -1680,19 +1679,19 @@ The following capabilities are planned for future development, building on the c
 | **RVO (Registered Valuers Organisation)** | Body recognized by IBBI to certify and supervise registered valuers |
 | **Service Area** | The geographic region (city + specific areas) and service type (Valuation/Legal) that a vendor covers |
 | **Trust Tier** | Platform-assigned vendor level: New → Verified → Top Valuer — based on quality score and volume |
-| **Vendor** | A property valuation firm or legal practice that provides reports through PropEval |
+| **Vendor** | A property valuation firm or legal practice that provides reports through Get It Right |
 | **VendorEarning** | Billing record tracking money owed to a vendor for completed work |
 | **LenderPayable** | Billing record tracking money owed by a lender for received reports |
 
 ---
 
-# 19. Appendices
+# 18. Appendices
 
 ## Appendix A: Sample Report Field Mapping
 
-The following table maps common fields found in Indian property valuation reports to PropEval's extracted data fields:
+The following table maps common fields found in Indian property valuation reports to Get It Right's extracted data fields:
 
-| Report Field (as seen in PDFs) | PropEval Field Name | Category | Required |
+| Report Field (as seen in PDFs) | Get It Right Field Name | Category | Required |
 |---|---|---|---|
 | Property Address / Site Address | property_address | Anchor | Yes |
 | Property Type / Nature of Property | property_type | Anchor | Yes |
@@ -1716,7 +1715,7 @@ The following table maps common fields found in Indian property valuation report
 
 ## Appendix B: Regulatory Requirements Summary
 
-| Regulation | Requirement | PropEval Compliance |
+| Regulation | Requirement | Get It Right Compliance |
 |---|---|---|
 | RBI Board-Approved Valuation Policy | Banks must have formal policy for property valuation | Platform enforces standardized process |
 | RBI Dual Valuation | Two independent valuations for loans > INR 1 crore with collateral > INR 50 lakh | Lenders can create two separate requests; system ensures different vendors |
@@ -1743,29 +1742,29 @@ The following table maps common fields found in Indian property valuation report
 
 In this example, a residential valuation request in Koramangala costs INR 10,000 (area-specific), while the same request in HSR Layout costs INR 8,000 (city-level fallback).
 
-## Appendix D: Feature Delivery Phases
+## Appendix D: Feature Modules
 
-| Phase | Name | Scope | Status |
-|---|---|---|---|
-| 0 | Scaffold | Project structure, Docker, CI/CD | Complete |
-| 1 | Auth & Users | Login, OTP, RBAC, account management | Complete |
-| 2 | Pricing & Models | Data models, pricing engine, admin pricing UI | Complete |
-| 3 | New Request Workflow | End-to-end request → broadcast → report → accept flow | Complete |
-| 4 | OCR & Processing | AI data extraction, vendor review UI, bulk upload | Complete |
-| 5 | Listings Marketplace | Secondary market, PII redaction, purchase, browse | Complete |
-| 6 | Update & Nearby | Two new request types with parent report context | Complete |
-| 7 | Dashboards | Vendor/Lender/Admin dashboards, notifications, CSV export | Complete |
-| 8 | Templates | Lender-branded report download, template builder | Complete |
-| 9 | Map Views | Lender listings map, vendor coverage map | Complete |
-| 10 | Real-Time | WebSocket notifications, activity logging, preferences | Complete |
-| 11 | Mobile PWA | Service worker, Web Push, install/permission banners | Complete |
-| 12A | Billing & Invoicing | Monthly invoices, lifecycle management, admin billing | Complete |
-| 12B | System Config | Runtime-configurable platform parameters | Complete |
-| 12C | Polish & Hardening | Pagination, rate limiting, query optimization, cleanup | Complete |
-| 13 | Vendor Profiles | Public profiles, quality score, trust tiers, ratings | Planned |
-| 14 | Unified Marketplace | Airbnb-style discovery, split-view, rich filters | Planned |
-| 15 | Marketplace Pricing | Price bands, vendor self-pricing, platform fee | Planned |
-| 16 | Graduated Trust | Starter pool, GTR quality gate, tier progression | Planned |
+| Module | Name | Scope |
+|---|---|---|
+| 0 | Scaffold | Project structure, Docker, CI/CD |
+| 1 | Auth & Users | Login, OTP, RBAC, account management |
+| 2 | Pricing & Models | Data models, pricing engine, admin pricing UI |
+| 3 | New Request Workflow | End-to-end request → broadcast → report → accept flow |
+| 4 | OCR & Processing | AI data extraction, vendor review UI, bulk upload |
+| 5 | Listings Marketplace | Secondary market, PII redaction, purchase, browse |
+| 6 | Update & Nearby | Two new request types with parent report context |
+| 7 | Dashboards | Vendor/Lender/Admin dashboards, notifications, CSV export |
+| 8 | Templates | Lender-branded report download, template builder |
+| 9 | Map Views | Lender listings map, vendor coverage map |
+| 10 | Real-Time | WebSocket notifications, activity logging, preferences |
+| 11 | Mobile PWA | Service worker, Web Push, install/permission banners |
+| 12A | Billing & Invoicing | Monthly invoices, lifecycle management, admin billing |
+| 12B | System Config | Runtime-configurable platform parameters |
+| 12C | Polish & Hardening | Pagination, rate limiting, query optimization, cleanup |
+| 13 | Vendor Profiles | Public profiles, quality score, trust tiers, ratings |
+| 14 | Unified Marketplace | Airbnb-style discovery, split-view, rich filters |
+| 15 | Marketplace Pricing | Price bands, vendor self-pricing, platform fee |
+| 16 | Graduated Trust | Starter pool, GTR quality gate, tier progression |
 
 ## Appendix E: Market Data Sources
 
@@ -1781,4 +1780,4 @@ In this example, a residential valuation request in Koramangala costs INR 10,000
 ---
 
 *This document is maintained by the GTR Product Team. Last updated: April 13, 2026.*
-*For questions or contributions, contact the PropEval product lead.*
+*For questions or contributions, contact the Get It Right product lead.*
