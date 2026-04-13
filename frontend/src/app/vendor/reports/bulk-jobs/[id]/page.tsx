@@ -2,16 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft, FileText, CheckCircle2, AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
 import type { BulkUploadJob, BulkUploadReportStatus } from "@/types/bulk-upload";
-
-const STATUS_COLORS: Record<string, string> = {
-  UPLOADED: "bg-gray-100 text-gray-700",
-  PROCESSING: "bg-blue-100 text-blue-700",
-  EXTRACTION_FAILED: "bg-red-100 text-red-700",
-  READY_TO_PUBLISH: "bg-green-100 text-green-700",
-  PUBLISHED: "bg-emerald-100 text-emerald-700",
-};
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
+import { StatusBadge } from "@/components/status-badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { MetricCard } from "@/components/metric-card";
 
 export default function BulkJobDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -45,8 +44,23 @@ export default function BulkJobDetailPage() {
     return () => clearInterval(interval);
   }, [job?.status]);
 
-  if (loading) return <p className="text-gray-500 py-8">Loading...</p>;
-  if (!job) return <p className="text-red-500 py-8">Job not found</p>;
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <p className="text-destructive py-8">Job not found</p>
+      </div>
+    );
+  }
 
   const progress =
     job.total_reports > 0
@@ -55,74 +69,67 @@ export default function BulkJobDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => router.push("/vendor/reports/bulk-upload")}
-        className="text-sm text-blue-600 hover:underline mb-4 block"
+        className="mb-4"
       >
-        &larr; Back to Bulk Upload
-      </button>
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        Back to Bulk Upload
+      </Button>
 
-      <h1 className="text-2xl font-bold mb-4">Bulk Upload Progress</h1>
+      <PageHeader title="Bulk Upload Progress" />
 
-      <div className="border rounded-lg p-4 mb-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-          <div>
-            <p className="text-2xl font-bold">{job.total_reports}</p>
-            <p className="text-xs text-gray-500">Total</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-green-600">{job.processed_count}</p>
-            <p className="text-xs text-gray-500">Processed</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-red-600">{job.failed_count}</p>
-            <p className="text-xs text-gray-500">Failed</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-blue-600">{progress}%</p>
-            <p className="text-xs text-gray-500">Complete</p>
-          </div>
-        </div>
-
-        <div className="mt-4 bg-gray-200 rounded-full h-2 overflow-hidden">
-          <div
-            className="bg-blue-600 h-full transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        {(job.status === "IN_PROGRESS" || job.status === "PENDING") && (
-          <p className="text-sm text-blue-600 mt-2 text-center">Processing...</p>
-        )}
-        {job.status === "COMPLETED" && (
-          <p className="text-sm text-green-600 mt-2 text-center">All reports processed.</p>
-        )}
-        {job.status === "PARTIALLY_FAILED" && (
-          <p className="text-sm text-amber-600 mt-2 text-center">
-            Completed with {job.failed_count} failure(s).
-          </p>
-        )}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <MetricCard label="Total" value={job.total_reports} icon={FileText} accentColor="blue" />
+        <MetricCard label="Processed" value={job.processed_count} icon={CheckCircle2} accentColor="emerald" />
+        <MetricCard label="Failed" value={job.failed_count} icon={AlertTriangle} accentColor="red" />
+        <MetricCard label="Complete" value={`${progress}%`} icon={FileText} accentColor="purple" />
       </div>
 
-      <div className="border rounded-lg divide-y">
-        <div className="px-4 py-3 bg-gray-50">
-          <h3 className="font-semibold text-sm">Reports</h3>
-        </div>
-        {reports.map((r) => (
-          <div key={r.report_id} className="px-4 py-3 flex items-center justify-between">
-            <div className="min-w-0">
-              <p className="text-sm truncate">
-                {r.property_address || r.report_id}
-              </p>
-            </div>
-            <span
-              className={`text-xs px-2 py-1 rounded flex-shrink-0 ${STATUS_COLORS[r.status] || "bg-gray-100"}`}
-            >
-              {r.status.replace(/_/g, " ")}
-            </span>
+      <Card className="mb-6">
+        <CardContent className="pt-4">
+          <div className="bg-muted rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-primary h-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
           </div>
-        ))}
-      </div>
+
+          {(job.status === "IN_PROGRESS" || job.status === "PENDING") && (
+            <p className="text-sm text-primary mt-2 text-center">Processing...</p>
+          )}
+          {job.status === "COMPLETED" && (
+            <p className="text-sm text-emerald-600 mt-2 text-center">All reports processed.</p>
+          )}
+          {job.status === "PARTIALLY_FAILED" && (
+            <p className="text-sm text-amber-600 mt-2 text-center">
+              Completed with {job.failed_count} failure(s).
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Reports</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="divide-y divide-border">
+            {reports.map((r) => (
+              <div key={r.report_id} className="px-4 py-3 flex items-center justify-between">
+                <div className="min-w-0">
+                  <p className="text-sm truncate text-foreground">
+                    {r.property_address || r.report_id}
+                  </p>
+                </div>
+                <StatusBadge status={r.status} />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

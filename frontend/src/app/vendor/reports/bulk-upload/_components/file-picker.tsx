@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { Upload, X } from "lucide-react";
 import { api } from "@/lib/api";
 import type { BulkUploadJob } from "@/types/bulk-upload";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 type Props = {
   onJobCreated: (job: BulkUploadJob) => void;
@@ -57,64 +61,65 @@ export function FilePicker({ onJobCreated }: Props) {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="bg-red-50 text-red-700 px-3 py-2 rounded text-sm">{error}</div>
+        <div className="bg-destructive/10 text-destructive px-3 py-2 rounded-md text-sm">{error}</div>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Report Category
-        </label>
+        <Label className="mb-1">Report Category</Label>
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as "VALUATION" | "LEGAL")}
-          className="border rounded-lg px-3 py-2 text-sm"
+          className="flex h-9 w-auto rounded-md border border-border bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <option value="VALUATION">Valuation</option>
           <option value="LEGAL">Legal</option>
         </select>
       </div>
 
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-        <input
-          type="file"
-          accept=".pdf,application/pdf"
-          multiple
-          onChange={handleFilesSelected}
-          className="hidden"
-          id="bulk-file-input"
-        />
-        <label
-          htmlFor="bulk-file-input"
-          className="cursor-pointer text-blue-600 hover:underline text-sm"
-        >
-          Click to select PDF files
-        </label>
-        <p className="text-xs text-gray-500 mt-1">
-          Max 50 files per batch, 20MB each
-        </p>
-      </div>
+      <Card className="border-2 border-dashed">
+        <CardContent className="p-6 text-center">
+          <input
+            type="file"
+            accept=".pdf,application/pdf"
+            multiple
+            onChange={handleFilesSelected}
+            className="hidden"
+            id="bulk-file-input"
+          />
+          <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <label
+            htmlFor="bulk-file-input"
+            className="cursor-pointer text-primary hover:underline text-sm font-medium"
+          >
+            Click to select PDF files
+          </label>
+          <p className="text-xs text-muted-foreground mt-1">
+            Max 50 files per batch, 20MB each
+          </p>
+        </CardContent>
+      </Card>
 
       {files.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium mb-2">
+          <h4 className="text-sm font-medium text-foreground mb-2">
             {files.length} file(s) selected
           </h4>
           <div className="max-h-48 overflow-y-auto space-y-1">
             {files.map((f, i) => (
               <div
                 key={`${f.name}-${i}`}
-                className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded text-sm"
+                className="flex items-center justify-between bg-muted px-3 py-2 rounded-md text-sm"
               >
-                <span className="truncate">{f.name}</span>
+                <span className="truncate text-foreground">{f.name}</span>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-gray-400 text-xs">
+                  <span className="text-muted-foreground text-xs">
                     {(f.size / 1024 / 1024).toFixed(1)}MB
                   </span>
                   <button
                     onClick={() => removeFile(i)}
-                    className="text-red-400 hover:text-red-600"
+                    className="text-destructive/60 hover:text-destructive"
                   >
-                    &times;
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -123,13 +128,13 @@ export function FilePicker({ onJobCreated }: Props) {
         </div>
       )}
 
-      <button
+      <Button
         onClick={handleUpload}
         disabled={files.length === 0 || uploading}
-        className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
       >
+        <Upload className="h-4 w-4 mr-2" />
         {uploading ? "Uploading..." : `Upload ${files.length} File(s)`}
-      </button>
+      </Button>
     </div>
   );
 }

@@ -1,7 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import type { BulkUploadJob } from "@/types/bulk-upload";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
 import { FilePicker } from "./_components/file-picker";
 
 export default function BulkUploadPage() {
@@ -13,18 +16,20 @@ export default function BulkUploadPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => router.push("/vendor/requests")}
-        className="text-sm text-blue-600 hover:underline mb-4 block"
+        className="mb-4"
       >
-        &larr; Back
-      </button>
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        Back
+      </Button>
 
-      <h1 className="text-2xl font-bold mb-2">Bulk Upload Reports</h1>
-      <p className="text-sm text-gray-600 mb-6">
-        Upload multiple PDF reports at once. Each report will be automatically processed
-        to extract property details.
-      </p>
+      <PageHeader
+        title="Bulk Upload Reports"
+        description="Upload multiple PDF reports at once. Each report will be automatically processed to extract property details."
+      />
 
       <FilePicker onJobCreated={handleJobCreated} />
     </div>
