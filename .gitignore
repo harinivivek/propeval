@@ -57,3 +57,6 @@ frontend/public/swe-worker-*.js
 
 # TypeScript build info
 frontend/tsconfig.tsbuildinfo
+
+# LLM Wiki (personal knowledge base)
+.wiki/
