@@ -2,15 +2,15 @@ services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-propeval}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
-      POSTGRES_DB: ${POSTGRES_DB:-propeval}
+      POSTGRES_USER: ${POSTGRES_USER:-getitright}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-getitright}
+      POSTGRES_DB: ${POSTGRES_DB:-getitright}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-propeval}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-getitright}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -34,9 +34,9 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     environment:
       POSTGRES_HOST: postgres
-      POSTGRES_USER: ${POSTGRES_USER:-propeval}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
-      POSTGRES_DB: ${POSTGRES_DB:-propeval}
+      POSTGRES_USER: ${POSTGRES_USER:-getitright}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-getitright}
+      POSTGRES_DB: ${POSTGRES_DB:-getitright}
       REDIS_HOST: redis
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/1
@@ -44,11 +44,14 @@ services:
       APP_ENV: local
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3020}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      USE_MANAGED_AGENT: ${USE_MANAGED_AGENT:-false}
+      OCR_MODEL: ${OCR_MODEL:-sonnet}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - ./backend/app:/app/app
       - media_data:/app/media
+      - ~/.claude:/home/appuser/.claude:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -62,16 +65,19 @@ services:
     command: celery -A app.jobs.celery_app worker --loglevel=info --pool=solo
     environment:
       POSTGRES_HOST: postgres
-      POSTGRES_USER: ${POSTGRES_USER:-propeval}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
-      POSTGRES_DB: ${POSTGRES_DB:-propeval}
+      POSTGRES_USER: ${POSTGRES_USER:-getitright}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-getitright}
+      POSTGRES_DB: ${POSTGRES_DB:-getitright}
       REDIS_HOST: redis
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      USE_MANAGED_AGENT: ${USE_MANAGED_AGENT:-false}
+      OCR_MODEL: ${OCR_MODEL:-sonnet}
     volumes:
       - ./backend/app:/app/app
       - media_data:/app/media
+      - ~/.claude:/home/appuser/.claude:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -85,9 +91,9 @@ services:
     command: celery -A app.jobs.celery_app beat --loglevel=info
     environment:
       POSTGRES_HOST: postgres
-      POSTGRES_USER: ${POSTGRES_USER:-propeval}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
-      POSTGRES_DB: ${POSTGRES_DB:-propeval}
+      POSTGRES_USER: ${POSTGRES_USER:-getitright}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-getitright}
+      POSTGRES_DB: ${POSTGRES_DB:-getitright}
       REDIS_HOST: redis
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2

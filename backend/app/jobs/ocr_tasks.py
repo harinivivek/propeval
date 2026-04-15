@@ -14,13 +14,20 @@ from app.models.report import Report
 logger = logging.getLogger(__name__)
 
 
-def _get_ocr_service():
-    """Create OCR service with Claude provider (lazy init)."""
-    import anthropic
-    from app.services.ocr import ClaudeOcrProvider, OcrService
+def _get_ocr_service(task_id: str | None = None):
+    """Create OCR service with the configured provider (lazy init)."""
+    from app.services.ocr import ClaudeOcrProvider, ManagedAgentOcrProvider, OcrService
 
-    client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-    provider = ClaudeOcrProvider(client=client, model=settings.OCR_MODEL)
+    if settings.USE_MANAGED_AGENT:
+        provider = ManagedAgentOcrProvider(
+            model=settings.OCR_MODEL,
+            task_id=task_id,
+        )
+    else:
+        import anthropic
+        client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+        provider = ClaudeOcrProvider(client=client, model=settings.OCR_MODEL)
+
     return OcrService(provider=provider)
 
 
@@ -35,7 +42,7 @@ def process_report_ocr(self, report_id: str):
     """Process a single report through OCR extraction."""
 
     async def _run():
-        service = _get_ocr_service()
+        service = _get_ocr_service(task_id=report_id)
         async with get_async_session_context() as db:
             result = await db.execute(
                 select(Report).where(Report.id == report_id)
@@ -69,7 +76,7 @@ def process_bulk_upload(job_id: str, report_ids: list[str]):
     """Process a batch of reports for bulk upload."""
 
     async def _run():
-        service = _get_ocr_service()
+        service = _get_ocr_service(task_id=job_id)
         batch_size = settings.OCR_BATCH_SIZE
         processed = 0
         failed = 0

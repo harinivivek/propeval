@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "propeval"
+name = "getitright"
 version = "0.1.0"
 description = "Property Valuation & Legal Reports Marketplace"
 authors = ["SeoyDS"]
@@ -24,6 +24,7 @@ httpx = "^0.28.0"
 python-docx = "^1.1.0"
 pymupdf = "^1.25.0"
 anthropic = ">=0.40.0"
+claude-agent-sdk = ">=0.1.48"
 pikepdf = ">=9.0.0"
 openpyxl = "^3.1.0"
 pillow = "^11.0.0"

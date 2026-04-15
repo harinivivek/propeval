@@ -24,8 +24,9 @@ class OcrService:
             full_path = f"{MEDIA_ROOT}/{report.uploaded_file_path}"
             result = await self._provider.extract(full_path)
 
+            provider_name = "claude-agent-sdk" if settings.USE_MANAGED_AGENT else "claude"
             report.content_json = result.to_content_json(
-                provider="claude",
+                provider=provider_name,
                 model=settings.OCR_MODEL,
             )
             report.status = ReportStatus.READY_TO_PUBLISH

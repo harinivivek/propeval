@@ -6,12 +6,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     POETRY_VERSION=1.8.5 \
     POETRY_VIRTUALENVS_CREATE=false
 
-# System deps
+# System deps (includes Node.js for Claude Agent SDK CLI)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     build-essential \
     tesseract-ocr \
+    nodejs npm \
     && rm -rf /var/lib/apt/lists/*
+
+# Claude CLI (required by claude-agent-sdk for OAuth-based extraction)
+RUN npm install -g @anthropic-ai/claude-code
 
 # WeasyPrint system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -30,8 +34,9 @@ RUN poetry install --no-interaction --no-ansi --no-root
 # Copy app code
 COPY . .
 
-# Non-root user
+# Non-root user (home dir needed for ~/.claude credentials mount)
 RUN useradd -m appuser && chown -R appuser:appuser /app
+RUN mkdir -p /home/appuser/.claude && chown appuser:appuser /home/appuser/.claude
 USER appuser
 
 EXPOSE 8000

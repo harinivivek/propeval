@@ -3,14 +3,14 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # App
-    APP_NAME: str = "PropEval"
+    APP_NAME: str = "GetItRight"
     APP_ENV: str = "local"
     DEBUG: bool = True
 
     # Database
-    POSTGRES_USER: str = "propeval"
-    POSTGRES_PASSWORD: str = "propeval"
-    POSTGRES_DB: str = "propeval"
+    POSTGRES_USER: str = "getitright"
+    POSTGRES_PASSWORD: str = "getitright"
+    POSTGRES_DB: str = "getitright"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
 
@@ -72,6 +72,11 @@ class Settings(BaseSettings):
     OCR_MAX_PAGES: int = 20
     OCR_BATCH_SIZE: int = 5
     OCR_TASK_TIMEOUT: int = 300
+
+    # Claude Agent SDK OCR (set USE_MANAGED_AGENT=true to enable)
+    # Uses OAuth credentials from ~/.claude/.credentials.json (via `claude login`)
+    # No API key needed — authenticates via Claude Max subscription
+    USE_MANAGED_AGENT: bool = False
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 
