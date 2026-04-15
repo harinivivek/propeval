@@ -91,4 +91,5 @@ class ExtractedFieldUpdate(BaseModel):
 class ExtractedDataUpdate(BaseModel):
     """Payload for updating extracted report data."""
     anchor_fields: dict[str, ExtractedFieldUpdate] = {}
+    sections: dict[str, dict[str, ExtractedFieldUpdate]] = {}
     additional_fields: dict[str, ExtractedFieldUpdate] = {}

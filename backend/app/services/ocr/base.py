@@ -9,14 +9,16 @@ class ExtractionResult:
     additional_fields: dict[str, dict]
     raw_text: str
     page_count: int
+    sections: dict[str, dict] = field(default_factory=dict)
     usage: dict = field(default_factory=dict)
 
     def to_content_json(self, provider: str, model: str) -> dict:
         return {
-            "extraction_version": 1,
+            "extraction_version": 2,
             "provider": provider,
             "model": model,
             "anchor_fields": self.anchor_fields,
+            "sections": self.sections,
             "additional_fields": self.additional_fields,
             "raw_text": self.raw_text,
             "extracted_at": datetime.now(timezone.utc).isoformat(),

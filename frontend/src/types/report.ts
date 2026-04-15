@@ -19,6 +19,7 @@ export interface ContentJson {
   provider: string;
   model: string;
   anchor_fields: Record<string, ExtractedField>;
+  sections?: Record<string, Record<string, ExtractedField>>;
   additional_fields: Record<string, ExtractedField>;
   raw_text: string;
   extracted_at: string;

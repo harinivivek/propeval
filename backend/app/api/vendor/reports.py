@@ -196,9 +196,13 @@ async def update_extracted_data(
         raise HTTPException(status_code=404, detail="Report not found")
 
     anchor = {k: v.model_dump() for k, v in payload.anchor_fields.items()}
+    sections = {
+        sk: {fk: fv.model_dump() for fk, fv in sv.items()}
+        for sk, sv in payload.sections.items()
+    }
     additional = {k: v.model_dump() for k, v in payload.additional_fields.items()}
 
-    await report_service.update_extracted_data(db, report, anchor, additional)
+    await report_service.update_extracted_data(db, report, anchor, additional, sections)
     return report
 
 

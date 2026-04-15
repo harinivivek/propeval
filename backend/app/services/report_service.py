@@ -153,18 +153,22 @@ async def update_extracted_data(
     report: Report,
     anchor_fields: dict,
     additional_fields: dict,
+    sections: dict | None = None,
 ) -> Report:
     """Update report's content_json with edited extraction data."""
     if not report.content_json:
         report.content_json = {
-            "extraction_version": 1,
+            "extraction_version": 2,
             "provider": "manual",
             "anchor_fields": {},
+            "sections": {},
             "additional_fields": {},
         }
 
     content = dict(report.content_json)
     content["anchor_fields"] = anchor_fields
+    if sections is not None:
+        content["sections"] = sections
     content["additional_fields"] = additional_fields
     report.content_json = content
     await db.flush()

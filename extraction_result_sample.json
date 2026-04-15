@@ -1,0 +1,444 @@
+{
+  "extraction_version": 2,
+  "provider": "claude",
+  "model": "claude-sonnet-4-6",
+  "anchor_fields": {
+    "property_address": {
+      "value": "No. 09, Ramasamy Nagar, Uruvaiyar, Villianur, Puducherry – 605 110",
+      "confidence": 0.95,
+      "type": "text"
+    },
+    "property_type": {
+      "value": "residential",
+      "confidence": 0.98,
+      "type": "text"
+    },
+    "valuation_amount": {
+      "value": 3770000,
+      "confidence": 0.95,
+      "type": "currency"
+    },
+    "built_up_area": {
+      "value": "1255 Sqft (as per approved plan)",
+      "confidence": 0.92,
+      "type": "text"
+    },
+    "owner_name": {
+      "value": "M/s. Bhavani Plastics",
+      "confidence": 0.95,
+      "type": "text"
+    }
+  },
+  "sections": {
+    "general": {
+      "customer_id": {
+        "value": "NA",
+        "confidence": 0.9,
+        "type": "text"
+      },
+      "property_address_with_floor_pin": {
+        "value": "Plot No. 09, R S No. 3/3, Patta No. 98, Ramasamy Nagar, Uruvaiyar Village, Villianur commune SRO – Villianur, Puducherry – 605 110",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "nearest_landmark": {
+        "value": "About 200 m from Achariya College",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "cooperative_housing_society": {
+        "value": "NA",
+        "confidence": 0.5,
+        "type": "text"
+      },
+      "builder_developer": {
+        "value": "Self-Construction",
+        "confidence": 0.7,
+        "type": "text"
+      },
+      "contact_detail": {
+        "value": "Mr. Siva Vinayagavel - 9789434119",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "case_type": {
+        "value": "NA",
+        "confidence": 0.9,
+        "type": "text"
+      },
+      "current_owner_name": {
+        "value": "Mrs. Jothi (as per sale deed doc no. 19927, Dated: 18.09.2019)",
+        "confidence": 0.9,
+        "type": "text"
+      },
+      "address_of_property": {
+        "value": "No. 09, Ramasamy Nagar, Uruvaiyar, Villianur, Puducherry – 605 110",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "date_of_inspection": {
+        "value": "26.04.2021",
+        "confidence": 0.98,
+        "type": "date"
+      }
+    },
+    "locality": {
+      "vicinity": {
+        "value": "Medium locality, Developing area",
+        "confidence": 0.9,
+        "type": "text"
+      },
+      "type_property_as_per_approvals": {
+        "value": "Residential Premise",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "proximity_civic_amenities": {
+        "value": "Within 01 Kms from civic amenities/public transport",
+        "confidence": 0.9,
+        "type": "text"
+      },
+      "nearest_railway_station": {
+        "value": "Villianur Railway Station, About 02 kms",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "nearest_bus_stop": {
+        "value": "College Bus Stop, About 300 m",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "conditions_of_approach": {
+        "value": "Good – 20 Feet wide road, Legal approach Clear",
+        "confidence": 0.92,
+        "type": "text"
+      },
+      "plot_demarcated_at_site": {
+        "value": "No – Property was compounded",
+        "confidence": 0.9,
+        "type": "text"
+      },
+      "land_freehold_or_leasehold": {
+        "value": "Free Hold",
+        "confidence": 0.98,
+        "type": "text"
+      },
+      "identified_through_person_met": {
+        "value": "Mr. Siva Vinayagavel, identified with help of client and Key plan",
+        "confidence": 0.9,
+        "type": "text"
+      }
+    },
+    "property": {
+      "property_usage_observation": {
+        "value": "Residential & Vacant (GF – Self, FF – Vacant, SF – Under Construction 95%)",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "additional_amenities": {
+        "value": "Tiles flooring, Good interiors and exteriors",
+        "confidence": 0.8,
+        "type": "text"
+      },
+      "no_of_stories": {
+        "value": 3,
+        "confidence": 0.95,
+        "type": "number"
+      },
+      "occupied_by": {
+        "value": "Self & Tenant & Under Construction",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "relationship_occupant_customer": {
+        "value": "NA",
+        "confidence": 0.7,
+        "type": "text"
+      },
+      "within_municipal_limits": {
+        "value": "No – Commune Panchayath Limits",
+        "confidence": 0.95,
+        "type": "text"
+      }
+    },
+    "boundaries": {
+      "north_as_per_deed": {
+        "value": "Street",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "south_as_per_deed": {
+        "value": "Plot no. 22",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "east_as_per_deed": {
+        "value": "Street",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "west_as_per_deed": {
+        "value": "Plot no. 10",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "north_as_per_site": {
+        "value": "20 ft wide Street",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "south_as_per_site": {
+        "value": "Vacant Plot",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "east_as_per_site": {
+        "value": "Vacant Land",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "west_as_per_site": {
+        "value": "Vacant Plot",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "boundaries_match": {
+        "value": "Yes (but Eastern side boundary couldn't be verified)",
+        "confidence": 0.85,
+        "type": "text"
+      }
+    },
+    "structural_details": {
+      "type_of_structure": {
+        "value": "RCC Structure",
+        "confidence": 0.98,
+        "type": "text"
+      },
+      "no_of_floors": {
+        "value": 3,
+        "confidence": 0.95,
+        "type": "number"
+      },
+      "no_of_lifts": {
+        "value": 0,
+        "confidence": 0.95,
+        "type": "number"
+      },
+      "internal_composition": {
+        "value": "GF – 01 Unit 2BHK, FF – 01 Unit, SF – 02 Units 1BHK (Under Construction)",
+        "confidence": 0.9,
+        "type": "text"
+      },
+      "age_of_property": {
+        "value": "New Built (<1 years) & Under Construction",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "estimated_future_life": {
+        "value": "60 years",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "construction_stage": {
+        "value": "GF & FF – 100% Complete, SF – 95% Complete",
+        "confidence": 0.92,
+        "type": "text"
+      },
+      "recommendation": {
+        "value": "Positive",
+        "confidence": 0.95,
+        "type": "text"
+      }
+    },
+    "quality_of_construction": {
+      "appearance_maintenance": {
+        "value": "Good (Exteriors and Interiors)",
+        "confidence": 0.9,
+        "type": "text"
+      },
+      "flooring_finishing": {
+        "value": "Tiles flooring",
+        "confidence": 0.9,
+        "type": "text"
+      }
+    },
+    "technical_approvals": {
+      "approved_plan_details": {
+        "value": "No. PPA/2969/13956/Z (VCP)/2019, Date: 23.06.2020, Approved by Member Secretary",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "legal_document_details": {
+        "value": "Sale deed in favour of Mrs. Jothi, doc no. 19927, Dated: 18.09.2019",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "violations_observed": {
+        "value": "100% Horizontal Deviation, Floor deviation noticed (Second Floor unapproved)",
+        "confidence": 0.9,
+        "type": "text"
+      },
+      "structure_confirming_byelaws": {
+        "value": "Residential zone as per PPA master plan, building approved by Member Secretary – PPA",
+        "confidence": 0.85,
+        "type": "text"
+      }
+    },
+    "valuation_fair_market": {
+      "area_as_per_measurement": {
+        "value": "2477 Sqft (site measurement)",
+        "confidence": 0.92,
+        "type": "text"
+      },
+      "area_as_per_approved_plan": {
+        "value": "1255 Sqft",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "area_considered_for_valuation": {
+        "value": "1255 Sqft (least BUA as per approved plan)",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "rate_per_sqft": {
+        "value": 2000,
+        "confidence": 0.95,
+        "type": "currency"
+      },
+      "final_value_comparison_method": {
+        "value": 3770000,
+        "confidence": 0.95,
+        "type": "currency"
+      }
+    },
+    "valuation_land_building": {
+      "land_area_as_per_deed": {
+        "value": "840 Sqft",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "land_area_as_per_measurement": {
+        "value": "840 Sqft",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "land_area_considered": {
+        "value": "840 Sqft",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "land_rate": {
+        "value": 1500,
+        "confidence": 0.95,
+        "type": "currency"
+      },
+      "land_value": {
+        "value": 1260000,
+        "confidence": 0.95,
+        "type": "currency"
+      },
+      "area_considered_lb": {
+        "value": "1255 Sqft",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "construction_rate": {
+        "value": 2000,
+        "confidence": 0.95,
+        "type": "currency"
+      },
+      "construction_cost_completion": {
+        "value": 2510000,
+        "confidence": 0.95,
+        "type": "currency"
+      }
+    },
+    "recommended_valuation": {
+      "stage_of_construction": {
+        "value": "100% & 95%",
+        "confidence": 0.95,
+        "type": "text"
+      },
+      "stage_percentage": {
+        "value": "100% (GF & FF), 95% (SF)",
+        "confidence": 0.92,
+        "type": "text"
+      },
+      "recommended_disbursement_pct": {
+        "value": "100%",
+        "confidence": 0.9,
+        "type": "text"
+      },
+      "recommended_mortgage_valuation": {
+        "value": 3770000,
+        "confidence": 0.95,
+        "type": "currency"
+      },
+      "realizable_value": {
+        "value": 3016000,
+        "confidence": 0.95,
+        "type": "currency"
+      },
+      "longitude_latitude": {
+        "value": "11.903115, 79.750645",
+        "confidence": 0.98,
+        "type": "text"
+      }
+    },
+    "remarks": {
+      "remarks": {
+        "value": "Second floor under construction was unapproved portion and not considered for valuation. Eastern side boundary per document is street, per site is vacant land - couldn't be verified. Property lies 100m from Gingee River but land classification is residential zone in PPA master plan. Guideline value for land in RS No. 3/3 is Rs. 210/- per sqft.",
+        "confidence": 0.9,
+        "type": "text"
+      }
+    },
+    "google_location": {
+      "google_location_url": {
+        "value": "GPS Co-ordinates: 11.903115, 79.750645 (Google Maps location map included)",
+        "confidence": 0.95,
+        "type": "text"
+      }
+    },
+    "photos": {
+      "photos_description": {
+        "value": "6 site images: GF Hall view, GF Kitchen view, FF Hall view, FF & SF Kitchen view, Front Elevation view, Road view",
+        "confidence": 0.95,
+        "type": "text"
+      }
+    }
+  },
+  "additional_fields": {
+    "guideline_value": {
+      "value": "Rs. 210/- per Sqft",
+      "confidence": 0.95,
+      "type": "currency"
+    },
+    "forced_sale_value": {
+      "value": 3016000,
+      "confidence": 0.95,
+      "type": "currency"
+    },
+    "valuer_name": {
+      "value": "Stiffeners Property Valuers & Consultants",
+      "confidence": 0.98,
+      "type": "text"
+    },
+    "engineer_name": {
+      "value": "Mr. Muralidharan (Sr. Technical Officer)",
+      "confidence": 0.95,
+      "type": "text"
+    },
+    "report_date": {
+      "value": "28.04.2021",
+      "confidence": 0.98,
+      "type": "date"
+    }
+  },
+  "raw_text": "(extracted text from 9 pages)",
+  "extracted_at": "2026-04-15T10:00:00Z",
+  "page_count": 9,
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0
+  }
+}
