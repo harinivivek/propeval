@@ -62,7 +62,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: celery -A app.jobs.celery_app worker --loglevel=info --pool=solo
+    command: celery -A app.jobs.celery_app worker --loglevel=info --pool=solo --include=app.jobs.ocr_tasks,app.jobs.auto_accept,app.jobs.broadcast_tasks,app.jobs.billing_tasks,app.jobs.cleanup_tasks,app.jobs.tier_tasks
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${POSTGRES_USER:-getitright}

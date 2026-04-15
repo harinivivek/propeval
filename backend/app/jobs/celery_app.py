@@ -4,7 +4,7 @@ from celery.schedules import crontab
 from app.core.config import settings
 
 celery_app = Celery(
-    "propeval",
+    "getitright",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
 )
@@ -49,4 +49,11 @@ celery_app.conf.beat_schedule = {
 }
 
 # Auto-discover tasks in app.jobs package
-celery_app.autodiscover_tasks(["app.jobs"])
+celery_app.autodiscover_tasks([
+    "app.jobs.ocr_tasks",
+    "app.jobs.auto_accept",
+    "app.jobs.broadcast_tasks",
+    "app.jobs.billing_tasks",
+    "app.jobs.cleanup_tasks",
+    "app.jobs.tier_tasks",
+])
