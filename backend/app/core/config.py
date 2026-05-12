@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "propeval"
     POSTGRES_PASSWORD: str = "propeval"
     POSTGRES_DB: str = "propeval"
-    POSTGRES_HOST: str = "localhost"
+    POSTGRES_HOST: str = "postgres"
     POSTGRES_PORT: int = 5432
 
     @property
@@ -29,9 +29,9 @@ class Settings(BaseSettings):
         )
 
     # Redis
-    REDIS_HOST: str = "localhost"
+    REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
-    REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_URL: str = "redis://redis:6379/0"
 
     # JWT
     JWT_SECRET_KEY: str = "change-me-in-production"
@@ -49,11 +49,12 @@ class Settings(BaseSettings):
     DEV_OTP: str = "123456"
 
     # Celery
-    CELERY_BROKER_URL: str = "redis://localhost:6379/1"
-    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
+    CELERY_BROKER_URL: str = "redis://redis:6379/1"
+    CELERY_RESULT_BACKEND: str = "redis://redis:6379/2"
 
     # CORS
-    CORS_ORIGINS: str = "http://localhost:3000"
+    #CORS_ORIGINS: str = "http://localhost:3020"
+    CORS_ORIGINS: str = "http://localhost:3020,https://propeval-dev.getitright.co.in"
 
     # Media
     MEDIA_ROOT: str = "/app/media"

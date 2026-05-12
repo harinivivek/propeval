@@ -41,7 +41,7 @@ async def bulk_upload(
 ):
     """Upload multiple PDF reports for bulk processing."""
     vendor_id = await _get_vendor_id(db, current_user.id)
-
+    print(f"Received bulk upload request from vendor {vendor_id} with {len(files)} files")
     if len(files) > MAX_BULK_UPLOAD_FILES:
         raise HTTPException(
             status_code=400,
@@ -49,6 +49,7 @@ async def bulk_upload(
         )
 
     category = ReportCategory(report_category)
+    print(f"Report category: {category}")
 
     job = BulkUploadJob(
         vendor_id=vendor_id,
@@ -60,7 +61,7 @@ async def bulk_upload(
 
     from app.services.system_config_service import get_config_values
     config = await get_config_values()
-
+    print(f"Max upload size (MB): {config['max_upload_size_mb']}")
     report_ids = []
     for upload_file in files:
         try:
