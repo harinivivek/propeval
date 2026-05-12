@@ -7,24 +7,75 @@ from app.services.ocr.base import ExtractionResult, OcrProvider
 
 EXTRACTION_PROMPT = """You are analyzing a property valuation or legal due diligence report from India.
 Extract all relevant structured data from this document.
+Note: Section headings in the document may not match these exact labels; identify sections based on semantic similarity and context (e.g., "Building Specifications" should be mapped to "structural_details").
 
 You MUST return a JSON object with exactly two keys:
-- "anchor_fields": Always try to extract these fields:
-  - property_address (text): Full property address
-  - property_type (text): residential, commercial, industrial, or agricultural
-  - valuation_amount (currency): Market/fair value amount in INR
-  - built_up_area (text): Built-up area with unit
-  - owner_name (text): Property owner or loan applicant name
-- "additional_fields": Any other relevant fields you find (boundaries, plot number, construction year, encumbrances, occupation status, survey number, etc.)
+- "anchor_fields": Extract these primary fields for indexing:
+    - property_address: Full address with floor no & pin code
+    - property_type: Must be one of: residential, commercial, industrial, or agricultural
+    - valuation_amount: Final Recommended Net Mortgage Valuation (Comparison Method)
+    - built_up_area: Total built-up area used for valuation
+    - owner_name: Name of the current owner
+    - latitude: Decimal latitude
+    - longitude: Decimal longitude
+
+- "additional_fields": Organize the following sections:
+    - general: {
+        customer_id, nearest_landmark, society_name, builder_developer, 
+        contact_detail, case_type, inspection_date
+      }
+    - locality: {
+        ward_no, vicinity, property_type_per_approvals, proximity_civic_amenities,
+        nearest_railway_station, nearest_bus_stop, nearest_hospital, 
+        approach_conditions, plot_demarcated, tenure_type (freehold/leasehold)
+      }
+    - property_details: {
+        usage_observed, additional_amenities, no_of_stories, occupied_by,
+        occupant_relationship, name_on_board, within_municipal_limits
+      }
+    - boundaries: {
+        as_per_deed: {north, south, east, west},
+        as_per_site: {north, south, east, west},
+        matches_documentation: boolean
+      }
+    - structural_details: {
+        structure_type, no_of_floors, no_of_wings, flats_per_floor, 
+        no_of_lifts, internal_composition, age_of_property, future_life, 
+        construction_stage, recommendation
+      }
+    - quality_of_construction: {
+        beam_column_structure, maintenance_appearance, flooring_finishing,
+        roofing_terracing, fixtures_quality
+      }
+    - technical_approvals: {
+        layout_plan_details, approved_plan_no_date, construction_permission_no_date,
+        legal_document_details, violations_observed, confirm_local_byelaws
+      }
+    - valuation_fmv: {
+        area_measurement, area_agreement, area_approved_plan, area_considered,
+        rate_per_sqft, fmv_value, parking_value, acquisition_cost, final_comparison_value
+      }
+    - valuation_land_building: {
+        land: {area_plan, area_deed, area_measurement, area_considered, rate, value},
+        construction: {area_measurement, area_agreement, area_approved_plan, area_considered, 
+                       loading, built_up_area, rate, cost_at_completion, current_stage_pct,
+                       proportionate_cost},
+        value_as_on_date, value_on_completion
+      }
+    - recommended_valuation: {
+        stage_of_construction, stage_pct, recommended_disbursement_pct, 
+        realizable_value, distressed_valuation_80pct, rental_value_per_month,
+        reconstruction_cost_insurable_value
+      }
+    - remarks: Overall summary or specific notes
+    - photos: List any photo captions or descriptions found
 
 For each field, provide:
 - "value": The extracted value
-- "confidence": Your confidence score from 0.0 to 1.0
-- "type": One of "text", "number", "currency", "date"
+- "confidence": Your confidence score (0.0 to 1.0)
+- "type": One of "text", "number", "currency", "date", "boolean"
 
-If a field is not found in the document, omit it from the output.
-Return ONLY valid JSON, no other text."""
-
+If a field or section is not found in the document, omit it. Return ONLY valid JSON."""
 
 class ClaudeOcrProvider(OcrProvider):
     def __init__(self, client, model: str = "claude-sonnet-4-6"):
