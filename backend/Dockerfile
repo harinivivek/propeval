@@ -31,7 +31,7 @@ RUN poetry install --no-interaction --no-ansi --no-root
 COPY . .
 
 # Non-root user
-RUN useradd -m appuser && chown -R appuser:appuser /app
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000
