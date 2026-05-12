@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
       POSTGRES_DB: ${POSTGRES_DB:-propeval}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,7 +18,7 @@ services:
   redis:
     image: redis:7
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_PORT:-6380}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -38,14 +38,15 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
       POSTGRES_DB: ${POSTGRES_DB:-propeval}
       REDIS_HOST: redis
+      REDIS_PORT: 6379
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
       APP_ENV: local
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3020}
+      CORS_ORIGINS: "${CORS_ORIGINS:-http://localhost:3020,https://propeval-dev.getitright.co.in}"
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "${BACKEND_PORT:-8020}:8000"
     volumes:
       - ./backend/app:/app/app
       - media_data:/app/media
@@ -103,7 +104,7 @@ services:
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8020}
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "${FRONTEND_PORT:-3020}:3000"
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
