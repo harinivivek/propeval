@@ -69,7 +69,8 @@ class Settings(BaseSettings):
 
     # OCR
     ANTHROPIC_API_KEY: str = ""
-    OCR_MODEL: str = "claude-sonnet-4-6"
+    OPENROUTER_API_KEY: str = ""
+    OCR_MODEL: str = "openrouter/free"
     OCR_MAX_PAGES: int = 20
     OCR_BATCH_SIZE: int = 5
     OCR_TASK_TIMEOUT: int = 300

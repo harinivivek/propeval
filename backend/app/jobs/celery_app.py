@@ -40,5 +40,14 @@ celery_app.conf.beat_schedule = {
     },
 }
 
-# Auto-discover tasks in app.jobs package
-celery_app.autodiscover_tasks(["app.jobs"])
+# Explicitly import task modules to ensure they are registered in the worker
+celery_app.conf.imports = [
+    "app.jobs.ocr_tasks",
+    "app.jobs.broadcast_tasks",
+    "app.jobs.auto_accept",
+    "app.jobs.cleanup_tasks",
+    "app.jobs.billing_tasks",
+]
+
+# Fallback to autodiscovery
+celery_app.autodiscover_tasks(["app.jobs"], force=True)

@@ -28,6 +28,7 @@ export interface ContentJson {
 
 export interface Report {
   id: string;
+  request_id: string | null;
   vendor_id: string;
   report_category: "VALUATION" | "LEGAL";
   status: ReportStatus;

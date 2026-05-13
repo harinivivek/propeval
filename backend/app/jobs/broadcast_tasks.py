@@ -1,14 +1,13 @@
 from datetime import datetime, timezone
-
+from celery import shared_task
 from sqlalchemy import select
 
 from app.core.database import get_async_session_context
-from app.jobs.celery_app import celery_app
 from app.models.enums import BroadcastStatus
 from app.models.request import ReportRequest, RequestBroadcast
 
 
-@celery_app.task(name="app.jobs.broadcast_tasks.check_broadcast_rounds")
+@shared_task(name="app.jobs.broadcast_tasks.check_broadcast_rounds")
 def check_broadcast_rounds():
     """Every 5 min: expire overdue broadcasts and start next round."""
     import asyncio

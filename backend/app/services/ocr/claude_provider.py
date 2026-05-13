@@ -31,6 +31,10 @@ class ClaudeOcrProvider(OcrProvider):
         self._client = client
         self._model = model
 
+    @property
+    def name(self) -> str:
+        return "openrouter" if hasattr(self._client, "chat") else "claude"
+
     def _pdf_to_images(self, pdf_path: str, max_pages: int = 20) -> list[bytes]:
         """Convert PDF pages to PNG images."""
         images = []
@@ -45,24 +49,57 @@ class ClaudeOcrProvider(OcrProvider):
         """Extract structured data from PDF using Claude vision."""
         images = self._pdf_to_images(pdf_path)
         page_count = len(images)
+        print(f"Extracting from {page_count} pages using model {self._model}...")
+
+        # Detect if we are using OpenAI (OpenRouter) or Anthropic SDK
+        is_openai = hasattr(self._client, "chat")
 
         content = []
-        for i, img_bytes in enumerate(images):
-            b64 = base64.b64encode(img_bytes).decode("utf-8")
-            content.append({
-                "type": "image",
-                "source": {"type": "base64", "media_type": "image/png", "data": b64},
-            })
-            if i == 0:
-                content.append({"type": "text", "text": EXTRACTION_PROMPT})
+        if is_openai:
+            content.append({"type": "text", "text": EXTRACTION_PROMPT})
+            for img_bytes in images:
+                b64 = base64.b64encode(img_bytes).decode("utf-8")
+                content.append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/png;base64,{b64}"}
+                })
+        else:
+            for i, img_bytes in enumerate(images):
+                b64 = base64.b64encode(img_bytes).decode("utf-8")
+                content.append({
+                    "type": "image",
+                    "source": {"type": "base64", "media_type": "image/png", "data": b64},
+                })
+                if i == 0:
+                    content.append({"type": "text", "text": EXTRACTION_PROMPT})
 
-        response = await self._client.messages.create(
-            model=self._model,
-            max_tokens=4096,
-            messages=[{"role": "user", "content": content}],
-        )
+        if is_openai:
+            response = await self._client.chat.completions.create(
+                model=self._model,
+                max_tokens=4096,
+                messages=[{"role": "user", "content": content}],
+            )
+            raw_text = response.choices[0].message.content
+            print("Raw OCR Output:", raw_text)
+            usage = {
+                "input_tokens": response.usage.prompt_tokens,
+                "output_tokens": response.usage.completion_tokens,
+            }
+            if raw_text is None:
+                raise ValueError("OpenRouter API returned no content for extraction.")
 
-        raw_text = response.content[0].text
+        else:
+            response = await self._client.messages.create(
+                model=self._model,
+                max_tokens=4096,
+                messages=[{"role": "user", "content": content}],
+            )
+            raw_text = response.content[0].text
+            usage = {
+                "input_tokens": response.usage.input_tokens,
+                "output_tokens": response.usage.output_tokens,
+            }
+
         parsed = json.loads(raw_text)
 
         return ExtractionResult(
@@ -70,8 +107,5 @@ class ClaudeOcrProvider(OcrProvider):
             additional_fields=parsed.get("additional_fields", {}),
             raw_text=raw_text,
             page_count=page_count,
-            usage={
-                "input_tokens": response.usage.input_tokens,
-                "output_tokens": response.usage.output_tokens,
-            },
+            usage=usage,
         )

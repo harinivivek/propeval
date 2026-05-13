@@ -3,8 +3,7 @@ import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-
-from app.jobs.celery_app import celery_app
+from celery import shared_task
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +108,7 @@ async def _run_cleanup():
         )
 
 
-@celery_app.task(bind=True, name="app.jobs.cleanup_tasks.cleanup_orphaned_files")
+@shared_task(bind=True, name="app.jobs.cleanup_tasks.cleanup_orphaned_files")
 def cleanup_orphaned_files(self):
     """Weekly cleanup of orphaned media files."""
     logger.info("Starting orphaned file cleanup")

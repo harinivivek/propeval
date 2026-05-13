@@ -328,20 +328,28 @@ async def get_vendor_reports_table(
     sort_col = sort_map.get(sort_by, Report.report_date)
     order = sort_col.desc() if sort_order == "desc" else sort_col.asc()
 
-    stmt = base.order_by(order).offset((page - 1) * page_size).limit(page_size)
-    reports = (await db.execute(stmt)).scalars().all()
+    # Join with RequestAcceptance to get the request_id for linking in the dashboard
+    stmt = (
+        select(Report, RequestAcceptance.request_id)
+        .outerjoin(RequestAcceptance, RequestAcceptance.report_id == Report.id)
+        .where(Report.vendor_id == vendor_id, Report.is_active == True)
+        .order_by(order).offset((page - 1) * page_size).limit(page_size)
+    )
+    results = (await db.execute(stmt)).all()
 
     return [
         {
-            "id": str(r.id),
-            "report_date": str(r.report_date) if r.report_date else None,
-            "property_address": r.property_address,
-            "report_category": r.report_category.value if hasattr(r.report_category, "value") else str(r.report_category),
-            "property_type": r.property_type.value if r.property_type and hasattr(r.property_type, "value") else (str(r.property_type) if r.property_type else None),
-            "status": r.status.value if hasattr(r.status, "value") else str(r.status),
-            "valuation_amount": str(r.valuation_amount) if r.valuation_amount else None,
+            "id": str(r.Report.id),
+            "request_id": str(r.request_id) if r.request_id else None,
+            "report_date": str(r.Report.report_date) if r.Report.report_date else None,
+            "property_address": r.Report.property_address,
+            "report_category": r.Report.report_category.value if hasattr(r.Report.report_category, "value") else str(r.Report.report_category),
+            "property_type": r.Report.property_type.value if r.Report.property_type and hasattr(r.Report.property_type, "value") else (str(r.Report.property_type) if r.Report.property_type else None),
+            "status": r.Report.status.value if hasattr(r.Report.status, "value") else str(r.Report.status),
+            "valuation_amount": str(r.Report.valuation_amount) if r.Report.valuation_amount else None,
+            "content_json": r.Report.content_json,
         }
-        for r in reports
+        for r in results
     ], total
 
 
@@ -771,6 +779,7 @@ async def get_admin_reports_table(
             Report.property_type,
             Report.status,
             Report.valuation_amount,
+            Report.content_json,
         )
         .join(Vendor, Vendor.id == Report.vendor_id)
     )
@@ -826,6 +835,7 @@ async def get_admin_reports_table(
             "property_type": r.property_type.value if r.property_type and hasattr(r.property_type, "value") else None,
             "status": r.status.value if hasattr(r.status, "value") else str(r.status),
             "valuation_amount": str(r.valuation_amount) if r.valuation_amount else None,
+            "content_json": r.content_json,
         })
 
     return result, total

@@ -1,16 +1,15 @@
 from datetime import datetime, timedelta, timezone
-
+from celery import shared_task
 from sqlalchemy import select
 
 from app.core.constants import AUTO_ACCEPT_DAYS
 from app.core.database import get_async_session_context
-from app.jobs.celery_app import celery_app
 from app.models.enums import LenderRequestStatus
 from app.models.report import Report
 from app.models.request import ReportRequest, RequestAcceptance
 
 
-@celery_app.task(name="app.jobs.auto_accept.auto_accept_reports")
+@shared_task(name="app.jobs.auto_accept.auto_accept_reports")
 def auto_accept_reports():
     """Daily task: auto-accept reports not reviewed within AUTO_ACCEPT_DAYS."""
     import asyncio

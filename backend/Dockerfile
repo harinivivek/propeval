@@ -7,31 +7,36 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     POETRY_VIRTUALENVS_CREATE=false
 
 # System deps
+# Combined System and WeasyPrint dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     build-essential \
     tesseract-ocr \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libcairo2 \
+    libffi-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# WeasyPrint system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 \
-    libcairo2 libffi-dev && rm -rf /var/lib/apt/lists/*
 
 # Poetry
 RUN pip install --no-cache-dir "poetry==${POETRY_VERSION}"
 
-WORKDIR /app
+# Create a non-privileged user with a home directory
+RUN groupadd -r appuser && useradd -m -r -g appuser -u 1000 appuser
 
-# Install dependencies
+WORKDIR /app
+RUN chown appuser:appuser /app
+
+# Copy dependency files first for better caching
 COPY pyproject.toml poetry.lock* ./
+
+# Install dependencies as root (needed because virtualenvs are disabled)
 RUN poetry install --no-interaction --no-ansi --no-root
 
 # Copy app code
-COPY . .
+COPY --chown=appuser:appuser . .
 
-# Non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000

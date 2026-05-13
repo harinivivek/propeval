@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.constants import ALLOWED_CONTENT_TYPES, MAX_UPLOAD_SIZE_MB, MEDIA_ROOT, REPORTS_DIR, REQUIRED_REPORT_FIELDS
 from app.models.enums import (
     LenderRequestStatus,
+    PropertyType,
     ReportCategory,
     ReportStatus,
     VendorRequestStatus,
@@ -148,6 +149,44 @@ def validate_for_publish(content_json: dict | None) -> list[str]:
     return missing
 
 
+def sync_report_from_extraction(report: Report) -> None:
+    """Sync core fields from content_json to top-level columns for listing and search."""
+    if not report.content_json:
+        return
+
+    anchor = report.content_json.get("anchor_fields", {})
+
+    if "valuation_amount" in anchor:
+        val = anchor["valuation_amount"].get("value")
+        if val:
+            try:
+                # Clean common currency formatting
+                clean_val = str(val).replace(",", "").replace("₹", "").replace("INR", "").strip()
+                report.valuation_amount = Decimal(clean_val)
+            except (ValueError, TypeError, ArithmeticError):
+                pass
+
+    if "property_address" in anchor:
+        addr = anchor["property_address"].get("value")
+        if addr:
+            report.property_address = addr
+
+    if "owner_name" in anchor:
+        name = anchor["owner_name"].get("value")
+        if name:
+            report.loan_applicant_name = name
+
+    if "property_type" in anchor:
+        pt_val = anchor["property_type"].get("value")
+        if pt_val:
+            try:
+                pt_upper = str(pt_val).upper()
+                if pt_upper in PropertyType.__members__:
+                    report.property_type = PropertyType(pt_upper)
+            except (ValueError, KeyError):
+                pass
+
+
 async def update_extracted_data(
     db: AsyncSession,
     report: Report,
@@ -161,12 +200,15 @@ async def update_extracted_data(
             "provider": "manual",
             "anchor_fields": {},
             "additional_fields": {},
+            "is_edited": True,
         }
 
     content = dict(report.content_json)
     content["anchor_fields"] = anchor_fields
     content["additional_fields"] = additional_fields
+    content["is_edited"] = True
     report.content_json = content
+    sync_report_from_extraction(report)
     await db.flush()
     return report
 

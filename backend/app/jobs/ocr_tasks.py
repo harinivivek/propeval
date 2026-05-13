@@ -16,11 +16,29 @@ logger = logging.getLogger(__name__)
 
 def _get_ocr_service():
     """Create OCR service with Claude provider (lazy init)."""
-    import anthropic
     from app.services.ocr import ClaudeOcrProvider, OcrService
 
-    client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-    provider = ClaudeOcrProvider(client=client, model=settings.OCR_MODEL)
+    if settings.ANTHROPIC_API_KEY:
+        import anthropic
+        client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+        model = settings.OCR_MODEL
+    elif settings.OPENROUTER_API_KEY:
+        import openai
+        client = openai.AsyncOpenAI(
+            api_key=settings.OPENROUTER_API_KEY,
+            base_url="https://openrouter.ai/api/v1",
+            default_headers={
+                "HTTP-Referer": "http://localhost:8020", # Required by OpenRouter
+                "X-Title": "PropEval",
+            }
+        )
+        # For OpenRouter, use the OCR_MODEL as configured directly.
+        # OpenRouter handles the routing based on its own internal model identifiers.
+        model = settings.OCR_MODEL
+    else:
+        raise ValueError("No OCR API key configured (Anthropic or OpenRouter)")
+
+    provider = ClaudeOcrProvider(client=client, model=model)
     return OcrService(provider=provider)
 
 

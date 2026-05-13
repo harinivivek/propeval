@@ -17,15 +17,15 @@ class OcrService:
 
     async def process_report(self, db: AsyncSession, report: Report) -> None:
         """Run OCR extraction on a report and store results."""
-        report.status = ReportStatus.PROCESSING
-        await db.flush()
-
         try:
+            report.status = ReportStatus.PROCESSING
+            await db.flush()
+
             full_path = f"{MEDIA_ROOT}/{report.uploaded_file_path}"
             result = await self._provider.extract(full_path)
 
             report.content_json = result.to_content_json(
-                provider="claude",
+                provider=getattr(self._provider, "name", "unknown"),
                 model=settings.OCR_MODEL,
             )
             report.status = ReportStatus.READY_TO_PUBLISH
@@ -35,6 +35,12 @@ class OcrService:
             )
         except Exception as e:
             logger.exception("OCR extraction failed for report %s: %s", report.id, e)
+            # Rollback to clear any failed flush (like Enum errors) before setting fail status
+            await db.rollback()
+            # Merge the report back into the session after rollback
+            report = await db.merge(report)
             report.status = ReportStatus.EXTRACTION_FAILED
-
-        await db.flush()
+            await db.flush()
+            # Re-raise if it's not a business logic failure (optional, based on retry needs)
+            if not isinstance(e, (ValueError, KeyError)):
+                raise e

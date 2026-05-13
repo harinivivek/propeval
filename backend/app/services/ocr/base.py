@@ -22,6 +22,7 @@ class ExtractionResult:
             "extracted_at": datetime.now(timezone.utc).isoformat(),
             "page_count": self.page_count,
             "usage": self.usage,
+            "is_edited": False,
         }
 
 

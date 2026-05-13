@@ -1,11 +1,10 @@
 import asyncio
 from datetime import datetime, timedelta
-
+from celery import shared_task
 from app.core.database import get_async_session_context
-from app.jobs.celery_app import celery_app
 
 
-@celery_app.task(
+@shared_task(
     name="app.jobs.billing_tasks.generate_monthly_invoices",
     bind=True,
     max_retries=3,
