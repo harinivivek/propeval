@@ -7,6 +7,7 @@ from app.core.constants import MEDIA_ROOT
 from app.models.enums import ReportStatus
 from app.models.report import Report
 from app.services.ocr.base import OcrProvider
+from app.services.report_service import sync_report_from_extraction
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ class OcrService:
                 provider=getattr(self._provider, "name", "unknown"),
                 model=settings.OCR_MODEL,
             )
+            sync_report_from_extraction(report)
             report.status = ReportStatus.READY_TO_PUBLISH
             logger.info(
                 "OCR extraction succeeded for report %s (%d pages)",

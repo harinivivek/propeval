@@ -162,6 +162,19 @@ async def get_bulk_job_reports(
     ]
 
 
+@router.get("/{report_id}", response_model=ReportResponse)
+async def get_vendor_report(
+    report_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("VENDOR")),
+):
+    vendor_id = await _get_vendor_id(db, current_user.id)
+    report = await report_service.get_report(db, report_id)
+    if not report or report.vendor_id != vendor_id:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return report
+
+
 @router.post("/{report_id}/retry-extraction", response_model=ReportResponse)
 async def retry_extraction(
     report_id: UUID,

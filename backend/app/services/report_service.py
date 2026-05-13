@@ -187,6 +187,32 @@ def sync_report_from_extraction(report: Report) -> None:
                 pass
 
 
+def display_property_address(report: Report) -> str | None:
+    """Column value for lists: prefer denormalized field, else anchor extraction (legacy rows)."""
+    try:
+        if report.property_address:
+            return report.property_address
+        cj = report.content_json
+        if not cj or not isinstance(cj, dict):
+            return None
+        raw_anchor = cj.get("anchor_fields")
+        if not isinstance(raw_anchor, dict):
+            return None
+        field = raw_anchor.get("property_address")
+        if isinstance(field, str):
+            s = field.strip()
+            return s or None
+        if not isinstance(field, dict):
+            return None
+        val = field.get("value")
+        if val is None:
+            return None
+        s = str(val).strip()
+        return s or None
+    except (TypeError, AttributeError, ValueError):
+        return None
+
+
 async def update_extracted_data(
     db: AsyncSession,
     report: Report,

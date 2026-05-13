@@ -52,9 +52,11 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str = "redis://redis:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://redis:6379/2"
 
-    # CORS
-    #CORS_ORIGINS: str = "http://localhost:3020"
-    CORS_ORIGINS: str = "http://localhost:3020,https://propeval-dev.getitright.co.in"
+    # CORS — include loopback variants; LAN regex added in main.py for local DEBUG
+    CORS_ORIGINS: str = (
+        "http://localhost:3020,http://127.0.0.1:3020,http://[::1]:3020,"
+        "https://propeval-dev.getitright.co.in"
+    )
 
     # Media
     MEDIA_ROOT: str = "/app/media"

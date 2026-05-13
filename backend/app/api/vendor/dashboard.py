@@ -66,7 +66,10 @@ async def vendor_pending_requests(
 @router.get("/reports")
 async def vendor_reports(
     search: str | None = Query(None),
-    status: str | None = Query(None),
+    status: str | None = Query(
+        None,
+        description="Single ReportStatus or comma-separated list, e.g. READY_TO_PUBLISH,PUBLISHED",
+    ),
     category: str | None = Query(None),
     property_type: str | None = Query(None),
     sort_by: str = Query("report_date"),

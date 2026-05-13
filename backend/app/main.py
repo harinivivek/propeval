@@ -55,13 +55,23 @@ async def add_private_network_control_headers(request: Request, call_next):
 # CORS
 allowed_origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
 
+_cors_kwargs: dict = {
+    "allow_origins": allowed_origins,
+    "allow_credentials": True,
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+    "expose_headers": ["*"],
+}
+# Local dev: allow common LAN origins (e.g. http://192.168.x.x:3020) without editing env
+if settings.APP_ENV == "local" and settings.DEBUG:
+    _cors_kwargs["allow_origin_regex"] = (
+        r"^https?://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$"
+        r"|^https?://(192\.168(\.\d{1,3}){2}|10(\.\d{1,3}){3})(:\d+)?$"
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
+    **_cors_kwargs,
 )
 
 

@@ -1,7 +1,28 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { NotificationBell } from "@/components/notification-bell";
 import { WebSocketProvider } from "@/contexts/websocket-provider";
+
+const NAV_ITEMS = [
+  { href: "/vendor/dashboard", label: "Dashboard" },
+  { href: "/vendor/requests", label: "Requests" },
+  { href: "/vendor/reports/bulk-upload", label: "Upload Reports" },
+  { href: "/vendor/reports", label: "Reports" },
+  { href: "/vendor/listings", label: "My Listings" },
+  { href: "/vendor/map", label: "Coverage Map" },
+  { href: "/vendor/settings", label: "Settings" },
+];
+
+const NavLinks = () => (
+  <nav className="space-y-1 text-sm">
+    {NAV_ITEMS.map((item) => (
+      <Link key={item.href} href={item.href} className="block px-2 py-3 rounded hover:bg-gray-100">
+        {item.label}
+      </Link>
+    ))}
+  </nav>
+);
 
 export default function VendorLayout({
   children,
@@ -16,14 +37,7 @@ export default function VendorLayout({
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:w-64 border-r bg-gray-50 p-4 flex-col">
         <h2 className="text-lg font-semibold mb-4">Vendor Portal</h2>
-        <nav className="space-y-1 text-sm">
-          <a href="/vendor/dashboard" className="block px-2 py-3 rounded hover:bg-gray-100">Dashboard</a>
-          <a href="/vendor/requests" className="block px-2 py-3 rounded hover:bg-gray-100">Requests</a>
-          <a href="/vendor/reports/bulk-upload" className="block px-2 py-3 rounded hover:bg-gray-100">Reports</a>
-          <a href="/vendor/listings" className="block px-2 py-3 rounded hover:bg-gray-100">My Listings</a>
-          <a href="/vendor/map" className="block px-2 py-3 rounded hover:bg-gray-100">Coverage Map</a>
-          <a href="/vendor/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
-        </nav>
+        <NavLinks />
       </aside>
 
       {/* Mobile/tablet overlay sidebar */}
@@ -46,14 +60,7 @@ export default function VendorLayout({
                 ✕
               </button>
             </div>
-            <nav className="space-y-1 text-sm">
-              <a href="/vendor/dashboard" className="block px-2 py-3 rounded hover:bg-gray-100">Dashboard</a>
-              <a href="/vendor/requests" className="block px-2 py-3 rounded hover:bg-gray-100">Requests</a>
-              <a href="/vendor/reports/bulk-upload" className="block px-2 py-3 rounded hover:bg-gray-100">Reports</a>
-              <a href="/vendor/listings" className="block px-2 py-3 rounded hover:bg-gray-100">My Listings</a>
-              <a href="/vendor/map" className="block px-2 py-3 rounded hover:bg-gray-100">Coverage Map</a>
-              <a href="/vendor/settings" className="block px-2 py-3 rounded hover:bg-gray-100">Settings</a>
-            </nav>
+            <NavLinks />
           </aside>
         </div>
       )}

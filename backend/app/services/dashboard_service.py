@@ -2,17 +2,23 @@ from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import case, distinct, func, select
+from sqlalchemy import and_, case, distinct, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.billing import Invoice, LenderPayable, VendorEarning
-from app.models.enums import InvoiceType as InvType
+from app.models.enums import (
+    InvoiceType as InvType,
+    PropertyType,
+    ReportCategory,
+    ReportStatus,
+)
 from app.models.lender import Lender
 from app.models.listing import Listing, ListingReport
 from app.models.purchase import ReportPurchase
 from app.models.report import Report
 from app.models.request import ReportRequest, RequestAcceptance, RequestBroadcast
 from app.models.vendor import Vendor
+from app.services.report_service import display_property_address
 
 
 def _get_fy_range(fy_year: int | None = None) -> tuple[str, str]:
@@ -300,21 +306,43 @@ async def get_vendor_reports_table(
     page: int = 1,
     page_size: int = 20,
 ) -> tuple[list[dict], int]:
-    base = select(Report).where(Report.vendor_id == vendor_id, Report.is_active == True)  # noqa: E712
+    conditions = [
+        Report.vendor_id == vendor_id,
+        Report.is_active == True,  # noqa: E712
+    ]
 
     if search:
-        base = base.where(
-            Report.property_address.ilike(f"%{search}%")
-            | Report.loan_applicant_name.ilike(f"%{search}%")
+        conditions.append(
+            or_(
+                Report.property_address.ilike(f"%{search}%"),
+                Report.loan_applicant_name.ilike(f"%{search}%"),
+            )
         )
     if status_filter:
-        base = base.where(Report.status == status_filter)
+        parts = [p.strip() for p in status_filter.split(",") if p.strip()]
+        statuses: list[ReportStatus] = []
+        for p in parts:
+            try:
+                statuses.append(ReportStatus(p))
+            except ValueError:
+                continue
+        if statuses:
+            if len(statuses) == 1:
+                conditions.append(Report.status == statuses[0])
+            else:
+                conditions.append(Report.status.in_(statuses))
     if category_filter:
-        base = base.where(Report.report_category == category_filter)
+        try:
+            conditions.append(Report.report_category == ReportCategory(category_filter))
+        except ValueError:
+            pass
     if property_type_filter:
-        base = base.where(Report.property_type == property_type_filter)
+        try:
+            conditions.append(Report.property_type == PropertyType(property_type_filter))
+        except ValueError:
+            pass
 
-    count_stmt = select(func.count()).select_from(base.subquery())
+    count_stmt = select(func.count()).select_from(Report).where(and_(*conditions))
     total = (await db.execute(count_stmt)).scalar_one()
 
     sort_map = {
@@ -332,8 +360,10 @@ async def get_vendor_reports_table(
     stmt = (
         select(Report, RequestAcceptance.request_id)
         .outerjoin(RequestAcceptance, RequestAcceptance.report_id == Report.id)
-        .where(Report.vendor_id == vendor_id, Report.is_active == True)
-        .order_by(order).offset((page - 1) * page_size).limit(page_size)
+        .where(and_(*conditions))
+        .order_by(order)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     )
     results = (await db.execute(stmt)).all()
 
@@ -342,12 +372,11 @@ async def get_vendor_reports_table(
             "id": str(r.Report.id),
             "request_id": str(r.request_id) if r.request_id else None,
             "report_date": str(r.Report.report_date) if r.Report.report_date else None,
-            "property_address": r.Report.property_address,
+            "property_address": display_property_address(r.Report),
             "report_category": r.Report.report_category.value if hasattr(r.Report.report_category, "value") else str(r.Report.report_category),
             "property_type": r.Report.property_type.value if r.Report.property_type and hasattr(r.Report.property_type, "value") else (str(r.Report.property_type) if r.Report.property_type else None),
             "status": r.Report.status.value if hasattr(r.Report.status, "value") else str(r.Report.status),
             "valuation_amount": str(r.Report.valuation_amount) if r.Report.valuation_amount else None,
-            "content_json": r.Report.content_json,
         }
         for r in results
     ], total

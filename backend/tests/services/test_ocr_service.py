@@ -31,7 +31,7 @@ async def _create_test_report(db: AsyncSession) -> tuple[Vendor, Report]:
         vendor_id=vendor.id,
         report_category=ReportCategory.VALUATION,
         status=ReportStatus.UPLOADED,
-        property_address="123 Main St",
+        property_address=None,
         city="Mumbai",
         property_type=PropertyType.RESIDENTIAL,
         uploaded_file_path="reports/test/report.pdf",
@@ -65,6 +65,7 @@ async def test_ocr_service_process_success(db_session: AsyncSession):
     assert report.status == ReportStatus.READY_TO_PUBLISH
     assert report.content_json is not None
     assert report.content_json["anchor_fields"]["property_address"]["value"] == "123 Main St"
+    assert report.property_address == "123 Main St"
     assert report.content_json["extraction_version"] == 1
     assert report.content_json["provider"] == "claude"
 

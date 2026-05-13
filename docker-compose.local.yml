@@ -31,8 +31,20 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command:
+      [
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+        "--log-config",
+        "/app/uvicorn_logging.json",
+      ]
     environment:
+      TZ: ${TZ:-UTC}
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${POSTGRES_USER:-propeval}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
@@ -43,7 +55,7 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
       APP_ENV: local
-      CORS_ORIGINS: "${CORS_ORIGINS:-http://localhost:3020,https://propeval-dev.getitright.co.in}"
+      CORS_ORIGINS: "${CORS_ORIGINS:-http://localhost:3020,http://127.0.0.1:3020,http://[::1]:3020,https://propeval-dev.getitright.co.in}"
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     ports:
       - "${BACKEND_PORT:-8020}:8000"
@@ -62,6 +74,7 @@ services:
       dockerfile: Dockerfile
     command: celery -A app.jobs.celery_app worker --loglevel=info --pool=solo
     environment:
+      TZ: ${TZ:-UTC}
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${POSTGRES_USER:-propeval}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
@@ -85,6 +98,7 @@ services:
       dockerfile: Dockerfile
     command: celery -A app.jobs.celery_app beat --loglevel=info
     environment:
+      TZ: ${TZ:-UTC}
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${POSTGRES_USER:-propeval}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
@@ -102,7 +116,11 @@ services:
       dockerfile: Dockerfile
     command: npm run dev
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8020}
+      TZ: ${TZ:-UTC}
+      # Proxy target for next.config dev rewrites (/api → backend). Use host.docker.internal:8020 if backend is only on the host.
+      BACKEND_PROXY_TARGET: ${BACKEND_PROXY_TARGET:-http://backend:8000}
+      # Leave unset in dev so the browser uses same-origin /api (rewritten). Set only for a remote API.
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
     ports:
       - "${FRONTEND_PORT:-3020}:3000"
     volumes:

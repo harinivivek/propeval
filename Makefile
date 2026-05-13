@@ -16,7 +16,13 @@ local-down:
 	docker compose -f $(LOCAL_COMPOSE) --env-file $(LOCAL_ENV) down
 
 local-logs:
-	docker compose -f $(LOCAL_COMPOSE) --env-file $(LOCAL_ENV) logs -f
+	docker compose -f $(LOCAL_COMPOSE) --env-file $(LOCAL_ENV) logs -f --timestamps
+
+local-logs-backend:
+	docker compose -f $(LOCAL_COMPOSE) --env-file $(LOCAL_ENV) logs -f --timestamps backend
+
+local-logs-frontend:
+	docker compose -f $(LOCAL_COMPOSE) --env-file $(LOCAL_ENV) logs -f --timestamps frontend
 
 local-restart:
 	docker compose -f $(LOCAL_COMPOSE) --env-file $(LOCAL_ENV) restart
@@ -80,4 +86,4 @@ clean:
 	docker compose -f $(LOCAL_COMPOSE) --env-file $(LOCAL_ENV) down -v
 	docker system prune -f
 
-.PHONY: local-up local-down local-logs local-restart migrate migration migrate-down seed test-backend test-frontend test shell-backend shell-frontend shell-db dev-up dev-down dev-logs lint format clean
+.PHONY: local-up local-down local-logs local-logs-backend local-logs-frontend local-restart migrate migration migrate-down seed test-backend test-frontend test shell-backend shell-frontend shell-db dev-up dev-down dev-logs lint format clean
