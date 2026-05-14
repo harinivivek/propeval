@@ -5,9 +5,9 @@ function normalizeBase(url: string): string {
 /**
  * In `next dev`, browser requests use same-origin `/api` (see next.config rewrites) so
  * the host always matches the page (e.g. LAN IP). Server-side calls use BACKEND_PROXY_TARGET
- * or a local default.
+ * or a local default. Exported for authenticated `fetch` outside `api.*` (e.g. PDF download).
  */
-function getApiBaseUrl(): string {
+export function getApiBaseUrl(): string {
   const envRaw = process.env.NEXT_PUBLIC_API_URL;
   const envUrl =
     envRaw && String(envRaw).trim() !== ""

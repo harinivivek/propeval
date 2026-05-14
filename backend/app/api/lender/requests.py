@@ -9,7 +9,9 @@ from app.core.database import get_db
 from app.core.deps import require_role
 from app.models.lender import LenderUser
 from app.models.report import Report
+from app.models.request import RequestAcceptance
 from app.models.user import User
+from app.models.vendor import Vendor
 from app.schemas.request import (
     EligibleVendorResponse,
     NearbyRequestInput,
@@ -214,16 +216,75 @@ async def create_nearby_request(
     return request
 
 
-@router.get("/{request_id}", response_model=ReportRequestResponse)
+@router.get("/{request_id}", response_model=ReportRequestDetail)
 async def get_request(
     request_id: UUID,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_role("LENDER")),
+    current_user: User = Depends(require_role("LENDER")),
 ):
+    result = await db.execute(
+        select(LenderUser).where(LenderUser.user_id == current_user.id)
+    )
+    lender_user = result.scalar_one_or_none()
+    if not lender_user:
+        raise HTTPException(status_code=400, detail="User not associated with a lender")
+
     req = await request_service.get_request(db, request_id)
-    if not req:
+    if not req or req.lender_id != lender_user.lender_id:
         raise HTTPException(status_code=404, detail="Request not found")
-    return req
+
+    acceptance_result = await db.execute(
+        select(RequestAcceptance).where(RequestAcceptance.request_id == request_id)
+    )
+    acceptance = acceptance_result.scalar_one_or_none()
+
+    vendor_name: str | None = None
+    report_id: UUID | None = None
+    report_status: str | None = None
+    report_file_path: str | None = None
+
+    if acceptance:
+        v_row = await db.execute(select(Vendor).where(Vendor.id == acceptance.vendor_id))
+        vendor = v_row.scalar_one_or_none()
+        vendor_name = vendor.name if vendor else None
+
+        rep: Report | None = None
+        if acceptance.report_id:
+            rep_result = await db.execute(
+                select(Report).where(
+                    Report.id == acceptance.report_id,
+                    Report.is_active == True,
+                )
+            )
+            rep = rep_result.scalar_one_or_none()
+        if rep is None:
+            rep_result = await db.execute(
+                select(Report)
+                .where(
+                    Report.vendor_id == acceptance.vendor_id,
+                    Report.is_active == True,
+                )
+                .order_by(Report.created_at.desc())
+            )
+            rep = rep_result.scalars().first()
+        if rep:
+            report_id = rep.id
+            report_status = (
+                rep.status.value if hasattr(rep.status, "value") else str(rep.status)
+            )
+            report_file_path = rep.uploaded_file_path
+
+    base = ReportRequestResponse.model_validate(req)
+    return ReportRequestDetail(
+        **base.model_dump(),
+        vendor_name=vendor_name,
+        broadcast_round=None,
+        broadcast_deadline=None,
+        broadcast_status=None,
+        report_id=report_id,
+        report_status=report_status,
+        report_file_path=report_file_path,
+    )
 
 
 @router.post("/{request_id}/accept")

@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import type { ReportRequest } from "@/types/request";
 import { StatusTimeline } from "./_components/status-timeline";
 import DownloadButton from "@/components/download-button";
+import { LenderReportPdfModal } from "./_components/lender-report-pdf-modal";
 
 export default function LenderRequestDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,7 @@ export default function LenderRequestDetailPage() {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectComments, setRejectComments] = useState("");
   const [error, setError] = useState("");
+  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
 
   useEffect(() => {
     api
@@ -30,7 +32,8 @@ export default function LenderRequestDetailPage() {
     setError("");
     try {
       await api.post(`/api/lender/requests/${id}/accept`, {});
-      setRequest((prev) => prev ? { ...prev, lender_status: "ACCEPTED", vendor_status: "ACCEPTED" } : prev);
+      const updated = await api.get<ReportRequest>(`/api/lender/requests/${id}`);
+      setRequest(updated);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to accept");
     } finally {
@@ -58,6 +61,7 @@ export default function LenderRequestDetailPage() {
   if (!request) return <p className="text-red-500 py-8">{error || "Request not found"}</p>;
 
   const canAcceptReject = request.lender_status === "RECEIVED";
+  const reportId = request.report_id ?? null;
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -128,29 +132,64 @@ export default function LenderRequestDetailPage() {
         <div className="border rounded-lg p-4 mb-4 bg-green-50">
           <h2 className="font-semibold mb-3">Report Uploaded</h2>
           <p className="text-sm text-gray-700 mb-4">The vendor has uploaded a report. You can accept or send it back for revision.</p>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
             <button onClick={handleAccept} disabled={actionLoading}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 disabled:opacity-50">
+              className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 disabled:opacity-50 min-h-11">
               {actionLoading ? "Processing..." : "Accept Report"}
             </button>
             <button onClick={() => setShowRejectDialog(true)} disabled={actionLoading}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-600 disabled:opacity-50">
+              className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-600 disabled:opacity-50 min-h-11">
               Send Back for Revision
             </button>
-            <DownloadButton
-              downloadUrl={`/api/reports/${id}/download`}
-              filename={`report-${id}.pdf`}
-              className="border px-4 py-2 rounded-lg text-sm hover:bg-gray-50"
-            />
+            {reportId ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setPdfPreviewOpen(true)}
+                  className="border border-gray-300 bg-white px-4 py-2 rounded-lg text-sm hover:bg-gray-50 min-h-11"
+                >
+                  View PDF
+                </button>
+                <DownloadButton
+                  downloadUrl={`/api/reports/${reportId}/download`}
+                  filename={`report-${reportId}.pdf`}
+                  className="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 min-h-11"
+                />
+              </>
+            ) : (
+              <p className="text-sm text-amber-800 self-center">
+                Report file is not linked yet; refresh the page or contact support if this persists.
+              </p>
+            )}
           </div>
         </div>
       )}
 
       {request.lender_status === "ACCEPTED" && (
         <div className="border rounded-lg p-4 mb-4 bg-emerald-50">
-          <p className="text-emerald-800 font-medium">Report accepted. Billing entries created.</p>
+          <p className="text-emerald-800 font-medium mb-3">Report accepted. Billing entries created.</p>
+          {reportId ? (
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setPdfPreviewOpen(true)}
+                className="border border-emerald-200 bg-white px-4 py-2 rounded-lg text-sm text-emerald-900 hover:bg-emerald-100/80 min-h-11"
+              >
+                View PDF
+              </button>
+              <DownloadButton
+                downloadUrl={`/api/reports/${reportId}/download`}
+                filename={`report-${reportId}.pdf`}
+                className="border border-emerald-200 bg-white px-4 py-2 rounded-lg text-sm text-emerald-900 hover:bg-emerald-100/80 min-h-11"
+              />
+            </div>
+          ) : null}
         </div>
       )}
+
+      {pdfPreviewOpen && reportId ? (
+        <LenderReportPdfModal reportId={reportId} onClose={() => setPdfPreviewOpen(false)} />
+      ) : null}
 
       {/* Reject Dialog */}
       {showRejectDialog && (

@@ -46,6 +46,11 @@ export interface ReportRequest {
   vendor_status: VendorRequestStatus | null;
   created_at: string;
   updated_at: string;
+  /** Present on GET /api/lender/requests/:id — linked vendor report for this request. */
+  report_id?: string | null;
+  report_status?: string | null;
+  report_file_path?: string | null;
+  vendor_name?: string | null;
 }
 
 export interface ReportRequestCreate {

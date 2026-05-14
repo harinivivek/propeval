@@ -1,21 +1,13 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { api, getApiBaseUrl } from "@/lib/api";
 import type { ReportTemplate } from "@/types/template";
 
 interface DownloadButtonProps {
   downloadUrl: string;
   filename?: string;
   className?: string;
-}
-
-function getApiBase() {
-  if (typeof window === "undefined") return "http://localhost:8020";
-  const { hostname } = window.location;
-  if (hostname === "localhost" || hostname === "127.0.0.1") {
-    return "http://localhost:8020";
-  }
-  return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8020";
 }
 
 export default function DownloadButton({ downloadUrl, filename, className }: DownloadButtonProps) {
@@ -45,14 +37,27 @@ export default function DownloadButton({ downloadUrl, filename, className }: Dow
     setOpen(false);
     try {
       const separator = downloadUrl.includes("?") ? "&" : "?";
-      const url = `${getApiBase()}${downloadUrl}${separator}format=${format}`;
+      const base = getApiBaseUrl();
+      const path = downloadUrl.startsWith("/") ? downloadUrl : `/${downloadUrl}`;
+      const url = `${base}${path}${separator}format=${format}`;
       const token = localStorage.getItem("access_token");
 
       const response = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
-      if (!response.ok) throw new Error("Download failed");
+      if (response.status === 401 || response.status === 403) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("access_token");
+          window.location.href = "/login";
+        }
+        throw new Error("Session expired. Please sign in again.");
+      }
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => "");
+        throw new Error(errText || `Download failed (${response.status})`);
+      }
 
       const blob = await response.blob();
       const a = document.createElement("a");
@@ -60,8 +65,9 @@ export default function DownloadButton({ downloadUrl, filename, className }: Dow
       a.download = filename || "report.pdf";
       a.click();
       URL.revokeObjectURL(a.href);
-    } catch {
-      // Silently fail — the API layer handles 401 redirects
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Download failed";
+      toast.error(msg);
     } finally {
       setDownloading(false);
     }
