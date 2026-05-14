@@ -35,6 +35,7 @@ async def _create_test_report(db: AsyncSession) -> tuple[Vendor, Report]:
         city="Mumbai",
         property_type=PropertyType.RESIDENTIAL,
         uploaded_file_path="reports/test/report.pdf",
+        report_date=date(2026, 1, 15),
     )
     db.add(report)
     await db.flush()

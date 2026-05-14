@@ -1,7 +1,8 @@
 import uuid as uuid_mod
+from datetime import date
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +16,11 @@ from app.models.report import Report
 from app.models.user import User
 from app.models.vendor import VendorUser
 from app.schemas.bulk_upload import BulkUploadJobResponse, BulkUploadReportStatus
-from app.schemas.report import ExtractedDataUpdate, ReportResponse
+from app.schemas.report import (
+    ExtractedDataUpdate,
+    ReportResponse,
+    VendorReportsBulkDeleteRequest,
+)
 from app.services import report_service
 from app.services.report_service import InvalidFileError
 
@@ -35,7 +40,8 @@ async def _get_vendor_id(db: AsyncSession, user_id: UUID) -> UUID:
 @router.post("/bulk-upload", response_model=BulkUploadJobResponse)
 async def bulk_upload(
     files: list[UploadFile] = File(...),
-    report_category: str = "VALUATION",
+    report_category: str = Form("VALUATION"),
+    report_date: date = Form(...),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("VENDOR")),
 ):
@@ -81,6 +87,7 @@ async def bulk_upload(
             status=ReportStatus.UPLOADED,
             uploaded_file_path=relative_path,
             bulk_upload_job_id=job.id,
+            report_date=report_date,
         )
         db.add(report)
         report_ids.append(str(report_id))
@@ -91,6 +98,19 @@ async def bulk_upload(
     process_bulk_upload.delay(str(job.id), report_ids)
 
     return job
+
+
+@router.post("/bulk-delete")
+async def bulk_delete_reports(
+    payload: VendorReportsBulkDeleteRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("VENDOR")),
+):
+    vendor_id = await _get_vendor_id(db, current_user.id)
+    deleted = await report_service.soft_delete_vendor_reports(
+        db, vendor_id=vendor_id, report_ids=payload.report_ids
+    )
+    return {"deleted": deleted}
 
 
 @router.get("/bulk-jobs", response_model=list[BulkUploadJobResponse])
@@ -185,8 +205,11 @@ async def retry_extraction(
     report = await report_service.get_report(db, report_id)
     if not report or report.vendor_id != vendor_id:
         raise HTTPException(status_code=404, detail="Report not found")
-    if report.status != ReportStatus.EXTRACTION_FAILED:
-        raise HTTPException(status_code=400, detail="Report is not in failed state")
+    if report.status not in (ReportStatus.EXTRACTION_FAILED, ReportStatus.UPLOADED):
+        raise HTTPException(
+            status_code=400,
+            detail="Report must be uploaded or extraction-failed to retry processing",
+        )
 
     report.status = ReportStatus.UPLOADED
     await db.flush()

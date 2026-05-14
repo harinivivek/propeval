@@ -70,6 +70,7 @@ async def _setup_billing_data(db: AsyncSession, suffix: str = "01"):
         report_category=ReportCategory.VALUATION,
         status=ReportStatus.UPLOADED,
         city="Mumbai",
+        report_date=date(2026, 1, 10),
     )
     db.add(report)
     await db.flush()

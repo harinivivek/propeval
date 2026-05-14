@@ -18,25 +18,29 @@ def _get_ocr_service():
     """Create OCR service with Claude provider (lazy init)."""
     from app.services.ocr import ClaudeOcrProvider, OcrService
 
-    if settings.ANTHROPIC_API_KEY:
-        import anthropic
-        client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-        model = settings.OCR_MODEL
-    elif settings.OPENROUTER_API_KEY:
+    # Prefer OpenRouter when configured (OCR_MODEL should be an OpenRouter model id).
+    if settings.OPENROUTER_API_KEY:
         import openai
+
         client = openai.AsyncOpenAI(
             api_key=settings.OPENROUTER_API_KEY,
             base_url="https://openrouter.ai/api/v1",
             default_headers={
-                "HTTP-Referer": "http://localhost:8020", # Required by OpenRouter
+                "HTTP-Referer": settings.OPENROUTER_HTTP_REFERER,
                 "X-Title": "PropEval",
-            }
+            },
         )
-        # For OpenRouter, use the OCR_MODEL as configured directly.
-        # OpenRouter handles the routing based on its own internal model identifiers.
+        model = settings.OCR_MODEL
+    elif settings.ANTHROPIC_API_KEY:
+        import anthropic
+
+        client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
         model = settings.OCR_MODEL
     else:
-        raise ValueError("No OCR API key configured (Anthropic or OpenRouter)")
+        raise ValueError(
+            "No OCR API key configured. Set OPENROUTER_API_KEY (and OCR_MODEL) "
+            "or ANTHROPIC_API_KEY in .env / .env.local."
+        )
 
     provider = ClaudeOcrProvider(client=client, model=model)
     return OcrService(provider=provider)
@@ -53,7 +57,20 @@ def process_report_ocr(self, report_id: str):
     """Process a single report through OCR extraction."""
 
     async def _run():
-        service = _get_ocr_service()
+        try:
+            service = _get_ocr_service()
+        except ValueError as exc:
+            # Misconfiguration (e.g. missing API keys) — retries will not help.
+            logger.error("OCR configuration error for report %s: %s", report_id, exc)
+            async with get_async_session_context() as db:
+                result = await db.execute(
+                    select(Report).where(Report.id == report_id)
+                )
+                report = result.scalar_one_or_none()
+                if report and report.status == ReportStatus.UPLOADED:
+                    report.status = ReportStatus.EXTRACTION_FAILED
+            return
+
         async with get_async_session_context() as db:
             result = await db.execute(
                 select(Report).where(Report.id == report_id)
@@ -79,7 +96,7 @@ def process_report_ocr(self, report_id: str):
         asyncio.run(_run())
     except Exception as exc:
         logger.exception("OCR task failed for report %s", report_id)
-        raise self.retry(exc=exc)
+        raise self.retry(exc=exc) from exc
 
 
 @shared_task(name="app.jobs.ocr_tasks.process_bulk_upload")

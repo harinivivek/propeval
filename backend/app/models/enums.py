@@ -48,6 +48,12 @@ class RequestType(str, Enum):
 
 
 class LenderRequestStatus(str, Enum):
+    """Lender-side lifecycle for a report request (not the same as vendor_status).
+
+    SENT here means the lender has issued the request (broadcast / assignment to vendors),
+    not that a finished report was sent back to the lender.
+    """
+
     DRAFT = "DRAFT"
     SENT = "SENT"
     AWAITED = "AWAITED"
@@ -58,6 +64,12 @@ class LenderRequestStatus(str, Enum):
 
 
 class VendorRequestStatus(str, Enum):
+    """Vendor-side lifecycle.
+
+    SENT means the vendor has published the report; the lender request is then
+    RECEIVED on the lender side so the lender can accept or send for revision.
+    """
+
     INCOMING = "INCOMING"
     DENIED = "DENIED"
     PENDING = "PENDING"

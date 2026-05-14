@@ -33,6 +33,7 @@ from app.api.admin.system_config import router as admin_system_config_router
 from app.api.vendor.config import router as vendor_config_router
 from app.api.lender.config import router as lender_config_router
 from app.core.ws_manager import ws_manager
+from app.middleware.proxy_collection_path import ProxyCollectionTrailingSlashMiddleware
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -73,6 +74,7 @@ app.add_middleware(
     CORSMiddleware,
     **_cors_kwargs,
 )
+app.add_middleware(ProxyCollectionTrailingSlashMiddleware)
 
 
 @app.on_event("startup")

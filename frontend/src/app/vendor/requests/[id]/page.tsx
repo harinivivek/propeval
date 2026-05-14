@@ -21,6 +21,7 @@ export default function VendorRequestDetailPage() {
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [retryLoading, setRetryLoading] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState<RejectionReason>("LOW_PRICE");
   const [error, setError] = useState("");
@@ -42,13 +43,21 @@ export default function VendorRequestDetailPage() {
 
   useEffect(() => { fetchRequest(); }, [id]);
 
+  // Load report once vendor has accepted (pending / revision / completed pipeline).
   useEffect(() => {
-    if (request?.vendor_status === "SENT" || request?.vendor_status === "ACCEPTED") {
-      fetchReport();
-      const interval = setInterval(fetchReport, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [request?.vendor_status]);
+    if (!request) return;
+    if (request.vendor_status === "INCOMING") return;
+    fetchReport();
+  }, [id, request?.vendor_status]);
+
+  // Poll while OCR may still be running or stuck before publish.
+  useEffect(() => {
+    if (!report) return;
+    const pollStatuses = ["UPLOADED", "PROCESSING", "EXTRACTION_FAILED"];
+    if (!pollStatuses.includes(report.status)) return;
+    const interval = setInterval(fetchReport, 5000);
+    return () => clearInterval(interval);
+  }, [report?.id, report?.status]);
 
   const handleAccept = async () => {
     setActionLoading(true);
@@ -84,6 +93,22 @@ export default function VendorRequestDetailPage() {
   const isPending = request.vendor_status === "PENDING";
   const isRevision = request.vendor_status === "REVISION";
   const isCompleted = request.vendor_status === "SENT" || request.vendor_status === "ACCEPTED";
+  const showReportPipeline =
+    report && (isPending || isRevision || isCompleted);
+
+  const handleRetryProcessing = async () => {
+    if (!report) return;
+    setRetryLoading(true);
+    setError("");
+    try {
+      await api.post(`/api/vendor/reports/${report.id}/retry-extraction`, {});
+      await fetchReport();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Could not restart processing");
+    } finally {
+      setRetryLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -175,7 +200,13 @@ export default function VendorRequestDetailPage() {
 
       {/* Pending: Upload */}
       {isPending && (
-        <UploadSection requestId={id} onUploaded={fetchRequest} />
+        <UploadSection
+          requestId={id}
+          onUploaded={() => {
+            fetchRequest();
+            fetchReport();
+          }}
+        />
       )}
 
       {/* Revision: Re-upload */}
@@ -185,12 +216,19 @@ export default function VendorRequestDetailPage() {
             <h3 className="font-semibold text-orange-800 mb-2">Revision Requested</h3>
             <p className="text-sm text-orange-700">The lender has requested revisions. Please re-upload an updated report.</p>
           </div>
-          <UploadSection requestId={id} isRevision onUploaded={fetchRequest} />
+          <UploadSection
+            requestId={id}
+            isRevision
+            onUploaded={() => {
+              fetchRequest();
+              fetchReport();
+            }}
+          />
         </>
       )}
 
-      {/* Report Status (after upload) */}
-      {isCompleted && report && (
+      {/* Report pipeline: upload/OCR/publish (shown while pending/revision or after publish) */}
+      {showReportPipeline && (
         <>
           {report.status === "PROCESSING" && (
             <div className="border rounded-lg p-4 mb-4 bg-blue-50">
@@ -206,31 +244,42 @@ export default function VendorRequestDetailPage() {
 
           {report.status === "EXTRACTION_FAILED" && (
             <div className="border rounded-lg p-4 mb-4 bg-red-50">
-              <h3 className="font-semibold text-red-800 mb-2">Extraction Failed</h3>
+              <h3 className="font-semibold text-red-800 mb-2">Extraction failed</h3>
               <p className="text-sm text-red-700 mb-3">
-                We couldn&apos;t extract data from this report. You can retry or fill in the fields manually.
+                We couldn&apos;t extract data from this report. Retry processing (e.g. after fixing API keys) or fill in fields manually after extraction succeeds.
               </p>
               <button
-                onClick={async () => {
-                  try {
-                    await api.post(`/api/vendor/reports/${report.id}/retry-extraction`, {});
-                    fetchReport();
-                  } catch {}
-                }}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700"
+                type="button"
+                onClick={handleRetryProcessing}
+                disabled={retryLoading}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 disabled:opacity-50"
               >
-                Retry Extraction
+                {retryLoading ? "Starting…" : "Retry processing"}
               </button>
             </div>
           )}
 
           {(report.status === "READY_TO_PUBLISH" || report.status === "PUBLISHED") && (
-            <ExtractionReview report={report} onUpdated={fetchReport} />
+            <ExtractionReview
+              report={report}
+              onUpdated={fetchReport}
+              readOnly={report.status === "PUBLISHED"}
+            />
           )}
 
           {report.status === "UPLOADED" && (
             <div className="border rounded-lg p-4 mb-4 bg-gray-50">
-              <p className="text-gray-600">Report uploaded. Waiting for processing to start...</p>
+              <p className="text-gray-700 mb-3">
+                Report uploaded. Processing should start shortly. If it stays here (e.g. worker misconfiguration), you can re-queue extraction.
+              </p>
+              <button
+                type="button"
+                onClick={handleRetryProcessing}
+                disabled={retryLoading}
+                className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-900 disabled:opacity-50"
+              >
+                {retryLoading ? "Starting…" : "Retry processing"}
+              </button>
             </div>
           )}
         </>

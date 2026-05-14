@@ -46,7 +46,7 @@ class Report(BaseModel):
     loan_applicant_name: Mapped[str | None] = mapped_column(
         String(255), nullable=True
     )
-    report_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    report_date: Mapped[date] = mapped_column(Date, nullable=False)
     expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     content_json: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     uploaded_file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)

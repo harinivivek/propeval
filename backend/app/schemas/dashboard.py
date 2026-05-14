@@ -65,7 +65,9 @@ class VendorReportItem(BaseModel):
     model_config = {"from_attributes": True}
 
     id: UUID
-    report_date: str | None
+    request_id: UUID | None = None
+    report_date: str
+    uploaded_at: str
     property_address: str | None
     report_category: str
     property_type: str | None

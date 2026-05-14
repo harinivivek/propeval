@@ -53,7 +53,9 @@ export interface PendingRequestItem {
 
 export interface VendorReportItem {
   id: string;
-  report_date: string | null;
+  request_id?: string | null;
+  report_date: string;
+  uploaded_at: string;
   property_address: string | null;
   report_category: string;
   property_type: string | null;

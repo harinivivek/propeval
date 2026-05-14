@@ -8,7 +8,6 @@ import { VendorStats } from "./_components/vendor-stats";
 import { ReceivablesSection } from "./_components/receivables-section";
 import { EarningsCharts } from "./_components/earnings-charts";
 import { PendingRequestsTable } from "./_components/pending-requests-table";
-import { ReportsTable } from "./_components/reports-table";
 import { InstallBanner } from "./_components/install-banner";
 import { NotificationBanner } from "./_components/notification-banner";
 
@@ -47,7 +46,6 @@ export default function VendorDashboardPage() {
       </div>
 
       <EarningsCharts fyYear={fyYear} />
-      <ReportsTable />
     </div>
   );
 }

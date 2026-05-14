@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
-import type { ContentJson, ExtractedField, Report } from "@/types/report";
+import type { ExtractedField, Report } from "@/types/report";
 
 type Props = {
   report: Report;
   onUpdated: () => void;
+  /** Published reports: show extraction read-only (no save/publish). */
+  readOnly?: boolean;
 };
 
 const FIELD_LABELS: Record<string, string> = {
@@ -41,13 +43,32 @@ type FieldEntry = {
   isAnchor: boolean;
 };
 
-function flattenFields(content: ContentJson): FieldEntry[] {
+function flattenFields(content: {
+  anchor_fields?: Record<string, ExtractedField>;
+  additional_fields?: Record<string, ExtractedField>;
+}): FieldEntry[] {
   const entries: FieldEntry[] = [];
-  for (const [key, field] of Object.entries(content.anchor_fields)) {
-    entries.push({ key, ...field, isAnchor: true });
+  for (const [key, field] of Object.entries(content.anchor_fields ?? {})) {
+    entries.push({
+      key,
+      value: field.value ?? null,
+      confidence: typeof field.confidence === "number" ? field.confidence : 0,
+      type: field.type ?? "text",
+      original: field.original,
+      edited: field.edited,
+      isAnchor: true,
+    });
   }
-  for (const [key, field] of Object.entries(content.additional_fields)) {
-    entries.push({ key, ...field, isAnchor: false });
+  for (const [key, field] of Object.entries(content.additional_fields ?? {})) {
+    entries.push({
+      key,
+      value: field.value ?? null,
+      confidence: typeof field.confidence === "number" ? field.confidence : 0,
+      type: field.type ?? "text",
+      original: field.original,
+      edited: field.edited,
+      isAnchor: false,
+    });
   }
   return entries;
 }
@@ -58,9 +79,13 @@ function PdfModal({ reportId, onClose }: { reportId: string; onClose: () => void
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8020";
+    const envUrl = (process.env.NEXT_PUBLIC_API_URL ?? "").trim().replace(/\/$/, "");
+    const base =
+      typeof window !== "undefined" && !envUrl ? "" : envUrl || "http://127.0.0.1:8020";
+    const path = `/api/vendor/reports/${reportId}/pdf`;
+    const url = base ? `${base}${path}` : path;
 
-    fetch(`${apiUrl}/api/vendor/reports/${reportId}/pdf`, {
+    fetch(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => {
@@ -103,7 +128,7 @@ function PdfModal({ reportId, onClose }: { reportId: string; onClose: () => void
   );
 }
 
-export function ExtractionReview({ report, onUpdated }: Props) {
+export function ExtractionReview({ report, onUpdated, readOnly = false }: Props) {
   const content = report.content_json;
   const [fields, setFields] = useState<FieldEntry[]>(
     content ? flattenFields(content) : []
@@ -114,6 +139,11 @@ export function ExtractionReview({ report, onUpdated }: Props) {
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState("");
   const [showPdf, setShowPdf] = useState(false);
+
+  useEffect(() => {
+    const c = report.content_json;
+    setFields(c ? flattenFields(c) : []);
+  }, [report.id, report.content_json]);
 
   const updateFieldValue = (index: number, newValue: string) => {
     setFields((prev) =>
@@ -220,8 +250,10 @@ export function ExtractionReview({ report, onUpdated }: Props) {
 
       {content && (
         <p className="text-xs text-gray-500">
-          Extracted from {content.page_count} page(s) on{" "}
-          {new Date(content.extracted_at).toLocaleDateString()}
+          Extracted from {content.page_count ?? "—"} page(s) on{" "}
+          {content.extracted_at
+            ? new Date(content.extracted_at).toLocaleDateString()
+            : "—"}
         </p>
       )}
 
@@ -248,6 +280,7 @@ export function ExtractionReview({ report, onUpdated }: Props) {
                     type={f.type === "number" || f.type === "currency" ? "number" : "text"}
                     className={inputClass}
                     value={f.value ?? ""}
+                    readOnly={readOnly}
                     onChange={(e) => updateFieldValue(globalIndex, e.target.value)}
                   />
                   <span
@@ -279,6 +312,7 @@ export function ExtractionReview({ report, onUpdated }: Props) {
                       type="text"
                       className={inputClass}
                       value={f.value ?? ""}
+                      readOnly={readOnly}
                       onChange={(e) => updateFieldValue(globalIndex, e.target.value)}
                     />
                     <span
@@ -286,13 +320,15 @@ export function ExtractionReview({ report, onUpdated }: Props) {
                     >
                       {confidenceLabel(f.confidence)} ({Math.round(f.confidence * 100)}%)
                     </span>
-                    <button
-                      onClick={() => removeField(globalIndex)}
-                      className="text-red-400 hover:text-red-600 text-sm"
-                      title="Remove field"
-                    >
-                      &times;
-                    </button>
+                    {!readOnly && (
+                      <button
+                        onClick={() => removeField(globalIndex)}
+                        className="text-red-400 hover:text-red-600 text-sm"
+                        title="Remove field"
+                      >
+                        &times;
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -301,60 +337,64 @@ export function ExtractionReview({ report, onUpdated }: Props) {
       )}
 
       {/* Add field */}
-      <div className="border-t pt-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Add Field</h4>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="text"
-            placeholder="Field name"
-            className={`${inputClass} sm:w-40`}
-            value={newFieldKey}
-            onChange={(e) => setNewFieldKey(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Value"
-            className={inputClass}
-            value={newFieldValue}
-            onChange={(e) => setNewFieldValue(e.target.value)}
-          />
-          <button
-            onClick={addField}
-            disabled={!newFieldKey.trim()}
-            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 disabled:opacity-50 whitespace-nowrap"
-          >
-            + Add
-          </button>
+      {!readOnly && (
+        <div className="border-t pt-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Add Field</h4>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              placeholder="Field name"
+              className={`${inputClass} sm:w-40`}
+              value={newFieldKey}
+              onChange={(e) => setNewFieldKey(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Value"
+              className={inputClass}
+              value={newFieldValue}
+              onChange={(e) => setNewFieldValue(e.target.value)}
+            />
+            <button
+              onClick={addField}
+              disabled={!newFieldKey.trim()}
+              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 disabled:opacity-50 whitespace-nowrap"
+            >
+              + Add
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-2">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save Draft"}
-        </button>
-        <button
-          onClick={handlePublish}
-          disabled={publishing || missingRequired.length > 0}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
-          title={
-            missingRequired.length > 0
-              ? `Missing: ${missingRequired.join(", ")}`
-              : "Publish report"
-          }
-        >
-          {publishing ? "Publishing..." : "Publish"}
-        </button>
-        {missingRequired.length > 0 && (
-          <p className="text-xs text-red-500 self-center">
-            Missing required: {missingRequired.join(", ")}
-          </p>
-        )}
-      </div>
+      {!readOnly && (
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save Draft"}
+          </button>
+          <button
+            onClick={handlePublish}
+            disabled={publishing || missingRequired.length > 0}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+            title={
+              missingRequired.length > 0
+                ? `Missing: ${missingRequired.join(", ")}`
+                : "Publish report"
+            }
+          >
+            {publishing ? "Publishing..." : "Publish"}
+          </button>
+          {missingRequired.length > 0 && (
+            <p className="text-xs text-red-500 self-center">
+              Missing required: {missingRequired.join(", ")}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* PDF Modal */}
       {showPdf && <PdfModal reportId={report.id} onClose={() => setShowPdf(false)} />}

@@ -31,6 +31,11 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    # Load API keys and other secrets without listing each in `environment:` (empty
+    # interpolation like ${VAR:-} would override these with blank strings).
+    env_file:
+      - path: .env.local
+        required: false
     command:
       [
         "uvicorn",
@@ -46,6 +51,9 @@ services:
     environment:
       TZ: ${TZ:-UTC}
       POSTGRES_HOST: postgres
+      # Inside the Compose network Postgres listens on 5432. Hosts use 5433 via
+      # ports: mapping — do not let .env.local's POSTGRES_PORT=5433 leak here.
+      POSTGRES_PORT: 5432
       POSTGRES_USER: ${POSTGRES_USER:-propeval}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
       POSTGRES_DB: ${POSTGRES_DB:-propeval}
@@ -56,7 +64,6 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/2
       APP_ENV: local
       CORS_ORIGINS: "${CORS_ORIGINS:-http://localhost:3020,http://127.0.0.1:3020,http://[::1]:3020,https://propeval-dev.getitright.co.in}"
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     ports:
       - "${BACKEND_PORT:-8020}:8000"
     volumes:
@@ -72,17 +79,20 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    env_file:
+      - path: .env.local
+        required: false
     command: celery -A app.jobs.celery_app worker --loglevel=info --pool=solo
     environment:
       TZ: ${TZ:-UTC}
       POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
       POSTGRES_USER: ${POSTGRES_USER:-propeval}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
       POSTGRES_DB: ${POSTGRES_DB:-propeval}
       REDIS_HOST: redis
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     volumes:
       - ./backend/app:/app/app
       - media_data:/app/media
@@ -100,6 +110,7 @@ services:
     environment:
       TZ: ${TZ:-UTC}
       POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
       POSTGRES_USER: ${POSTGRES_USER:-propeval}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-propeval}
       POSTGRES_DB: ${POSTGRES_DB:-propeval}

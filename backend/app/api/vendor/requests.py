@@ -143,7 +143,7 @@ async def upload_report(
     request_id: UUID,
     file: UploadFile = File(...),
     valuation_amount: Decimal | None = Form(None),
-    report_date: date | None = Form(None),
+    report_date: date = Form(...),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("VENDOR")),
 ):
@@ -174,10 +174,6 @@ async def upload_report(
         valuation_amount=valuation_amount,
         report_date=report_date,
     )
-
-    # Auto-approve if lender has preference set for this vendor
-    from app.services.request_service import check_auto_approve
-    await check_auto_approve(db, request=req, report=report, vendor_id=vendor_id)
 
     # Dispatch OCR extraction
     from app.jobs.ocr_tasks import process_report_ocr
@@ -216,6 +212,7 @@ async def get_request_report(
 async def revise_report(
     request_id: UUID,
     file: UploadFile = File(...),
+    report_date: date = Form(...),
     comments: str | None = Form(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_role("VENDOR")),
@@ -250,12 +247,13 @@ async def revise_report(
     await report_service.save_file(relative_path, content)
 
     await report_service.submit_revision(
-        db, report=report, request=req, file_path=relative_path, comments=comments,
+        db,
+        report=report,
+        request=req,
+        file_path=relative_path,
+        report_date=report_date,
+        comments=comments,
     )
-
-    # Auto-approve if lender has preference set for this vendor
-    from app.services.request_service import check_auto_approve
-    await check_auto_approve(db, request=req, report=report, vendor_id=vendor_id)
 
     # Dispatch OCR extraction on revised report
     from app.jobs.ocr_tasks import process_report_ocr

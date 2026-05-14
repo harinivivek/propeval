@@ -4,7 +4,7 @@ from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select, update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.constants import ALLOWED_CONTENT_TYPES, MAX_UPLOAD_SIZE_MB, MEDIA_ROOT, REPORTS_DIR, REQUIRED_REPORT_FIELDS
@@ -16,7 +16,7 @@ from app.models.enums import (
     VendorRequestStatus,
 )
 from app.models.report import Report, ReportRevision
-from app.models.request import ReportRequest
+from app.models.request import ReportRequest, RequestAcceptance
 
 
 class InvalidFileError(Exception):
@@ -57,10 +57,15 @@ async def create_report_for_request(
     request: ReportRequest,
     vendor_id: UUID,
     file_path: str,
+    report_date: date,
     valuation_amount: Decimal | None = None,
-    report_date: date | None = None,
 ) -> tuple[Report, str]:
-    """Create a Report linked to a request, updating statuses."""
+    """Create a Report linked to a request.
+
+    Lender/vendor request statuses stay AWAITED/PENDING until the vendor publishes
+    (see ``publish_report``): the lender only moves to RECEIVED once the report is
+    PUBLISHED.
+    """
     report = Report(
         vendor_id=vendor_id,
         report_category=request.report_category,
@@ -75,9 +80,17 @@ async def create_report_for_request(
         uploaded_file_path=file_path,
     )
     db.add(report)
+    await db.flush()
 
-    request.vendor_status = VendorRequestStatus.SENT
-    request.lender_status = LenderRequestStatus.RECEIVED
+    acc_result = await db.execute(
+        select(RequestAcceptance).where(
+            RequestAcceptance.request_id == request.id,
+            RequestAcceptance.vendor_id == vendor_id,
+        )
+    )
+    acc = acc_result.scalar_one_or_none()
+    if acc:
+        acc.report_id = report.id
 
     await db.flush()
     return report, file_path
@@ -89,6 +102,7 @@ async def submit_revision(
     report: Report,
     request: ReportRequest,
     file_path: str,
+    report_date: date,
     comments: str | None = None,
 ) -> ReportRevision:
     """Create a revision for an existing report."""
@@ -110,10 +124,7 @@ async def submit_revision(
     # Update report with new file
     report.uploaded_file_path = file_path
     report.status = ReportStatus.UPLOADED
-
-    # Reset request statuses
-    request.vendor_status = VendorRequestStatus.SENT
-    request.lender_status = LenderRequestStatus.RECEIVED
+    report.report_date = report_date
 
     await db.flush()
     return revision
@@ -240,7 +251,7 @@ async def update_extracted_data(
 
 
 async def publish_report(db: AsyncSession, report: Report) -> Report:
-    """Validate and transition report to PUBLISHED status."""
+    """Validate, set PUBLISHED, then mark the linked request delivered to the lender."""
     if report.status != ReportStatus.READY_TO_PUBLISH:
         raise ValueError(f"Report must be in READY_TO_PUBLISH status, currently: {report.status.value}")
 
@@ -249,5 +260,57 @@ async def publish_report(db: AsyncSession, report: Report) -> Report:
         raise ValueError(f"Missing required fields: {', '.join(missing)}")
 
     report.status = ReportStatus.PUBLISHED
+
+    acc_result = await db.execute(
+        select(RequestAcceptance).where(RequestAcceptance.report_id == report.id)
+    )
+    acc = acc_result.scalar_one_or_none()
+    if acc:
+        req_result = await db.execute(
+            select(ReportRequest).where(ReportRequest.id == acc.request_id)
+        )
+        req = req_result.scalar_one_or_none()
+        if req:
+            req.vendor_status = VendorRequestStatus.SENT
+            req.lender_status = LenderRequestStatus.RECEIVED
+            from app.services.request_service import check_auto_approve
+
+            await check_auto_approve(
+                db, request=req, report=report, vendor_id=acc.vendor_id,
+            )
+
     await db.flush()
     return report
+
+
+async def soft_delete_vendor_reports(
+    db: AsyncSession,
+    *,
+    vendor_id: UUID,
+    report_ids: list[UUID],
+) -> int:
+    """Soft-delete reports owned by the vendor; clears acceptance pointers."""
+    if not report_ids:
+        return 0
+
+    res = await db.execute(
+        select(Report.id).where(
+            Report.vendor_id == vendor_id,
+            Report.id.in_(report_ids),
+            Report.is_active == True,  # noqa: E712
+        )
+    )
+    ids = [row[0] for row in res.all()]
+    if not ids:
+        return 0
+
+    await db.execute(
+        sa_update(RequestAcceptance)
+        .where(RequestAcceptance.report_id.in_(ids))
+        .values(report_id=None)
+    )
+    await db.execute(
+        sa_update(Report).where(Report.id.in_(ids)).values(is_active=False)
+    )
+    await db.flush()
+    return len(ids)

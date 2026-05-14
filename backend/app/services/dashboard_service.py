@@ -301,7 +301,7 @@ async def get_vendor_reports_table(
     status_filter: str | None = None,
     category_filter: str | None = None,
     property_type_filter: str | None = None,
-    sort_by: str = "report_date",
+    sort_by: str = "uploaded_at",
     sort_order: str = "desc",
     page: int = 1,
     page_size: int = 20,
@@ -346,6 +346,7 @@ async def get_vendor_reports_table(
     total = (await db.execute(count_stmt)).scalar_one()
 
     sort_map = {
+        "uploaded_at": Report.created_at,
         "report_date": Report.report_date,
         "property_address": Report.property_address,
         "status": Report.status,
@@ -353,7 +354,7 @@ async def get_vendor_reports_table(
         "property_type": Report.property_type,
         "valuation_amount": Report.valuation_amount,
     }
-    sort_col = sort_map.get(sort_by, Report.report_date)
+    sort_col = sort_map.get(sort_by, Report.created_at)
     order = sort_col.desc() if sort_order == "desc" else sort_col.asc()
 
     # Join with RequestAcceptance to get the request_id for linking in the dashboard
@@ -371,7 +372,8 @@ async def get_vendor_reports_table(
         {
             "id": str(r.Report.id),
             "request_id": str(r.request_id) if r.request_id else None,
-            "report_date": str(r.Report.report_date) if r.Report.report_date else None,
+            "report_date": r.Report.report_date.isoformat() if r.Report.report_date is not None else "",
+            "uploaded_at": r.Report.created_at.isoformat(),
             "property_address": display_property_address(r.Report),
             "report_category": r.Report.report_category.value if hasattr(r.Report.report_category, "value") else str(r.Report.report_category),
             "property_type": r.Report.property_type.value if r.Report.property_type and hasattr(r.Report.property_type, "value") else (str(r.Report.property_type) if r.Report.property_type else None),

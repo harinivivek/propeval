@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api } from "@/lib/api";
+import { vendorReportUploadDate } from "@/lib/vendor-report-upload-date";
 import type { BulkUploadJob } from "@/types/bulk-upload";
 
 type Props = {
@@ -36,6 +37,7 @@ export function FilePicker({ onJobCreated }: Props) {
     const formData = new FormData();
     files.forEach((f) => formData.append("files", f));
     formData.append("report_category", category);
+    formData.append("report_date", vendorReportUploadDate());
 
     try {
       const job = await api.upload<BulkUploadJob>(

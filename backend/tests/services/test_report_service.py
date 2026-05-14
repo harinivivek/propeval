@@ -18,7 +18,7 @@ from app.models.enums import (
 )
 from app.models.lender import Lender
 from app.models.report import Report, ReportRevision
-from app.models.request import ReportRequest
+from app.models.request import ReportRequest, RequestAcceptance
 from app.models.user import Organization
 from app.models.vendor import Vendor
 from app.services import report_service, user_service
@@ -61,6 +61,8 @@ async def _setup_request_with_vendor(db: AsyncSession):
     )
     db.add(request)
     await db.flush()
+    db.add(RequestAcceptance(request_id=request.id, vendor_id=vendor.id))
+    await db.flush()
     return lender, vendor, lender_user, request
 
 
@@ -83,6 +85,35 @@ async def test_upload_report_creates_report(db_session: AsyncSession):
     assert report.city == "Mumbai"
     assert report.property_address == "123 Main St"
     assert report.valuation_amount == Decimal("5000000.00")
+    assert request.vendor_status == VendorRequestStatus.PENDING
+    assert request.lender_status == LenderRequestStatus.AWAITED
+
+
+@pytest.mark.asyncio
+async def test_publish_sets_request_delivered(db_session: AsyncSession):
+    lender, vendor, _, request = await _setup_request_with_vendor(db_session)
+
+    report, _ = await report_service.create_report_for_request(
+        db_session,
+        request=request,
+        vendor_id=vendor.id,
+        file_path="reports/test/report.pdf",
+        report_date=date(2026, 4, 1),
+    )
+    report.content_json = {
+        "anchor_fields": {
+            "property_address": {"value": "123 Main St", "confidence": 0.9, "type": "text"},
+            "property_type": {"value": "RESIDENTIAL", "confidence": 0.9, "type": "text"},
+            "valuation_amount": {"value": "5000000", "confidence": 0.9, "type": "currency"},
+        },
+        "additional_fields": {},
+    }
+    report.status = ReportStatus.READY_TO_PUBLISH
+    await db_session.flush()
+
+    await report_service.publish_report(db_session, report)
+
+    assert report.status == ReportStatus.PUBLISHED
     assert request.vendor_status == VendorRequestStatus.SENT
     assert request.lender_status == LenderRequestStatus.RECEIVED
 
@@ -96,6 +127,7 @@ async def test_submit_revision_creates_revision(db_session: AsyncSession):
         request=request,
         vendor_id=vendor.id,
         file_path="reports/test/report.pdf",
+        report_date=date(2026, 3, 15),
     )
 
     # Simulate lender sending back for revision
@@ -108,11 +140,12 @@ async def test_submit_revision_creates_revision(db_session: AsyncSession):
         report=report,
         request=request,
         file_path="reports/test/report_rev1.pdf",
+        report_date=date(2026, 3, 20),
         comments="Updated valuation",
     )
 
     assert revision.revision_number == 1
     assert revision.comments == "Updated valuation"
     assert report.uploaded_file_path == "reports/test/report_rev1.pdf"
-    assert request.vendor_status == VendorRequestStatus.SENT
-    assert request.lender_status == LenderRequestStatus.RECEIVED
+    assert request.vendor_status == VendorRequestStatus.REVISION
+    assert request.lender_status == LenderRequestStatus.SENT_FOR_REVIEW

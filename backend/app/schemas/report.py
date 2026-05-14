@@ -17,7 +17,7 @@ class ReportCreate(BaseModel):
     built_up_sqft: Decimal | None = None
     valuation_amount: Decimal | None = None
     loan_applicant_name: str | None = None
-    report_date: date | None = None
+    report_date: date
     uploaded_file_path: str | None = None
     latitude: Decimal | None = None
     longitude: Decimal | None = None
@@ -65,6 +65,10 @@ class ReportUploadMeta(BaseModel):
     """Optional metadata submitted with report upload."""
     valuation_amount: Decimal | None = None
     report_date: date | None = None
+
+
+class VendorReportsBulkDeleteRequest(BaseModel):
+    report_ids: list[UUID]
 
 
 class RevisionSummary(BaseModel):

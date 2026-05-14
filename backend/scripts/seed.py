@@ -106,10 +106,17 @@ async def seed() -> None:
         # ── Sample pricing rules for ABCL Bank ──────────────────────────────
         from decimal import Decimal
 
-        pricing_configs = [
+        # Same city-wide tariffs for several metros so local demos work outside Bengaluru.
+        seed_pricing_cities = [
+            "Bengaluru",
+            "Mumbai",
+            "Delhi",
+            "Chennai",
+            "Puducherry",
+        ]
+        city_wide_templates = [
             {
                 "report_category": "VALUATION",
-                "city": "Bengaluru",
                 "area": None,
                 "property_type": "RESIDENTIAL",
                 "new_request_price": Decimal("2500.00"),
@@ -119,7 +126,6 @@ async def seed() -> None:
             },
             {
                 "report_category": "VALUATION",
-                "city": "Bengaluru",
                 "area": None,
                 "property_type": "COMMERCIAL",
                 "new_request_price": Decimal("5000.00"),
@@ -129,7 +135,6 @@ async def seed() -> None:
             },
             {
                 "report_category": "LEGAL",
-                "city": "Bengaluru",
                 "area": None,
                 "property_type": "RESIDENTIAL",
                 "new_request_price": Decimal("2000.00"),
@@ -137,6 +142,13 @@ async def seed() -> None:
                 "update_additional_price": Decimal("800.00"),
                 "nearby_additional_price": Decimal("800.00"),
             },
+        ]
+        pricing_configs = [
+            {**tmpl, "city": city}
+            for city in seed_pricing_cities
+            for tmpl in city_wide_templates
+        ]
+        pricing_configs.append(
             {
                 "report_category": "VALUATION",
                 "city": "Bengaluru",
@@ -146,8 +158,8 @@ async def seed() -> None:
                 "listing_download_price": Decimal("1800.00"),
                 "update_additional_price": Decimal("1200.00"),
                 "nearby_additional_price": Decimal("1200.00"),
-            },
-        ]
+            }
+        )
         for cfg in pricing_configs:
             rule = await pricing_service.create_pricing_rule(
                 db, lender_id=lender.id, **cfg

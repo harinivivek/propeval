@@ -1,4 +1,34 @@
-from pydantic_settings import BaseSettings
+from pathlib import Path
+
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _resolved_env_files() -> tuple[str, ...] | None:
+    """Paths to try for .env (independent of process cwd — fixes Celery/workers).
+
+    Later entries override earlier ones. Typical layout: repo `.env.local`, then
+    `backend/.env` for keys like ANTHROPIC_API_KEY / OPENROUTER_API_KEY.
+    """
+    here = Path(__file__).resolve()
+    backend_dir = here.parents[2]  # .../backend/app/core/config.py -> backend/
+    repo_dir = backend_dir.parent
+    ordered = (
+        repo_dir / ".env.local",
+        repo_dir / ".env",
+        backend_dir / ".env.local",
+        backend_dir / ".env",
+    )
+    found = tuple(str(p) for p in ordered if p.is_file())
+    return found if found else None
+
+
+def _settings_config() -> SettingsConfigDict:
+    kw: dict = {"env_file_encoding": "utf-8", "extra": "ignore"}
+    files = _resolved_env_files()
+    if files:
+        kw["env_file"] = files
+    return SettingsConfigDict(**kw)
 
 
 class Settings(BaseSettings):
@@ -69,15 +99,32 @@ class Settings(BaseSettings):
     # Auto-accept
     AUTO_ACCEPT_DAYS: int = 7
 
-    # OCR
+    # OCR — OpenRouter is preferred when OPENROUTER_API_KEY is set (see ocr_tasks).
     ANTHROPIC_API_KEY: str = ""
     OPENROUTER_API_KEY: str = ""
+    # OpenRouter model id (vision-capable). Override in .env if you prefer another model.
     OCR_MODEL: str = "openrouter/free"
+    # Required by OpenRouter; set to your public app URL in production.
+    OPENROUTER_HTTP_REFERER: str = "http://localhost:8020"
     OCR_MAX_PAGES: int = 20
     OCR_BATCH_SIZE: int = 5
     OCR_TASK_TIMEOUT: int = 300
 
-    model_config = {"env_file": ".env", "extra": "ignore"}
+    model_config = _settings_config()
+
+    @field_validator(
+        "ANTHROPIC_API_KEY",
+        "OPENROUTER_API_KEY",
+        "OPENROUTER_HTTP_REFERER",
+        mode="before",
+    )
+    @classmethod
+    def strip_secret_env(cls, v: object) -> str:
+        if v is None:
+            return ""
+        if isinstance(v, str):
+            return v.strip()
+        return str(v)
 
 
 settings = Settings()

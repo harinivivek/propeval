@@ -72,6 +72,25 @@ async def _full_setup(db: AsyncSession):
     return lender, lender_user, vendor
 
 
+_MIN_PUBLISH_ANCHOR = {
+    "anchor_fields": {
+        "property_address": {"value": "123 Main St", "confidence": 0.9, "type": "text"},
+        "property_type": {"value": "RESIDENTIAL", "confidence": 0.9, "type": "text"},
+        "valuation_amount": {"value": "5000000", "confidence": 0.9, "type": "currency"},
+    },
+    "additional_fields": {},
+}
+
+
+async def _publish_ready_report(db: AsyncSession, report: Report) -> None:
+    from app.services import report_service
+
+    report.content_json = _MIN_PUBLISH_ANCHOR
+    report.status = ReportStatus.READY_TO_PUBLISH
+    await db.flush()
+    await report_service.publish_report(db, report)
+
+
 @pytest.mark.asyncio
 async def test_create_request_with_broadcast(db_session: AsyncSession):
     lender, lender_user, vendor = await _full_setup(db_session)
@@ -143,7 +162,10 @@ async def test_accept_report_creates_billing_and_listing(db_session: AsyncSessio
         request=request,
         vendor_id=vendor.id,
         file_path="reports/test/report.pdf",
+        report_date=date(2026, 5, 1),
     )
+
+    await _publish_ready_report(db_session, report)
 
     # Lender accepts
     await request_service.accept_report(
@@ -194,7 +216,10 @@ async def test_reject_report_creates_revision(db_session: AsyncSession):
     report, _ = await report_service.create_report_for_request(
         db_session, request=request, vendor_id=vendor.id,
         file_path="reports/test/report.pdf",
+        report_date=date(2026, 5, 2),
     )
+
+    await _publish_ready_report(db_session, report)
 
     await request_service.reject_report(
         db_session, request=request, report=report, comments="Needs updated valuation",
