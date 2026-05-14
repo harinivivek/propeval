@@ -17,7 +17,13 @@ const FIELD_LABELS: Record<string, string> = {
   valuation_amount: "Valuation Amount",
   built_up_area: "Built-up Area",
   owner_name: "Owner Name",
+  pin_code: "PIN Code",
+  latitude: "Latitude",
+  longitude: "Longitude",
 };
+
+/** Keys stored in anchor_fields so they sync to report columns (map, pin, listing). */
+const ANCHOR_BY_KEY = new Set(["latitude", "longitude", "pin_code"]);
 
 const REQUIRED_FIELDS = ["property_address", "property_type", "valuation_amount"];
 
@@ -162,15 +168,19 @@ export function ExtractionReview({ report, onUpdated, readOnly = false }: Props)
 
   const addField = () => {
     if (!newFieldKey.trim()) return;
+    const key = newFieldKey.trim().toLowerCase().replace(/\s+/g, "_");
+    const useAnchor = ANCHOR_BY_KEY.has(key);
+    const fieldType =
+      key === "latitude" || key === "longitude" ? "number" : "text";
     setFields((prev) => [
       ...prev,
       {
-        key: newFieldKey.trim().toLowerCase().replace(/\s+/g, "_"),
+        key,
         value: newFieldValue,
         confidence: 1.0,
-        type: "text",
+        type: fieldType,
         edited: false,
-        isAnchor: false,
+        isAnchor: useAnchor,
       },
     ]);
     setNewFieldKey("");
@@ -278,6 +288,7 @@ export function ExtractionReview({ report, onUpdated, readOnly = false }: Props)
                   </label>
                   <input
                     type={f.type === "number" || f.type === "currency" ? "number" : "text"}
+                    step={f.type === "number" ? "any" : undefined}
                     className={inputClass}
                     value={f.value ?? ""}
                     readOnly={readOnly}
@@ -340,6 +351,11 @@ export function ExtractionReview({ report, onUpdated, readOnly = false }: Props)
       {!readOnly && (
         <div className="border-t pt-4">
           <h4 className="text-sm font-medium text-gray-700 mb-2">Add Field</h4>
+          <p className="text-xs text-gray-500 mb-2">
+            Use field names <code className="bg-gray-100 px-1 rounded text-[11px]">latitude</code> and{" "}
+            <code className="bg-gray-100 px-1 rounded text-[11px]">longitude</code> (decimal degrees, e.g. 19.05 / 72.91)
+            to sync pins to the coverage map after you save.
+          </p>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"

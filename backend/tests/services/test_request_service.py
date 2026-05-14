@@ -169,7 +169,11 @@ async def test_accept_report_creates_billing_and_listing(db_session: AsyncSessio
 
     # Lender accepts
     await request_service.accept_report(
-        db_session, request=request, report=report, vendor_id=vendor.id,
+        db_session,
+        request=request,
+        report=report,
+        vendor_id=vendor.id,
+        accepted_by_user_id=lender_user.id,
     )
 
     assert request.lender_status == LenderRequestStatus.ACCEPTED

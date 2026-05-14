@@ -160,12 +160,49 @@ def validate_for_publish(content_json: dict | None) -> list[str]:
     return missing
 
 
+def _decimal_from_anchor_value(raw) -> Decimal | None:
+    """Parse a numeric anchor field value to Decimal."""
+    if raw is None or isinstance(raw, dict):
+        return None
+    if isinstance(raw, bool):
+        return None
+    if isinstance(raw, (int, float)):
+        try:
+            return Decimal(str(raw))
+        except (ArithmeticError, ValueError):
+            return None
+    s = str(raw).strip()
+    if not s:
+        return None
+    try:
+        return Decimal(s.replace(",", ""))
+    except (ArithmeticError, ValueError):
+        return None
+
+
+def _extraction_field_value(content_json: dict, key: str):
+    """Read a field value from anchor_fields first, then additional_fields."""
+    for section in ("anchor_fields", "additional_fields"):
+        block = content_json.get(section) or {}
+        if not isinstance(block, dict):
+            continue
+        fd = block.get(key)
+        if isinstance(fd, dict) and "value" in fd:
+            val = fd.get("value")
+            if val is not None and val != "":
+                return val
+    return None
+
+
 def sync_report_from_extraction(report: Report) -> None:
     """Sync core fields from content_json to top-level columns for listing and search."""
     if not report.content_json:
         return
 
-    anchor = report.content_json.get("anchor_fields", {})
+    cj = report.content_json if isinstance(report.content_json, dict) else {}
+    anchor = cj.get("anchor_fields", {}) or {}
+    if not isinstance(anchor, dict):
+        anchor = {}
 
     if "valuation_amount" in anchor:
         val = anchor["valuation_amount"].get("value")
@@ -196,6 +233,21 @@ def sync_report_from_extraction(report: Report) -> None:
                     report.property_type = PropertyType(pt_upper)
             except (ValueError, KeyError):
                 pass
+
+    pc_raw = _extraction_field_value(cj, "pin_code")
+    if pc_raw is not None:
+        digits = "".join(c for c in str(pc_raw) if c.isdigit())
+        if len(digits) >= 6:
+            report.pin_code = digits[:6]
+
+    lat_raw = _extraction_field_value(cj, "latitude")
+    lng_raw = _extraction_field_value(cj, "longitude")
+    lat_d = _decimal_from_anchor_value(lat_raw)
+    lng_d = _decimal_from_anchor_value(lng_raw)
+    if lat_d is not None and lng_d is not None:
+        if Decimal("-90") <= lat_d <= Decimal("90") and Decimal("-180") <= lng_d <= Decimal("180"):
+            report.latitude = lat_d
+            report.longitude = lng_d
 
 
 def display_property_address(report: Report) -> str | None:
@@ -246,6 +298,52 @@ async def update_extracted_data(
     content["is_edited"] = True
     report.content_json = content
     sync_report_from_extraction(report)
+    await db.flush()
+    return report
+
+
+async def update_report_map_coordinates(
+    db: AsyncSession,
+    report: Report,
+    *,
+    latitude: Decimal,
+    longitude: Decimal,
+) -> Report:
+    """Set WGS84 coordinates on the report for coverage map (manual entry)."""
+    if not (Decimal("-90") <= latitude <= Decimal("90")):
+        raise ValueError("latitude must be between -90 and 90")
+    if not (Decimal("-180") <= longitude <= Decimal("180")):
+        raise ValueError("longitude must be between -180 and 180")
+
+    report.latitude = latitude
+    report.longitude = longitude
+
+    if not report.content_json or not isinstance(report.content_json, dict):
+        report.content_json = {
+            "extraction_version": 1,
+            "provider": "manual",
+            "anchor_fields": {},
+            "additional_fields": {},
+            "is_edited": True,
+        }
+    content = dict(report.content_json)
+    anchor = dict(content.get("anchor_fields") or {})
+    anchor["latitude"] = {
+        "value": str(latitude),
+        "confidence": 1.0,
+        "type": "number",
+        "edited": True,
+    }
+    anchor["longitude"] = {
+        "value": str(longitude),
+        "confidence": 1.0,
+        "type": "number",
+        "edited": True,
+    }
+    content["anchor_fields"] = anchor
+    content["is_edited"] = True
+    report.content_json = content
+
     await db.flush()
     return report
 

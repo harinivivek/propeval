@@ -291,7 +291,7 @@ async def get_request(
 async def accept_report(
     request_id: UUID,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_role("LENDER")),
+    current_user: User = Depends(require_role("LENDER")),
 ):
     req = await request_service.get_request(db, request_id)
     if not req:
@@ -317,7 +317,11 @@ async def accept_report(
 
     try:
         await request_service.accept_report(
-            db, request=req, report=report, vendor_id=acceptance.vendor_id,
+            db,
+            request=req,
+            report=report,
+            vendor_id=acceptance.vendor_id,
+            accepted_by_user_id=current_user.id,
         )
     except InvalidStatusTransition as e:
         raise HTTPException(status_code=400, detail=str(e))

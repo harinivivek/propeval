@@ -25,6 +25,9 @@ You MUST return a JSON object with exactly two keys:
   - valuation_amount (currency): Market/fair value amount in INR
   - built_up_area (text): Built-up area with unit
   - owner_name (text): Property owner or loan applicant name
+  - pin_code (text): 6-digit Indian postal PIN if visible in the address or document
+  - latitude (number): WGS84 latitude in decimal degrees if stated (e.g. from maps/GPS in the report)
+  - longitude (number): WGS84 longitude in decimal degrees if stated
 - "additional_fields": Any other relevant fields you find (boundaries, plot number, construction year, encumbrances, occupation status, survey number, etc.)
 
 For each field, provide:

@@ -18,6 +18,7 @@ from app.models.vendor import VendorUser
 from app.schemas.bulk_upload import BulkUploadJobResponse, BulkUploadReportStatus
 from app.schemas.report import (
     ExtractedDataUpdate,
+    ReportMapCoordinatesBody,
     ReportResponse,
     VendorReportsBulkDeleteRequest,
 )
@@ -236,6 +237,35 @@ async def update_extracted_data(
     additional = {k: v.model_dump() for k, v in payload.additional_fields.items()}
 
     await report_service.update_extracted_data(db, report, anchor, additional)
+    return report
+
+
+@router.patch("/{report_id}/map-coordinates", response_model=ReportResponse)
+async def update_map_coordinates(
+    report_id: UUID,
+    payload: ReportMapCoordinatesBody,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("VENDOR")),
+):
+    """Set latitude/longitude on the report for the coverage map (e.g. OCR missed them)."""
+    vendor_id = await _get_vendor_id(db, current_user.id)
+    report = await report_service.get_report(db, report_id)
+    if not report or report.vendor_id != vendor_id:
+        raise HTTPException(status_code=404, detail="Report not found")
+    if report.status == ReportStatus.PROCESSING:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot update coordinates while extraction is in progress",
+        )
+    try:
+        await report_service.update_report_map_coordinates(
+            db,
+            report,
+            latitude=payload.latitude,
+            longitude=payload.longitude,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     return report
 
 

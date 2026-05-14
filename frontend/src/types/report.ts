@@ -47,6 +47,8 @@ export interface Report {
   content_json: ContentJson | null;
   listing_approved: boolean;
   is_active: boolean;
+  latitude?: string | null;
+  longitude?: string | null;
 }
 
 export interface ReportRevision {

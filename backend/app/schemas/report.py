@@ -96,3 +96,9 @@ class ExtractedDataUpdate(BaseModel):
     """Payload for updating extracted report data."""
     anchor_fields: dict[str, ExtractedFieldUpdate] = {}
     additional_fields: dict[str, ExtractedFieldUpdate] = {}
+
+
+class ReportMapCoordinatesBody(BaseModel):
+    """Manual WGS84 coordinates for vendor coverage map."""
+    latitude: Decimal
+    longitude: Decimal

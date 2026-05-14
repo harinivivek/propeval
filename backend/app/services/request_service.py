@@ -169,8 +169,13 @@ async def accept_report(
     request: ReportRequest,
     report: Report,
     vendor_id: UUID,
+    accepted_by_user_id: UUID | None = None,
 ) -> None:
-    """Lender accepts the report — billing + listing."""
+    """Lender accepts the report — billing + listing.
+
+    ``accepted_by_user_id`` is the lender user who clicked accept; omit for
+    automated accepts (e.g. Celery) so activity log uses a system actor.
+    """
     if request.lender_status not in (
         LenderRequestStatus.RECEIVED,
     ):
@@ -216,11 +221,12 @@ async def accept_report(
 
     await log_activity(
         db,
-        actor_id=vendor_id,
-        actor_type="VENDOR",
+        actor_id=accepted_by_user_id,
+        actor_type="LENDER" if accepted_by_user_id else "SYSTEM",
         action="REQUEST_ACCEPTED",
         target_type="REQUEST",
         target_id=request.id,
+        metadata={"vendor_id": str(vendor_id)},
     )
 
 
@@ -275,11 +281,12 @@ async def check_auto_approve(
 
     await log_activity(
         db,
-        actor_id=vendor_id,
+        actor_id=None,
         actor_type="SYSTEM",
         action="REPORT_AUTO_APPROVED",
         target_type="REQUEST",
         target_id=request.id,
+        metadata={"vendor_id": str(vendor_id)},
     )
 
     # Check auto-listing
@@ -296,6 +303,12 @@ async def _check_auto_listing(
 ) -> None:
     """If vendor has auto-listing enabled, auto-list the accepted report."""
     from app.services.vendor_config_service import get_vendor_config
+
+    existing = await db.execute(
+        select(ListingReport).where(ListingReport.report_id == report.id)
+    )
+    if existing.scalar_one_or_none():
+        return
 
     config = await get_vendor_config(db, vendor_id)
     if not config.auto_listing_enabled:

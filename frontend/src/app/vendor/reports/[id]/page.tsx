@@ -7,6 +7,7 @@ import { Loader2, ArrowLeft, FileText } from "lucide-react";
 import Link from "next/link";
 import type { Report } from "@/types/report";
 import { ExtractionReview } from "@/app/vendor/requests/[id]/_components/extraction-review";
+import { MapCoordinatesForm } from "@/app/vendor/requests/[id]/_components/map-coordinates-form";
 
 export default function VendorReportDetailPage() {
   const params = useParams<{ id: string }>();
@@ -80,6 +81,10 @@ export default function VendorReportDetailPage() {
           onUpdated={() => void fetchReport()}
           readOnly={status === "PUBLISHED"}
         />
+
+        {status !== "PROCESSING" && (
+          <MapCoordinatesForm report={report} onSaved={() => void fetchReport()} />
+        )}
       </div>
     );
   }

@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import type { ReportRequest, RejectionReason } from "@/types/request";
 import type { Report } from "@/types/report";
 import { ExtractionReview } from "./_components/extraction-review";
+import { MapCoordinatesForm } from "./_components/map-coordinates-form";
 import { UploadSection } from "./_components/upload-section";
 
 const REJECTION_REASONS: { value: RejectionReason; label: string }[] = [
@@ -291,6 +292,12 @@ export default function VendorRequestDetailPage() {
               >
                 {retryLoading ? "Starting…" : "Retry processing"}
               </button>
+            </div>
+          )}
+
+          {report.status !== "PROCESSING" && (
+            <div className="mb-4">
+              <MapCoordinatesForm report={report} onSaved={fetchReport} />
             </div>
           )}
         </>
