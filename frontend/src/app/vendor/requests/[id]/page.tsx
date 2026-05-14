@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 import type { ReportRequest, RejectionReason } from "@/types/request";
 import type { Report } from "@/types/report";
@@ -101,10 +102,20 @@ export default function VendorRequestDetailPage() {
     setRetryLoading(true);
     setError("");
     try {
-      await api.post(`/api/vendor/reports/${report.id}/retry-extraction`, {});
+      const updated = await api.post<Report>(
+        `/api/vendor/reports/${report.id}/retry-extraction`,
+        {},
+      );
+      setReport(updated);
+      toast.success("Retry processing started", {
+        description:
+          "Extraction is queued in the background. This usually takes about a minute—you can leave this page.",
+      });
       await fetchReport();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Could not restart processing");
+      const msg = e instanceof Error ? e.message : "Could not restart processing";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setRetryLoading(false);
     }

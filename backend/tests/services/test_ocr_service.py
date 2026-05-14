@@ -83,3 +83,36 @@ async def test_ocr_service_process_failure(db_session: AsyncSession):
 
     assert report.status == ReportStatus.EXTRACTION_FAILED
     assert report.content_json is None
+
+
+@pytest.mark.asyncio
+async def test_ocr_service_transient_error_propagates(db_session: AsyncSession):
+    """429 / 5xx etc. should re-raise for Celery retry — not mark EXTRACTION_FAILED."""
+    _, report = await _create_test_report(db_session)
+
+    err = Exception("upstream")
+    err.status_code = 503  # type: ignore[attr-defined]
+
+    mock_provider = AsyncMock()
+    mock_provider.extract = AsyncMock(side_effect=err)
+
+    service = OcrService(provider=mock_provider)
+    with pytest.raises(Exception, match="upstream"):
+        await service.process_report(db_session, report)
+
+
+@pytest.mark.asyncio
+async def test_ocr_service_openrouter_style_404_marks_failed(db_session: AsyncSession):
+    """404 / bad model / no vision — terminal; persist EXTRACTION_FAILED, do not re-raise."""
+    _, report = await _create_test_report(db_session)
+
+    err = Exception("No endpoints found that support image input")
+    err.status_code = 404  # type: ignore[attr-defined]
+
+    mock_provider = AsyncMock()
+    mock_provider.extract = AsyncMock(side_effect=err)
+
+    service = OcrService(provider=mock_provider)
+    await service.process_report(db_session, report)
+
+    assert report.status == ReportStatus.EXTRACTION_FAILED

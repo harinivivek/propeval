@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +11,18 @@ from app.services.ocr.base import OcrProvider
 from app.services.report_service import sync_report_from_extraction
 
 logger = logging.getLogger(__name__)
+
+
+def _ocr_should_retry_later(exc: BaseException) -> bool:
+    """True only for errors where a Celery retry may succeed (rate limits, upstream blips)."""
+    if isinstance(exc, (TimeoutError, asyncio.TimeoutError, ConnectionError, BrokenPipeError)):
+        return True
+    code = getattr(exc, "status_code", None)
+    if code == 429:
+        return True
+    if code in (500, 502, 503, 504):
+        return True
+    return False
 
 
 class OcrService:
@@ -37,12 +50,14 @@ class OcrService:
             )
         except Exception as e:
             logger.exception("OCR extraction failed for report %s: %s", report.id, e)
-            # Rollback to clear any failed flush (like Enum errors) before setting fail status
+            # Rollback to clear any failed flush (like Enum errors) before updating status
             await db.rollback()
-            # Merge the report back into the session after rollback
             report = await db.merge(report)
+
+            if _ocr_should_retry_later(e):
+                # Do not mark EXTRACTION_FAILED — commit would be rolled back on re-raise anyway.
+                # DB stays at last committed state (typically UPLOADED); Celery retries the task.
+                raise e
+
             report.status = ReportStatus.EXTRACTION_FAILED
             await db.flush()
-            # Re-raise if it's not a business logic failure (optional, based on retry needs)
-            if not isinstance(e, (ValueError, KeyError)):
-                raise e

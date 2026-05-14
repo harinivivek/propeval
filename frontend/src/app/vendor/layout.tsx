@@ -7,7 +7,6 @@ import { WebSocketProvider } from "@/contexts/websocket-provider";
 const NAV_ITEMS = [
   { href: "/vendor/dashboard", label: "Dashboard" },
   { href: "/vendor/requests", label: "Requests" },
-  { href: "/vendor/reports/bulk-upload", label: "Upload Reports" },
   { href: "/vendor/reports", label: "Reports" },
   { href: "/vendor/listings", label: "My Listings" },
   { href: "/vendor/map", label: "Coverage Map" },

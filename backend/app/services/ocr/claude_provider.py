@@ -1,9 +1,19 @@
 import base64
 import json
+import re
 
 import fitz  # PyMuPDF
 
 from app.services.ocr.base import ExtractionResult, OcrProvider
+
+
+def _parse_extraction_json(raw_text: str) -> dict:
+    """Parse model output as JSON; tolerate optional markdown fences."""
+    text = (raw_text or "").strip()
+    fence = re.match(r"^```(?:json)?\s*\n?(.*?)\n?```\s*$", text, re.DOTALL | re.IGNORECASE)
+    if fence:
+        text = fence.group(1).strip()
+    return json.loads(text)
 
 EXTRACTION_PROMPT = """You are analyzing a property valuation or legal due diligence report from India.
 Extract all relevant structured data from this document.
@@ -100,7 +110,7 @@ class ClaudeOcrProvider(OcrProvider):
                 "output_tokens": response.usage.output_tokens,
             }
 
-        parsed = json.loads(raw_text)
+        parsed = _parse_extraction_json(raw_text)
 
         return ExtractionResult(
             anchor_fields=parsed.get("anchor_fields", {}),

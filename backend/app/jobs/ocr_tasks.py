@@ -18,7 +18,8 @@ def _get_ocr_service():
     """Create OCR service with Claude provider (lazy init)."""
     from app.services.ocr import ClaudeOcrProvider, OcrService
 
-    # Prefer OpenRouter when configured (OCR_MODEL should be an OpenRouter model id).
+    # Prefer OpenRouter when configured. OCR_MODEL must be a vision / multimodal model id
+    # (PDF pages are sent as images); see app.core.config.Settings.OCR_MODEL.
     if settings.OPENROUTER_API_KEY:
         import openai
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loader2, Search, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Loader2, Search, Trash2, Upload } from "lucide-react";
 import { api } from "@/lib/api";
 import type { PaginatedResponse, VendorReportItem } from "@/types/dashboard";
 import { DataTable } from "@/components/data-table";
@@ -146,19 +147,28 @@ export default function VendorReportsPage() {
             aria-label="Search reports"
           />
         </div>
-        <button
-          type="button"
-          onClick={() => void handleBulkDelete()}
-          disabled={selectedIds.size === 0 || deleting}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:pointer-events-none"
-        >
-          {deleting ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-          ) : (
-            <Trash2 className="h-4 w-4" aria-hidden />
-          )}
-          Delete selected
-        </button>
+        <div className="flex flex-wrap gap-2 sm:justify-end">
+          <Link
+            href="/vendor/reports/bulk-upload"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            <Upload className="h-4 w-4 shrink-0" aria-hidden />
+            Upload reports
+          </Link>
+          <button
+            type="button"
+            onClick={() => void handleBulkDelete()}
+            disabled={selectedIds.size === 0 || deleting}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:pointer-events-none"
+          >
+            {deleting ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Trash2 className="h-4 w-4" aria-hidden />
+            )}
+            Delete selected
+          </button>
+        </div>
       </div>
 
       {loading ? (

@@ -102,8 +102,10 @@ class Settings(BaseSettings):
     # OCR — OpenRouter is preferred when OPENROUTER_API_KEY is set (see ocr_tasks).
     ANTHROPIC_API_KEY: str = ""
     OPENROUTER_API_KEY: str = ""
-    # OpenRouter model id (vision-capable). Override in .env if you prefer another model.
-    OCR_MODEL: str = "openrouter/free"
+    # OpenRouter model id — must be multimodal (PDF pages are sent as images). The slug
+    # "openrouter/free" is not valid; use e.g. openai/gpt-4o-mini or a :free vision model from
+    # OpenRouter's model list (e.g. google/gemini-2.0-flash-001).
+    OCR_MODEL: str = "openai/gpt-4o-mini"
     # Required by OpenRouter; set to your public app URL in production.
     OPENROUTER_HTTP_REFERER: str = "http://localhost:8020"
     OCR_MAX_PAGES: int = 20
