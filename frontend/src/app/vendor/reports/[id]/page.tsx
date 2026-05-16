@@ -82,9 +82,7 @@ export default function VendorReportDetailPage() {
           readOnly={status === "PUBLISHED"}
         />
 
-        {status !== "PROCESSING" && (
-          <MapCoordinatesForm report={report} onSaved={() => void fetchReport()} />
-        )}
+        <MapCoordinatesForm report={report} onSaved={() => void fetchReport()} />
       </div>
     );
   }
